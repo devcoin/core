@@ -1,0 +1,86 @@
+# Environment setup #
+
+(Debian squeeze on Oct 28th 2012)
+
+
+sudo apt-get install gcc-mingw32 mingw32-binutils mingw32-runtime
+
+mkdir -p ~/lib/i586-mingw32msvc ~/downloads/terracoin/i586-mingw32msvc
+
+
+# Thirdparty libraries #
+
+## openssl ##
+
+Download page: http://www.openssl.org/source/
+wget 'http://www.openssl.org/source/openssl-1.0.1c.tar.gz' -O ~/downloads/terracoin/i586-mingw32msvc/openssl-1.0.1c.tar.gz
+
+cd ~/lib/i586-mingw32msvc
+tar zxvf ~/downloads/terracoin/i586-mingw32msvc/openssl-1.0.1c.tar.gz
+cd openssl-1.0.1c/
+CROSS_COMPILE="i586-mingw32msvc-" ./Configure mingw no-asm no-shared --prefix=/usr/i586-mingw32msvc
+PATH=$PATH:/usr/i586-mingw32msvc/bin make depend
+PATH=$PATH:/usr/i586-mingw32msvc/bin make
+
+
+## berkeley DB ##
+
+Download page: http://www.oracle.com/technetwork/products/berkeleydb/downloads/index-082944.html
+wget 'http://download.oracle.com/berkeley-db/db-4.8.30.NC.tar.gz' -O ~/downloads/terracoin/i586-mingw32msvc/db-4.8.30.NC.tar.gz
+
+cd ~/lib/i586-mingw32msvc
+tar zxvf /home/terra/downloads/terracoin/i586-mingw32msvc/db-4.8.30.NC.tar.gz
+cd db-4.8.30.NC/build_unix/
+
+sh ../dist/configure --host=i586-mingw32msvc --enable-cxx --enable-mingw
+make
+
+# (previous line may generate multiple warnings but that should be ok)
+
+
+## miniupnpc ##
+
+Download page: http://miniupnp.tuxfamily.org/files/
+wget 'http://miniupnp.tuxfamily.org/files/download.php?file=miniupnpc-1.6.tar.gz' -O ~/downloads/terracoin/i586-mingw32msvc/miniupnpc-1.6.tar.gz
+
+# if you _really_ want upnp support .. first install wine:
+# apt-get install wine
+
+cd ~/lib/i586-mingw32msvc
+tar zxvf /home/terra/downloads/terracoin/i586-mingw32msvc/miniupnpc-1.6.tar.gz
+cd miniupnpc-1.6
+
+sed -i 's/CC = gcc/CC = i586-mingw32msvc-gcc/' Makefile.mingw
+sed -i 's/wingenminiupnpcstrings \$/wine \.\/wingenminiupnpcstrings \$/' Makefile.mingw
+sed -i 's/dllwrap/i586-mingw32msvc-dllwrap/' Makefile.mingw
+sed -i 's/driver-name gcc/driver-name i586-mingw32msvc-gcc/' Makefile.mingw
+
+AR=i586-mingw32msvc-ar make -f Makefile.mingw
+
+
+## boost ##
+
+Download page: http://www.boost.org/users/download/
+wget 'http://sourceforge.net/projects/boost/files/boost/1.50.0/boost_1_50_0.tar.bz2/download' -O ~/downloads/terracoin/i586-mingw32msvc/boost_1_50_0.tar.bz2
+
+cd ~/lib/i586-mingw32msvc
+tar jxvf ~/downloads/terracoin/i586-mingw32msvc/boost_1_50_0.tar.bz2
+cd boost_1_50_0/
+
+./bootstrap.sh --without-icu
+echo "using gcc : 4.4 : i586-mingw32msvc-g++ : <rc>i586-mingw32msvc-windres <archiver>i586-mingw32msvc-ar ;" > user-config.jam
+
+./bjam toolset=gcc target-os=windows variant=release threading=multi threadapi=win32 --user-config=user-config.jam -j 2 --without-mpi --without-python -sNO_BZIP2=1 -sNO_ZLIB=1 --layout=tagged stage
+
+# watch 4 seasons of breaking bad, while you wait :)
+
+
+## terracoin ##
+
+### daemon ###
+cd terracoin/src/leveldb/
+PATH=/usr/i586-mingw32msvc/bin/:$PATH TARGET_OS="OS_WINDOWS_CROSSCOMPILE" CXX=i586-mingw32msvc-c++ CC=i586-mingw32msvc-cc LD=i586-mingw32msvc-ld OPT="-I/home/terra/lib/i586-mingw32msvc/boost_1_50_0" make libmemenv.a libleveldb.a
+cd ../
+make -f makefile.linux-mingw
+/usr/i586-mingw32msvc/bin/strip terracoind.exe
+

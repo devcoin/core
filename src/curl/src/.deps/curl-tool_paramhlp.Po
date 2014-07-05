@@ -1,0 +1,498 @@
+curl-tool_paramhlp.o: tool_paramhlp.c tool_setup.h ../lib/curl_setup.h \
+ ../lib/curl_config.h ../include/curl/curlbuild.h \
+ c:\mingw\i686-w64-mingw32\include\windows.h \
+ c:\mingw\i686-w64-mingw32\include\_mingw.h \
+ c:\mingw\i686-w64-mingw32\include\_mingw_mac.h \
+ c:\mingw\i686-w64-mingw32\include\_mingw_secapi.h \
+ c:\mingw\i686-w64-mingw32\include\vadefs.h \
+ c:\mingw\i686-w64-mingw32\include\sdks/_mingw_directx.h \
+ c:\mingw\i686-w64-mingw32\include\sdks/_mingw_ddk.h \
+ c:\mingw\i686-w64-mingw32\include\sdkddkver.h \
+ c:\mingw\i686-w64-mingw32\include\excpt.h \
+ c:\mingw\i686-w64-mingw32\include\crtdefs.h \
+ c:\mingw\lib\gcc\i686-w64-mingw32\4.8.1\include\stdarg.h \
+ c:\mingw\i686-w64-mingw32\include\stdarg.h \
+ c:\mingw\i686-w64-mingw32\include\_mingw_stdarg.h \
+ c:\mingw\i686-w64-mingw32\include\windef.h \
+ c:\mingw\i686-w64-mingw32\include\minwindef.h \
+ c:\mingw\i686-w64-mingw32\include\winapifamily.h \
+ c:\mingw\i686-w64-mingw32\include\specstrings.h \
+ c:\mingw\i686-w64-mingw32\include\sal.h \
+ c:\mingw\i686-w64-mingw32\include\winnt.h \
+ c:\mingw\i686-w64-mingw32\include\_mingw_unicode.h \
+ c:\mingw\i686-w64-mingw32\include\ctype.h \
+ c:\mingw\i686-w64-mingw32\include\psdk_inc\intrin-impl.h \
+ c:\mingw\i686-w64-mingw32\include\basetsd.h \
+ c:\mingw\i686-w64-mingw32\include\guiddef.h \
+ c:\mingw\i686-w64-mingw32\include\string.h \
+ c:\mingw\i686-w64-mingw32\include\sec_api\string_s.h \
+ c:\mingw\i686-w64-mingw32\include\pshpack4.h \
+ c:\mingw\i686-w64-mingw32\include\poppack.h \
+ c:\mingw\i686-w64-mingw32\include\pshpack4.h \
+ c:\mingw\i686-w64-mingw32\include\pshpack2.h \
+ c:\mingw\i686-w64-mingw32\include\poppack.h \
+ c:\mingw\i686-w64-mingw32\include\pshpack2.h \
+ c:\mingw\i686-w64-mingw32\include\pshpack8.h \
+ c:\mingw\i686-w64-mingw32\include\ktmtypes.h \
+ c:\mingw\i686-w64-mingw32\include\winbase.h \
+ c:\mingw\i686-w64-mingw32\include\apisetcconv.h \
+ c:\mingw\i686-w64-mingw32\include\minwinbase.h \
+ c:\mingw\i686-w64-mingw32\include\bemapiset.h \
+ c:\mingw\i686-w64-mingw32\include\apiset.h \
+ c:\mingw\i686-w64-mingw32\include\debugapi.h \
+ c:\mingw\i686-w64-mingw32\include\errhandlingapi.h \
+ c:\mingw\i686-w64-mingw32\include\fibersapi.h \
+ c:\mingw\i686-w64-mingw32\include\fileapi.h \
+ c:\mingw\i686-w64-mingw32\include\handleapi.h \
+ c:\mingw\i686-w64-mingw32\include\heapapi.h \
+ c:\mingw\i686-w64-mingw32\include\ioapiset.h \
+ c:\mingw\i686-w64-mingw32\include\interlockedapi.h \
+ c:\mingw\i686-w64-mingw32\include\jobapi.h \
+ c:\mingw\i686-w64-mingw32\include\libloaderapi.h \
+ c:\mingw\i686-w64-mingw32\include\memoryapi.h \
+ c:\mingw\i686-w64-mingw32\include\namedpipeapi.h \
+ c:\mingw\i686-w64-mingw32\include\namespaceapi.h \
+ c:\mingw\i686-w64-mingw32\include\processenv.h \
+ c:\mingw\i686-w64-mingw32\include\processthreadsapi.h \
+ c:\mingw\i686-w64-mingw32\include\processtopologyapi.h \
+ c:\mingw\i686-w64-mingw32\include\profileapi.h \
+ c:\mingw\i686-w64-mingw32\include\realtimeapiset.h \
+ c:\mingw\i686-w64-mingw32\include\securityappcontainer.h \
+ c:\mingw\i686-w64-mingw32\include\securitybaseapi.h \
+ c:\mingw\i686-w64-mingw32\include\synchapi.h \
+ c:\mingw\i686-w64-mingw32\include\sysinfoapi.h \
+ c:\mingw\i686-w64-mingw32\include\systemtopologyapi.h \
+ c:\mingw\i686-w64-mingw32\include\threadpoolapiset.h \
+ c:\mingw\i686-w64-mingw32\include\threadpoollegacyapiset.h \
+ c:\mingw\i686-w64-mingw32\include\utilapiset.h \
+ c:\mingw\i686-w64-mingw32\include\wow64apiset.h \
+ c:\mingw\i686-w64-mingw32\include\winerror.h \
+ c:\mingw\i686-w64-mingw32\include\fltwinerror.h \
+ c:\mingw\i686-w64-mingw32\include\timezoneapi.h \
+ c:\mingw\i686-w64-mingw32\include\wingdi.h \
+ c:\mingw\i686-w64-mingw32\include\pshpack1.h \
+ c:\mingw\i686-w64-mingw32\include\winuser.h \
+ c:\mingw\i686-w64-mingw32\include\tvout.h \
+ c:\mingw\i686-w64-mingw32\include\winnls.h \
+ c:\mingw\i686-w64-mingw32\include\wincon.h \
+ c:\mingw\i686-w64-mingw32\include\winver.h \
+ c:\mingw\i686-w64-mingw32\include\winreg.h \
+ c:\mingw\i686-w64-mingw32\include\reason.h \
+ c:\mingw\i686-w64-mingw32\include\winnetwk.h \
+ c:\mingw\i686-w64-mingw32\include\wnnc.h \
+ c:\mingw\i686-w64-mingw32\include\virtdisk.h \
+ c:\mingw\i686-w64-mingw32\include\stralign.h \
+ c:\mingw\i686-w64-mingw32\include\sec_api\stralign_s.h \
+ c:\mingw\i686-w64-mingw32\include\winsvc.h \
+ c:\mingw\i686-w64-mingw32\include\mcx.h \
+ c:\mingw\i686-w64-mingw32\include\imm.h \
+ c:\mingw\i686-w64-mingw32\include\winsock2.h \
+ c:\mingw\i686-w64-mingw32\include\psdk_inc\_ws1_undef.h \
+ c:\mingw\i686-w64-mingw32\include\_timeval.h \
+ c:\mingw\i686-w64-mingw32\include\_bsd_types.h \
+ c:\mingw\i686-w64-mingw32\include\inaddr.h \
+ c:\mingw\i686-w64-mingw32\include\psdk_inc\_socket_types.h \
+ c:\mingw\i686-w64-mingw32\include\psdk_inc\_fd_types.h \
+ c:\mingw\i686-w64-mingw32\include\psdk_inc\_ip_types.h \
+ c:\mingw\i686-w64-mingw32\include\psdk_inc\_wsadata.h \
+ c:\mingw\i686-w64-mingw32\include\ws2def.h \
+ c:\mingw\i686-w64-mingw32\include\psdk_inc\_wsa_errnos.h \
+ c:\mingw\i686-w64-mingw32\include\qos.h \
+ c:\mingw\i686-w64-mingw32\include\ws2tcpip.h \
+ c:\mingw\i686-w64-mingw32\include\psdk_inc\_ip_mreq1.h \
+ c:\mingw\i686-w64-mingw32\include\ws2ipdef.h \
+ c:\mingw\i686-w64-mingw32\include\in6addr.h \
+ c:\mingw\i686-w64-mingw32\include\mstcpip.h \
+ c:\mingw\i686-w64-mingw32\include\sys\types.h \
+ c:\mingw\i686-w64-mingw32\include\_mingw_off_t.h \
+ c:\mingw\lib\gcc\i686-w64-mingw32\4.8.1\include\stdint.h \
+ c:\mingw\i686-w64-mingw32\include\stdint.h \
+ c:\mingw\lib\gcc\i686-w64-mingw32\4.8.1\include\stddef.h \
+ c:\mingw\i686-w64-mingw32\include\stddef.h \
+ c:\mingw\i686-w64-mingw32\include\inttypes.h \
+ c:\mingw\i686-w64-mingw32\include\_mingw_print_push.h \
+ c:\mingw\i686-w64-mingw32\include\_mingw_print_pop.h \
+ ../include/curl/curlrules.h c:\mingw\i686-w64-mingw32\include\tchar.h \
+ c:\mingw\i686-w64-mingw32\include\sec_api\tchar_s.h \
+ c:\mingw\i686-w64-mingw32\include\stdio.h \
+ c:\mingw\i686-w64-mingw32\include\swprintf.inl \
+ c:\mingw\i686-w64-mingw32\include\sec_api\stdio_s.h \
+ c:\mingw\i686-w64-mingw32\include\assert.h \
+ c:\mingw\i686-w64-mingw32\include\io.h \
+ c:\mingw\i686-w64-mingw32\include\sec_api\io_s.h \
+ c:\mingw\i686-w64-mingw32\include\sys\stat.h \
+ c:\mingw\i686-w64-mingw32\include\_mingw_stat64.h \
+ ../lib/curl_setup_once.h c:\mingw\i686-w64-mingw32\include\stdlib.h \
+ c:\mingw\lib\gcc\i686-w64-mingw32\4.8.1\include-fixed\limits.h \
+ c:\mingw\lib\gcc\i686-w64-mingw32\4.8.1\include-fixed\syslimits.h \
+ c:\mingw\i686-w64-mingw32\include\limits.h \
+ c:\mingw\i686-w64-mingw32\include\sec_api\stdlib_s.h \
+ c:\mingw\i686-w64-mingw32\include\malloc.h \
+ c:\mingw\i686-w64-mingw32\include\errno.h \
+ c:\mingw\i686-w64-mingw32\include\sys\time.h \
+ c:\mingw\i686-w64-mingw32\include\time.h \
+ c:\mingw\i686-w64-mingw32\include\sec_api\time_s.h \
+ c:\mingw\i686-w64-mingw32\include\sys\timeb.h \
+ c:\mingw\i686-w64-mingw32\include\sec_api\sys\timeb_s.h \
+ c:\mingw\i686-w64-mingw32\include\pthread_time.h \
+ c:\mingw\i686-w64-mingw32\include\fcntl.h \
+ c:\mingw\lib\gcc\i686-w64-mingw32\4.8.1\include\stdbool.h \
+ c:\mingw\i686-w64-mingw32\include\unistd.h \
+ c:\mingw\i686-w64-mingw32\include\process.h \
+ c:\mingw\i686-w64-mingw32\include\getopt.h \
+ c:\mingw\i686-w64-mingw32\include\pthread_unistd.h \
+ ../include/curl/curl.h ../include/curl/curlver.h \
+ ../include/curl/curlbuild.h ../include/curl/curlrules.h \
+ ../include/curl/easy.h ../include/curl/multi.h ../include/curl/curl.h \
+ ../include/curl/typecheck-gcc.h ../lib/rawstr.h ../lib/curlx.h \
+ ../include/curl/mprintf.h ../lib/strequal.h ../lib/strtoofft.h \
+ ../lib/curl_setup.h ../lib/timeval.h ../lib/nonblock.h ../lib/warnless.h \
+ tool_cfgable.h tool_sdecls.h tool_metalink.h tool_getparam.h \
+ tool_getpass.h tool_homedir.h tool_msgs.h tool_paramhlp.h \
+ ../lib/memdebug.h
+
+tool_setup.h:
+
+../lib/curl_setup.h:
+
+../lib/curl_config.h:
+
+../include/curl/curlbuild.h:
+
+c:\mingw\i686-w64-mingw32\include\windows.h:
+
+c:\mingw\i686-w64-mingw32\include\_mingw.h:
+
+c:\mingw\i686-w64-mingw32\include\_mingw_mac.h:
+
+c:\mingw\i686-w64-mingw32\include\_mingw_secapi.h:
+
+c:\mingw\i686-w64-mingw32\include\vadefs.h:
+
+c:\mingw\i686-w64-mingw32\include\sdks/_mingw_directx.h:
+
+c:\mingw\i686-w64-mingw32\include\sdks/_mingw_ddk.h:
+
+c:\mingw\i686-w64-mingw32\include\sdkddkver.h:
+
+c:\mingw\i686-w64-mingw32\include\excpt.h:
+
+c:\mingw\i686-w64-mingw32\include\crtdefs.h:
+
+c:\mingw\lib\gcc\i686-w64-mingw32\4.8.1\include\stdarg.h:
+
+c:\mingw\i686-w64-mingw32\include\stdarg.h:
+
+c:\mingw\i686-w64-mingw32\include\_mingw_stdarg.h:
+
+c:\mingw\i686-w64-mingw32\include\windef.h:
+
+c:\mingw\i686-w64-mingw32\include\minwindef.h:
+
+c:\mingw\i686-w64-mingw32\include\winapifamily.h:
+
+c:\mingw\i686-w64-mingw32\include\specstrings.h:
+
+c:\mingw\i686-w64-mingw32\include\sal.h:
+
+c:\mingw\i686-w64-mingw32\include\winnt.h:
+
+c:\mingw\i686-w64-mingw32\include\_mingw_unicode.h:
+
+c:\mingw\i686-w64-mingw32\include\ctype.h:
+
+c:\mingw\i686-w64-mingw32\include\psdk_inc\intrin-impl.h:
+
+c:\mingw\i686-w64-mingw32\include\basetsd.h:
+
+c:\mingw\i686-w64-mingw32\include\guiddef.h:
+
+c:\mingw\i686-w64-mingw32\include\string.h:
+
+c:\mingw\i686-w64-mingw32\include\sec_api\string_s.h:
+
+c:\mingw\i686-w64-mingw32\include\pshpack4.h:
+
+c:\mingw\i686-w64-mingw32\include\poppack.h:
+
+c:\mingw\i686-w64-mingw32\include\pshpack4.h:
+
+c:\mingw\i686-w64-mingw32\include\pshpack2.h:
+
+c:\mingw\i686-w64-mingw32\include\poppack.h:
+
+c:\mingw\i686-w64-mingw32\include\pshpack2.h:
+
+c:\mingw\i686-w64-mingw32\include\pshpack8.h:
+
+c:\mingw\i686-w64-mingw32\include\ktmtypes.h:
+
+c:\mingw\i686-w64-mingw32\include\winbase.h:
+
+c:\mingw\i686-w64-mingw32\include\apisetcconv.h:
+
+c:\mingw\i686-w64-mingw32\include\minwinbase.h:
+
+c:\mingw\i686-w64-mingw32\include\bemapiset.h:
+
+c:\mingw\i686-w64-mingw32\include\apiset.h:
+
+c:\mingw\i686-w64-mingw32\include\debugapi.h:
+
+c:\mingw\i686-w64-mingw32\include\errhandlingapi.h:
+
+c:\mingw\i686-w64-mingw32\include\fibersapi.h:
+
+c:\mingw\i686-w64-mingw32\include\fileapi.h:
+
+c:\mingw\i686-w64-mingw32\include\handleapi.h:
+
+c:\mingw\i686-w64-mingw32\include\heapapi.h:
+
+c:\mingw\i686-w64-mingw32\include\ioapiset.h:
+
+c:\mingw\i686-w64-mingw32\include\interlockedapi.h:
+
+c:\mingw\i686-w64-mingw32\include\jobapi.h:
+
+c:\mingw\i686-w64-mingw32\include\libloaderapi.h:
+
+c:\mingw\i686-w64-mingw32\include\memoryapi.h:
+
+c:\mingw\i686-w64-mingw32\include\namedpipeapi.h:
+
+c:\mingw\i686-w64-mingw32\include\namespaceapi.h:
+
+c:\mingw\i686-w64-mingw32\include\processenv.h:
+
+c:\mingw\i686-w64-mingw32\include\processthreadsapi.h:
+
+c:\mingw\i686-w64-mingw32\include\processtopologyapi.h:
+
+c:\mingw\i686-w64-mingw32\include\profileapi.h:
+
+c:\mingw\i686-w64-mingw32\include\realtimeapiset.h:
+
+c:\mingw\i686-w64-mingw32\include\securityappcontainer.h:
+
+c:\mingw\i686-w64-mingw32\include\securitybaseapi.h:
+
+c:\mingw\i686-w64-mingw32\include\synchapi.h:
+
+c:\mingw\i686-w64-mingw32\include\sysinfoapi.h:
+
+c:\mingw\i686-w64-mingw32\include\systemtopologyapi.h:
+
+c:\mingw\i686-w64-mingw32\include\threadpoolapiset.h:
+
+c:\mingw\i686-w64-mingw32\include\threadpoollegacyapiset.h:
+
+c:\mingw\i686-w64-mingw32\include\utilapiset.h:
+
+c:\mingw\i686-w64-mingw32\include\wow64apiset.h:
+
+c:\mingw\i686-w64-mingw32\include\winerror.h:
+
+c:\mingw\i686-w64-mingw32\include\fltwinerror.h:
+
+c:\mingw\i686-w64-mingw32\include\timezoneapi.h:
+
+c:\mingw\i686-w64-mingw32\include\wingdi.h:
+
+c:\mingw\i686-w64-mingw32\include\pshpack1.h:
+
+c:\mingw\i686-w64-mingw32\include\winuser.h:
+
+c:\mingw\i686-w64-mingw32\include\tvout.h:
+
+c:\mingw\i686-w64-mingw32\include\winnls.h:
+
+c:\mingw\i686-w64-mingw32\include\wincon.h:
+
+c:\mingw\i686-w64-mingw32\include\winver.h:
+
+c:\mingw\i686-w64-mingw32\include\winreg.h:
+
+c:\mingw\i686-w64-mingw32\include\reason.h:
+
+c:\mingw\i686-w64-mingw32\include\winnetwk.h:
+
+c:\mingw\i686-w64-mingw32\include\wnnc.h:
+
+c:\mingw\i686-w64-mingw32\include\virtdisk.h:
+
+c:\mingw\i686-w64-mingw32\include\stralign.h:
+
+c:\mingw\i686-w64-mingw32\include\sec_api\stralign_s.h:
+
+c:\mingw\i686-w64-mingw32\include\winsvc.h:
+
+c:\mingw\i686-w64-mingw32\include\mcx.h:
+
+c:\mingw\i686-w64-mingw32\include\imm.h:
+
+c:\mingw\i686-w64-mingw32\include\winsock2.h:
+
+c:\mingw\i686-w64-mingw32\include\psdk_inc\_ws1_undef.h:
+
+c:\mingw\i686-w64-mingw32\include\_timeval.h:
+
+c:\mingw\i686-w64-mingw32\include\_bsd_types.h:
+
+c:\mingw\i686-w64-mingw32\include\inaddr.h:
+
+c:\mingw\i686-w64-mingw32\include\psdk_inc\_socket_types.h:
+
+c:\mingw\i686-w64-mingw32\include\psdk_inc\_fd_types.h:
+
+c:\mingw\i686-w64-mingw32\include\psdk_inc\_ip_types.h:
+
+c:\mingw\i686-w64-mingw32\include\psdk_inc\_wsadata.h:
+
+c:\mingw\i686-w64-mingw32\include\ws2def.h:
+
+c:\mingw\i686-w64-mingw32\include\psdk_inc\_wsa_errnos.h:
+
+c:\mingw\i686-w64-mingw32\include\qos.h:
+
+c:\mingw\i686-w64-mingw32\include\ws2tcpip.h:
+
+c:\mingw\i686-w64-mingw32\include\psdk_inc\_ip_mreq1.h:
+
+c:\mingw\i686-w64-mingw32\include\ws2ipdef.h:
+
+c:\mingw\i686-w64-mingw32\include\in6addr.h:
+
+c:\mingw\i686-w64-mingw32\include\mstcpip.h:
+
+c:\mingw\i686-w64-mingw32\include\sys\types.h:
+
+c:\mingw\i686-w64-mingw32\include\_mingw_off_t.h:
+
+c:\mingw\lib\gcc\i686-w64-mingw32\4.8.1\include\stdint.h:
+
+c:\mingw\i686-w64-mingw32\include\stdint.h:
+
+c:\mingw\lib\gcc\i686-w64-mingw32\4.8.1\include\stddef.h:
+
+c:\mingw\i686-w64-mingw32\include\stddef.h:
+
+c:\mingw\i686-w64-mingw32\include\inttypes.h:
+
+c:\mingw\i686-w64-mingw32\include\_mingw_print_push.h:
+
+c:\mingw\i686-w64-mingw32\include\_mingw_print_pop.h:
+
+../include/curl/curlrules.h:
+
+c:\mingw\i686-w64-mingw32\include\tchar.h:
+
+c:\mingw\i686-w64-mingw32\include\sec_api\tchar_s.h:
+
+c:\mingw\i686-w64-mingw32\include\stdio.h:
+
+c:\mingw\i686-w64-mingw32\include\swprintf.inl:
+
+c:\mingw\i686-w64-mingw32\include\sec_api\stdio_s.h:
+
+c:\mingw\i686-w64-mingw32\include\assert.h:
+
+c:\mingw\i686-w64-mingw32\include\io.h:
+
+c:\mingw\i686-w64-mingw32\include\sec_api\io_s.h:
+
+c:\mingw\i686-w64-mingw32\include\sys\stat.h:
+
+c:\mingw\i686-w64-mingw32\include\_mingw_stat64.h:
+
+../lib/curl_setup_once.h:
+
+c:\mingw\i686-w64-mingw32\include\stdlib.h:
+
+c:\mingw\lib\gcc\i686-w64-mingw32\4.8.1\include-fixed\limits.h:
+
+c:\mingw\lib\gcc\i686-w64-mingw32\4.8.1\include-fixed\syslimits.h:
+
+c:\mingw\i686-w64-mingw32\include\limits.h:
+
+c:\mingw\i686-w64-mingw32\include\sec_api\stdlib_s.h:
+
+c:\mingw\i686-w64-mingw32\include\malloc.h:
+
+c:\mingw\i686-w64-mingw32\include\errno.h:
+
+c:\mingw\i686-w64-mingw32\include\sys\time.h:
+
+c:\mingw\i686-w64-mingw32\include\time.h:
+
+c:\mingw\i686-w64-mingw32\include\sec_api\time_s.h:
+
+c:\mingw\i686-w64-mingw32\include\sys\timeb.h:
+
+c:\mingw\i686-w64-mingw32\include\sec_api\sys\timeb_s.h:
+
+c:\mingw\i686-w64-mingw32\include\pthread_time.h:
+
+c:\mingw\i686-w64-mingw32\include\fcntl.h:
+
+c:\mingw\lib\gcc\i686-w64-mingw32\4.8.1\include\stdbool.h:
+
+c:\mingw\i686-w64-mingw32\include\unistd.h:
+
+c:\mingw\i686-w64-mingw32\include\process.h:
+
+c:\mingw\i686-w64-mingw32\include\getopt.h:
+
+c:\mingw\i686-w64-mingw32\include\pthread_unistd.h:
+
+../include/curl/curl.h:
+
+../include/curl/curlver.h:
+
+../include/curl/curlbuild.h:
+
+../include/curl/curlrules.h:
+
+../include/curl/easy.h:
+
+../include/curl/multi.h:
+
+../include/curl/curl.h:
+
+../include/curl/typecheck-gcc.h:
+
+../lib/rawstr.h:
+
+../lib/curlx.h:
+
+../include/curl/mprintf.h:
+
+../lib/strequal.h:
+
+../lib/strtoofft.h:
+
+../lib/curl_setup.h:
+
+../lib/timeval.h:
+
+../lib/nonblock.h:
+
+../lib/warnless.h:
+
+tool_cfgable.h:
+
+tool_sdecls.h:
+
+tool_metalink.h:
+
+tool_getparam.h:
+
+tool_getpass.h:
+
+tool_homedir.h:
+
+tool_msgs.h:
+
+tool_paramhlp.h:
+
+../lib/memdebug.h:

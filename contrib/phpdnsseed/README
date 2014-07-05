@@ -1,0 +1,34 @@
+PHP script to extract seednodes from
+a running daemon en put them in a format
+suitable for bind.
+
+Caveat: only IPV4 is supported at this moment.
+
+You should be familiar with bind. I assume you already run it
+and you want to add a subdomain to provide a DNSSeed.
+
+Config hints (replace example.com by your domain...)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Copy script elsewhere to avoid complicating your git workflow.
+
+- Edit the header of the script (config section).
+
+- Run this script with cron, say every 10 minutes.
+
+- Pipe the output to /etc/bind/db.i0seed.example.com
+
+Add the following to named.conf.local:
+----
+zone "i0seed.example.com" {
+        type master;
+        file "/etc/bind/db.i0seed.snel.it";
+        allow-query { any; };
+};
+----
+
+- You must "/etc/init.d/bind9 reload" after every update.
+
+Now a lookup of i0seed.example.com results in the latest
+connectable nodes.
+
