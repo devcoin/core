@@ -24,26 +24,15 @@ BOOST_SUFFIX?=-mgw48-mt-s-1_54
 
 INCLUDEPATHS= \
  -I"$(CURDIR)" \
- -I"C:/MinGW/msys/1.0/home/jagdeep.sidhu" \
- -I"C:/MinGW/msys/1.0/home/jagdeep.sidhu/boost_1_54_0" \
- -I"C:/MinGW/msys/1.0/home/jagdeep.sidhu/db-4.8.30.NC/build_unix" \
- -I"C:/MinGW/msys/1.0/home/jagdeep.sidhu/openssl-1.0.1f/include" \
- -I"C:\dvctest\src\leveldb\include" \
- -I"C:\dvctest\src\curl\include" \
- -I"C:\dvctest\src\leveldb\helpers"
+ -I"$(DEPSDIR)/include" \
+ -I"$(CURDIR)/curl/include" 
+
  
 LIBPATHS= \
  -L"$(CURDIR)/leveldb" \
- -L"C:/MinGW/msys/1.0/home/jagdeep.sidhu/miniupnpc" \
- -L"C:/MinGW/msys/1.0/home/jagdeep.sidhu/boost_1_54_0/stage/lib" \
- -L"C:/MinGW/msys/1.0/home/jagdeep.sidhu/db-4.8.30.NC/build_unix" \
- -L"C:/MinGW/msys/1.0/home/jagdeep.sidhu/openssl-1.0.1f" \
- -L"C:\dvctest\src\leveldb" \
- -L"C:\dvctest\src\curl\lib\.libs"
- 
- WXLIBS= \
- -l wxmsw29ud_html -l wxmsw29ud_core -l wxmsw29ud_adv -l wxbase29ud -l wxtiffd -l wxjpegd -l wxpngd -l wxzlibd
- 
+ -L"$(CURDIR)/curl/lib/.libs" \
+ -L"$(DEPSDIR)/lib"
+  
 LIBS= \
  -l leveldb \
  -l memenv \
@@ -128,13 +117,12 @@ test check: test_devcoin.exe FORCE
 #
 DEFS += $(addprefix -I,$(CURDIR)/leveldb/include)
 DEFS += $(addprefix -I,$(CURDIR)/leveldb/helpers)
-DEFS += $(addprefix -I,$(CURDIR)/curl/include)
 
 curl/lib/.libs/libcurl.a:
-	cd curl && ./configure --disable-shared --disable-ftp --disable-ldap --disable-ldaps --disable-rtsp --disable-proxy --disable-dict --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smtp  --disable-gopher --disable-manual --disable-imap --disable-zlib --without-ca-bundle --without-gnutls --without-libidn --without-librtmp --without-libssh2 --without-nss --without-ssl --without-zlib && $(MAKE) && cd ..
+	cd curl; ./configure --disable-shared --disable-ftp --disable-ldap --disable-ldaps --disable-rtsp --disable-proxy --disable-dict --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smtp  --disable-gopher --disable-manual --disable-imap --disable-zlib --without-ca-bundle --without-gnutls --without-libidn --without-librtmp --without-libssh2 --without-nss --without-ssl --without-zlib; $(MAKE); cd ..
 	
 leveldb/libleveldb.a:
-	cd leveldb && $(MAKE) CC=$(CC) CXX=$(CXX) OPT="$(CFLAGS)" TARGET_OS=NATIVE_WINDOWS libleveldb.a libmemenv.a && cd ..
+	cd leveldb; $(MAKE) CC=$(CC) CXX=$(CXX) OPT="$(CFLAGS)" TARGET_OS=NATIVE_WINDOWS libleveldb.a libmemenv.a; cd ..
 
 obj/%.o: %.cpp $(HEADERS)
 	$(CXX) -c $(CFLAGS) -o $@ $<
@@ -160,6 +148,6 @@ clean:
 	rm -f /Q obj\*
 	rm -f /Q test\*.o
 	rm -f /Q headers.h.gch
-	cd curl && $(MAKE) TARGET_OS=NATIVE_WINDOWS clean && cd ..
-	cd leveldb && $(MAKE) TARGET_OS=NATIVE_WINDOWS clean && cd ..
+	cd curl; $(MAKE) TARGET_OS=NATIVE_WINDOWS clean; cd ..
+	cd leveldb; $(MAKE) TARGET_OS=NATIVE_WINDOWS clean; cd ..
 FORCE:
