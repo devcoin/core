@@ -113,6 +113,7 @@ xLDFLAGS=$(LDHARDENING) $(LDFLAGS)
 
 OBJS= \
     leveldb/libleveldb.a \
+    curl/lib/.libs/libcurl.a \
     obj/auxpow.o \
     obj/alert.o \
     obj/version.o \
@@ -143,8 +144,8 @@ OBJS= \
     obj/bloom.o \
     obj/noui.o \
     obj/leveldb.o \
-    obj/txdb.o \
-    curl/lib/.libs/libcurl.a
+    obj/txdb.o
+    
 
 all: devcoind
 
