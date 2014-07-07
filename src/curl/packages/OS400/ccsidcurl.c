@@ -77,7 +77,8 @@ makeOS400IconvCode(char buf[ICONV_ID_SIZE], unsigned int ccsid)
 
 
 static iconv_t
-iconv_open_CCSID(unsigned int ccsidout, unsigned int ccsidin, unsigned int cstr)
+iconv_open_CCSID(unsigned int ccsidout, unsigned int ccsidin,
+                                                        unsigned int cstr)
 
 {
   char fromcode[ICONV_ID_SIZE];
@@ -218,7 +219,7 @@ slist_convert(int dccsid, struct curl_slist * from, int sccsid)
   struct curl_slist * to = (struct curl_slist *) NULL;
   char * cp;
 
-  for (; from; from = from->next) {
+  for(; from; from = from->next) {
     if(!(cp = dynconvert(dccsid, from->data, -1, sccsid))) {
       curl_slist_free_all(to);
       return (struct curl_slist *) NULL;
@@ -407,7 +408,7 @@ curl_version_info_ccsid(CURLversion stamp, unsigned int ccsid)
      compiler seems to compare string values after substitution. */
 
 #if CURLVERSION_NOW != CURLVERSION_FOURTH
-#error curl_version_info_data structure has changed: upgrade this procedure too.
+#error curl_version_info_data structure has changed: upgrade this procedure.
 #endif
 
   /* If caller has been compiled with a new version, error. */
@@ -426,7 +427,7 @@ curl_version_info_ccsid(CURLversion stamp, unsigned int ccsid)
   nproto = 0;
 
   if(p->protocols) {
-    while (p->protocols[nproto])
+    while(p->protocols[nproto])
       n += strlen(p->protocols[nproto++]);
 
     n += nproto++;
@@ -478,7 +479,7 @@ curl_version_info_ccsid(CURLversion stamp, unsigned int ccsid)
     cp += i;
     n -= i;
 
-    for (i = 0; id->protocols[i]; i++)
+    for(i = 0; id->protocols[i]; i++)
       if(convert_version_info_string(((const char * *) id->protocols) + i,
                                       &cp, &n, ccsid))
         return (curl_version_info_data *) NULL;
@@ -593,7 +594,7 @@ curl_certinfo_free_all(struct curl_certinfo *info)
   /* Free all memory used by certificate info. */
   if(info) {
     if(info->certinfo) {
-      for (i = 0; i < info->num_of_certs; i++)
+      for(i = 0; i < info->num_of_certs; i++)
         curl_slist_free_all(info->certinfo[i]);
       free((char *) info->certinfo);
     }
@@ -647,19 +648,21 @@ curl_easy_getinfo_ccsid(CURL * curl, CURLINFO info, ...)
 
     case CURLINFO_SLIST:
       ccsid = va_arg(arg, unsigned int);
-      if(info == CURLINFO_CERTINFO) {
+      switch (info) {
+      case CURLINFO_CERTINFO:
         cipf = *(struct curl_certinfo * *) paramp;
         if(cipf) {
           if(!(cipt = (struct curl_certinfo *) malloc(sizeof *cipt)))
             ret = CURLE_OUT_OF_MEMORY;
           else {
-            cipt->certinfo = (struct curl_slist * *) calloc(cipf->num_of_certs +
-                             1, sizeof(struct curl_slist *));
+            cipt->certinfo = (struct curl_slist * *)
+                             calloc(cipf->num_of_certs +
+                                    1, sizeof(struct curl_slist *));
             if(!cipt->certinfo)
               ret = CURLE_OUT_OF_MEMORY;
             else {
               cipt->num_of_certs = cipf->num_of_certs;
-              for (i = 0; i < cipf->num_of_certs; i++)
+              for(i = 0; i < cipf->num_of_certs; i++)
                 if(cipf->certinfo[i])
                   if(!(cipt->certinfo[i] = slist_convert(ccsid,
                                                           cipf->certinfo[i],
@@ -677,12 +680,18 @@ curl_easy_getinfo_ccsid(CURL * curl, CURLINFO info, ...)
 
           *(struct curl_certinfo * *) paramp = cipt;
         }
-      }
-      else {
+
+        break;
+
+      case CURLINFO_TLS_SESSION:
+        break;
+
+      default:
         slp = (struct curl_slist * *) paramp;
         if(*slp)
           if(!(*slp = slist_convert(ccsid, *slp, ASCII_CCSID)))
             ret = CURLE_OUT_OF_MEMORY;
+        break;
       }
     }
 
@@ -715,7 +724,7 @@ static void
 Curl_formadd_release_local(struct curl_forms * forms, int nargs, int skip)
 
 {
-  while (nargs--)
+  while(nargs--)
     if(nargs != skip)
       if(Curl_is_formadd_string(forms[nargs].option))
         if(forms[nargs].value)
@@ -755,7 +764,7 @@ Curl_formadd_convert(struct curl_forms * forms,
     return -1;
     }
 
-  cp2 = realloc(cp, l);                 /* Shorten buffer to the string size. */
+  cp2 = realloc(cp, l);         /* Shorten buffer to the string size. */
 
   if(cp2)
     cp = cp2;
@@ -763,7 +772,7 @@ Curl_formadd_convert(struct curl_forms * forms,
   forms[formx].value = cp;
 
   if(lengthx >= 0)
-    forms[lengthx].value = (char *) l;  /* Update to length after conversion. */
+    forms[lengthx].value = (char *) l;  /* Update length after conversion. */
 
   return l;
 }
@@ -826,7 +835,7 @@ curl_formadd_ccsid(struct curl_httppost * * httppost,
   forms = (struct curl_forms *) NULL;
   va_start(arg, last_post);
 
-  for (;;) {
+  for(;;) {
     /* Make sure there is still room for an item in local array. */
 
     if(nargs >= lformlen) {
@@ -1111,11 +1120,7 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
   if(testwarn) {
     testwarn = 0;
 
-#ifdef USE_TLS_SRP
-    if((int) STRING_LAST != (int) STRING_TLSAUTH_PASSWORD + 1)
-#else
-    if((int) STRING_LAST != (int) STRING_MAIL_AUTH + 1)
-#endif
+    if((int) STRING_LAST != (int) STRING_BEARER + 1)
       curl_mfprintf(stderr,
        "*** WARNING: curl_easy_setopt_ccsid() should be reworked ***\n");
     }
@@ -1143,6 +1148,7 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
   case CURLOPT_ISSUERCERT:
   case CURLOPT_KEYPASSWD:
   case CURLOPT_KRBLEVEL:
+  case CURLOPT_LOGIN_OPTIONS:
   case CURLOPT_MAIL_FROM:
   case CURLOPT_MAIL_AUTH:
   case CURLOPT_NETRC_FILE:
@@ -1176,6 +1182,7 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
   case CURLOPT_USERAGENT:
   case CURLOPT_USERNAME:
   case CURLOPT_USERPWD:
+  case CURLOPT_XOAUTH2_BEARER:
     s = va_arg(arg, char *);
     ccsid = va_arg(arg, unsigned int);
 

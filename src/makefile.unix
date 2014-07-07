@@ -160,14 +160,14 @@ MAKEOVERRIDES =
 LIBS += $(CURDIR)/leveldb/libleveldb.a $(CURDIR)/leveldb/libmemenv.a
 DEFS += $(addprefix -I,$(CURDIR)/leveldb/include)
 DEFS += $(addprefix -I,$(CURDIR)/leveldb/helpers)
-DEFS += $(addprefix -I,$(CURDIR)/curl/include)
 leveldb/libleveldb.a:
 	@echo "Building LevelDB ..."
 	cd leveldb; chmod +x build_detect_platform; $(MAKE) CC=$(CC) CXX=$(CXX) OPT="$(xCXXFLAGS)" libleveldb.a libmemenv.a; cd ..
-	
+MAKEOVERRIDES =
+DEFS += $(addprefix -I,$(CURDIR)/curl/include)
 curl/lib/.libs/libcurl.a:
 	@echo "Building LibCurl ..."
-	cd curl; chmod +x buildconf; ./buildconf; ./configure --disable-shared --disable-ftp --disable-ldap --disable-ldapis --disable-rtsp --disable-proxy --disable-dict --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smtp  --disable-gopher --disable-manual --disable-imap --disable-zlib --without-ca-bundle --without-gnutls --without-libidn --without-librtmp --without-libssh2 --without-nss --without-ssl --without-zlib; $(MAKE); cd ..
+	cd curl; ./configure --disable-shared --disable-ftp --disable-ldap --disable-ldapis --disable-rtsp --disable-proxy --disable-dict --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smtp  --disable-gopher --disable-manual --disable-imap --disable-zlib --without-ca-bundle --without-gnutls --without-libidn --without-librtmp --without-libssh2 --without-nss --without-ssl --without-zlib; $(MAKE); cd ..
 	
 # auto-generated dependencies:
 -include obj/*.P

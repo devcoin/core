@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -40,7 +40,7 @@ typedef enum {
 
 void glob_cleanup(URLGlob* glob);
 
-static GlobCode glob_fixed(URLGlob *glob, unsigned long *amount)
+static GlobCode glob_fixed(URLGlob *glob, char *fixed, size_t len)
 {
   URLPattern *pat = &glob->pattern[glob->size];
   pat->type = UPTSet;
@@ -48,16 +48,17 @@ static GlobCode glob_fixed(URLGlob *glob, unsigned long *amount)
   pat->content.Set.ptr_s = 0;
   pat->globindex = -1;
 
-  (*amount)++;
-
   pat->content.Set.elements = malloc(sizeof(char*));
 
   if(!pat->content.Set.elements)
     return GLOBERROR("out of memory", 0, GLOB_NO_MEM);
 
-  pat->content.Set.elements[0] = strdup(glob->glob_buffer);
+  pat->content.Set.elements[0] = malloc(len+1);
   if(!pat->content.Set.elements[0])
     return GLOBERROR("out of memory", 0, GLOB_NO_MEM);
+
+  memcpy(pat->content.Set.elements[0], fixed, len);
+  pat->content.Set.elements[0][len] = 0;
 
   return GLOB_OK;
 }
@@ -211,7 +212,7 @@ static GlobCode glob_range(URLGlob *glob, char **patternp,
       }
     }
     else
-      pattern+=3;
+      pattern += 4;
 
     *posp += (pattern - *patternp);
 
@@ -301,19 +302,63 @@ static GlobCode glob_range(URLGlob *glob, char **patternp,
   return GLOB_OK;
 }
 
+static bool peek_ipv6(const char *str, size_t *skip)
+{
+  /*
+   * Scan for a potential IPv6 literal.
+   * - Valid globs contain a hyphen and <= 1 colon.
+   * - IPv6 literals contain no hyphens and >= 2 colons.
+   */
+  size_t i = 0;
+  size_t colons = 0;
+  if(str[i++] != '[') {
+    return FALSE;
+  }
+  for(;;) {
+    const char c = str[i++];
+    if(ISALNUM(c) || c == '.' || c == '%') {
+      /* ok */
+    }
+    else if(c == ':') {
+      colons++;
+    }
+    else if(c == ']') {
+      *skip = i;
+      return colons >= 2 ? TRUE : FALSE;
+    }
+    else {
+      return FALSE;
+    }
+  }
+}
+
 static GlobCode glob_parse(URLGlob *glob, char *pattern,
                            size_t pos, unsigned long *amount)
 {
   /* processes a literal string component of a URL
      special characters '{' and '[' branch to set/range processing functions
    */
-  char* buf = glob->glob_buffer;
   GlobCode res = GLOB_OK;
   int globindex = 0; /* count "actual" globs */
 
+  *amount = 1;
+
   while(*pattern && !res) {
-    int sublen = 0;
-    while(*pattern && *pattern != '{' && *pattern != '[') {
+    char *buf = glob->glob_buffer;
+    size_t sublen = 0;
+    while(*pattern && *pattern != '{') {
+      if(*pattern == '[') {
+        /* Skip over potential IPv6 literals. */
+        size_t skip;
+        if(peek_ipv6(pattern, &skip)) {
+          memcpy(buf, pattern, skip);
+          buf += skip;
+          pattern += skip;
+          sublen += skip;
+          continue;
+        }
+        break;
+      }
       if(*pattern == '}' || *pattern == ']')
         return GLOBERROR("unmatched close brace/bracket", pos, GLOB_ERROR);
 
@@ -333,12 +378,9 @@ static GlobCode glob_parse(URLGlob *glob, char *pattern,
     if(sublen) {
       /* we got a literal string, add it as a single-item list */
       *buf = '\0';
-      res = glob_fixed(glob, amount);
+      res = glob_fixed(glob, glob->glob_buffer, sublen);
     }
     else {
-      if(!*amount)
-        *amount = 1;
-
       switch (*pattern) {
       case '\0': /* done  */
         break;
@@ -423,6 +465,7 @@ void glob_cleanup(URLGlob* glob)
   size_t i;
   int elem;
 
+  /* the < condition is required since i underflows! */
   for(i = glob->size - 1; i < glob->size; --i) {
     if((glob->pattern[i].type == UPTSet) &&
        (glob->pattern[i].content.Set.elements)) {
@@ -456,6 +499,7 @@ int glob_next_url(char **globbed, URLGlob *glob)
 
     /* implement a counter over the index ranges of all patterns,
        starting with the rightmost pattern */
+    /* the < condition is required since i underflows! */
     for(i = glob->size - 1; carry && (i < glob->size); --i) {
       carry = FALSE;
       pat = &glob->pattern[i];

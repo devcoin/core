@@ -2,8 +2,10 @@
 <info>
 <keywords>
 POP3
+Clear Text
 TOP
 CUSTOMREQUEST
+RFC2449
 </keywords>
 </info>
 

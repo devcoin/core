@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -50,16 +50,11 @@
 #include <sys/param.h>
 #endif
 
-#if defined(HAVE_SIGNAL_H) && defined(HAVE_SIGACTION) && defined(USE_OPENSSL)
-#define SIGPIPE_IGNORE 1
-#include <signal.h>
-#endif
-
 #include "strequal.h"
 #include "urldata.h"
 #include <curl/curl.h>
 #include "transfer.h"
-#include "sslgen.h"
+#include "vtls/vtls.h"
 #include "url.h"
 #include "getinfo.h"
 #include "hostip.h"
@@ -78,62 +73,13 @@
 #include "warnless.h"
 #include "conncache.h"
 #include "multiif.h"
+#include "sigpipe.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
 /* The last #include file should be: */
 #include "memdebug.h"
-
-#ifdef SIGPIPE_IGNORE
-struct sigpipe_ignore {
-  struct sigaction old_pipe_act;
-  bool no_signal;
-};
-
-#define SIGPIPE_VARIABLE(x) struct sigpipe_ignore x
-
-/*
- * sigpipe_ignore() makes sure we ignore SIGPIPE while running libcurl
- * internals, and then sigpipe_restore() will restore the situation when we
- * return from libcurl again.
- */
-static void sigpipe_ignore(struct SessionHandle *data,
-                           struct sigpipe_ignore *ig)
-{
-  /* get a local copy of no_signal because the SessionHandle might not be
-     around when we restore */
-  ig->no_signal = data->set.no_signal;
-  if(!data->set.no_signal) {
-    struct sigaction action;
-    /* first, extract the existing situation */
-    memset(&ig->old_pipe_act, 0, sizeof(struct sigaction));
-    sigaction(SIGPIPE, NULL, &ig->old_pipe_act);
-    action = ig->old_pipe_act;
-    /* ignore this signal */
-    action.sa_handler = SIG_IGN;
-    sigaction(SIGPIPE, &action, NULL);
-  }
-}
-
-/*
- * sigpipe_restore() puts back the outside world's opinion of signal handler
- * and SIGPIPE handling. It MUST only be called after a corresponding
- * sigpipe_ignore() was used.
- */
-static void sigpipe_restore(struct sigpipe_ignore *ig)
-{
-  if(!ig->no_signal)
-    /* restore the outside state */
-    sigaction(SIGPIPE, &ig->old_pipe_act, NULL);
-}
-
-#else
-/* for systems without sigaction */
-#define sigpipe_ignore(x,y) Curl_nop_stmt
-#define sigpipe_restore(x)  Curl_nop_stmt
-#define SIGPIPE_VARIABLE(x)
-#endif
 
 /* win32_cleanup() is for win32 socket cleanup functionality, the opposite
    of win32_init() */
@@ -353,9 +299,13 @@ CURLcode curl_global_init_mem(long flags, curl_malloc_callback m,
   if(!m || !f || !r || !s || !c)
     return CURLE_FAILED_INIT;
 
-  /* Already initialized, don't do it again */
-  if(initialized)
+  if(initialized) {
+    /* Already initialized, don't do it again, but bump the variable anyway to
+       work like curl_global_init() and require the same amount of cleanup
+       calls. */
+    initialized++;
     return CURLE_OK;
+  }
 
   /* Call the actual init function first */
   code = curl_global_init(flags);
@@ -769,6 +719,15 @@ static CURLcode easy_transfer(CURLM *multi)
       }
     }
   }
+
+  /* Make sure to return some kind of error if there was a multi problem */
+  if(mcode) {
+    return (mcode == CURLM_OUT_OF_MEMORY) ? CURLE_OUT_OF_MEMORY :
+            /* The other multi errors should never happen, so return
+               something suitably generic */
+            CURLE_BAD_FUNCTION_ARGUMENT;
+  }
+
   return code;
 }
 
@@ -801,7 +760,7 @@ static CURLcode easy_perform(struct SessionHandle *data, bool events)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
   if(data->multi) {
-    failf(data, "easy handled already used in multi handle");
+    failf(data, "easy handle already used in multi handle");
     return CURLE_FAILED_INIT;
   }
 

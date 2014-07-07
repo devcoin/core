@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -22,7 +22,11 @@
  *
  ***************************************************************************/
 
-#include "pingpong.h"
+#include <curl/curl.h>
+
+struct SessionHandle;
+struct connectdata;
+struct ntlmdata;
 
 /* Authentication mechanism values */
 #define SASL_AUTH_NONE          0
@@ -66,9 +70,13 @@ CURLcode Curl_sasl_create_login_message(struct SessionHandle *data,
                                         size_t *outlen);
 
 #ifndef CURL_DISABLE_CRYPTO_AUTH
+/* This is used to decode a base64 encoded CRAM-MD5 challange message */
+CURLcode Curl_sasl_decode_cram_md5_message(const char *chlg64, char **outptr,
+                                           size_t *outlen);
+
 /* This is used to generate a base64 encoded CRAM-MD5 response message */
 CURLcode Curl_sasl_create_cram_md5_message(struct SessionHandle *data,
-                                           const char *chlg64,
+                                           const char *chlg,
                                            const char *user,
                                            const char *passwdp,
                                            char **outptr, size_t *outlen);
@@ -76,7 +84,7 @@ CURLcode Curl_sasl_create_cram_md5_message(struct SessionHandle *data,
 /* This is used to generate a base64 encoded DIGEST-MD5 response message */
 CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
                                              const char *chlg64,
-                                             const char *user,
+                                             const char *userp,
                                              const char *passwdp,
                                              const char *service,
                                              char **outptr, size_t *outlen);
@@ -90,10 +98,13 @@ CURLcode Curl_sasl_create_ntlm_type1_message(const char *userp,
                                              char **outptr,
                                              size_t *outlen);
 
-/* This is used to decode an incoming NTLM type-2 message and generate a
-   base64 encoded type-3 response */
+/* This is used to decode a base64 encoded NTLM type-2 message */
+CURLcode Curl_sasl_decode_ntlm_type2_message(struct SessionHandle *data,
+                                             const char *type2msg,
+                                             struct ntlmdata *ntlm);
+
+/* This is used to generate a base64 encoded NTLM type-3 message */
 CURLcode Curl_sasl_create_ntlm_type3_message(struct SessionHandle *data,
-                                             const char *header,
                                              const char *userp,
                                              const char *passwdp,
                                              struct ntlmdata *ntlm,

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -41,6 +41,7 @@
 #include "bundles.h"
 #include "multihandle.h"
 #include "pipeline.h"
+#include "sigpipe.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -316,6 +317,9 @@ struct Curl_multi *Curl_multi_handle(int hashsize, /* socket hash */
   multi->closure_handle->state.conn_cache = multi->conn_cache;
 
   multi->max_pipeline_length = 5;
+
+  /* -1 means it not set by user, use the default value */
+  multi->maxconnects = -1;
   return (CURLM *) multi;
 
   error:
@@ -328,6 +332,7 @@ struct Curl_multi *Curl_multi_handle(int hashsize, /* socket hash */
   multi->conn_cache = NULL;
   Curl_close(multi->closure_handle);
   multi->closure_handle = NULL;
+  Curl_llist_destroy(multi->msglist, NULL);
 
   free(multi);
   return NULL;
@@ -398,6 +403,8 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
 
   /* Point to the multi's connection cache */
   data->state.conn_cache = multi->conn_cache;
+
+  data->state.infilesize = data->set.filesize;
 
   /* This adds the new entry at the 'end' of the doubly-linked circular
      list of SessionHandle structs to try and maintain a FIFO queue so
@@ -549,9 +556,11 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
         Curl_getoff_all_pipelines(data, data->easy_conn);
     }
 
+    Curl_wildcard_dtor(&data->wildcard);
+
     /* as this was using a shared connection cache we clear the pointer
        to that since we're not part of that multi handle anymore */
-      data->state.conn_cache = NULL;
+    data->state.conn_cache = NULL;
 
     /* change state without using multistate(), only to make singlesocket() do
        what we want */
@@ -621,17 +630,28 @@ static int waitconnect_getsock(struct connectdata *conn,
                                curl_socket_t *sock,
                                int numsocks)
 {
+  int i;
+  int s=0;
+  int rc=0;
+
   if(!numsocks)
     return GETSOCK_BLANK;
 
-  sock[0] = conn->sock[FIRSTSOCKET];
+  for(i=0; i<2; i++) {
+    if(conn->tempsock[i] != CURL_SOCKET_BAD) {
+      sock[s] = conn->tempsock[i];
+      rc |= GETSOCK_WRITESOCK(s++);
+    }
+  }
 
   /* when we've sent a CONNECT to a proxy, we should rather wait for the
      socket to become readable to be able to get the response headers */
-  if(conn->tunnel_state[FIRSTSOCKET] == TUNNEL_CONNECT)
-    return GETSOCK_READSOCK(0);
+  if(conn->tunnel_state[FIRSTSOCKET] == TUNNEL_CONNECT) {
+    sock[0] = conn->sock[FIRSTSOCKET];
+    rc = GETSOCK_READSOCK(0);
+  }
 
-  return GETSOCK_WRITESOCK(0);
+  return rc;
 }
 
 static int domore_getsock(struct connectdata *conn,
@@ -778,9 +798,9 @@ CURLMcode curl_multi_wait(CURLM *multi_handle,
 
   /* If the internally desired timeout is actually shorter than requested from
      the outside, then use the shorter time! But only if the internal timer
-     is actually larger than 0! */
+     is actually larger than -1! */
   (void)multi_timeout(multi, &timeout_internal);
-  if((timeout_internal > 0) && (timeout_internal < (long)timeout_ms))
+  if((timeout_internal >= 0) && (timeout_internal < (long)timeout_ms))
     timeout_ms = (int)timeout_internal;
 
   /* Count up how many fds we have from the multi handle */
@@ -810,7 +830,7 @@ CURLMcode curl_multi_wait(CURLM *multi_handle,
   curlfds = nfds; /* number of internal file descriptors */
   nfds += extra_nfds; /* add the externally provided ones */
 
-  if(nfds) {
+  if(nfds || extra_nfds) {
     ufds = malloc(nfds * sizeof(struct pollfd));
     if(!ufds)
       return CURLM_OUT_OF_MEMORY;
@@ -865,6 +885,7 @@ CURLMcode curl_multi_wait(CURLM *multi_handle,
 
   if(nfds) {
     /* wait... */
+    infof(data, "Curl_poll(%d ds, %d ms)\n", nfds, timeout_ms);
     i = Curl_poll(ufds, nfds, timeout_ms);
 
     if(i) {
@@ -972,10 +993,19 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
                 Curl_tvdiff(now, data->progress.t_startsingle));
         else {
           k = &data->req;
-          failf(data, "Operation timed out after %ld milliseconds with %"
-                FORMAT_OFF_T " out of %" FORMAT_OFF_T " bytes received",
-                Curl_tvdiff(now, data->progress.t_startsingle), k->bytecount,
-                k->size);
+          if(k->size != -1) {
+            failf(data, "Operation timed out after %ld milliseconds with %"
+                  CURL_FORMAT_CURL_OFF_T " out of %"
+                  CURL_FORMAT_CURL_OFF_T " bytes received",
+                  Curl_tvdiff(k->now, data->progress.t_startsingle),
+                  k->bytecount, k->size);
+          }
+          else {
+            failf(data, "Operation timed out after %ld milliseconds with %"
+                  CURL_FORMAT_CURL_OFF_T " bytes received",
+                  Curl_tvdiff(now, data->progress.t_startsingle),
+                  k->bytecount);
+          }
         }
 
         /* Force the connection closed because the server could continue to
@@ -996,6 +1026,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       if(CURLE_OK == data->result) {
         /* after init, go CONNECT */
         multistate(data, CURLM_STATE_CONNECT);
+        Curl_pgrsTime(data, TIMER_STARTOP);
         result = CURLM_CALL_MULTI_PERFORM;
       }
       break;
@@ -1368,7 +1399,14 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       Curl_move_handle_from_send_to_recv_pipe(data, data->easy_conn);
       /* Check if we can move pending requests to send pipe */
       Curl_multi_process_pending_handles(multi);
-      multistate(data, CURLM_STATE_WAITPERFORM);
+
+      /* Only perform the transfer if there's a good socket to work with.
+         Having both BAD is a signal to skip immediately to DONE */
+      if((data->easy_conn->sockfd != CURL_SOCKET_BAD) ||
+         (data->easy_conn->writesockfd != CURL_SOCKET_BAD))
+        multistate(data, CURLM_STATE_WAITPERFORM);
+      else
+        multistate(data, CURLM_STATE_DONE);
       result = CURLM_CALL_MULTI_PERFORM;
       break;
 
@@ -1564,13 +1602,20 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       result = CURLM_CALL_MULTI_PERFORM;
 
       if(data->easy_conn) {
+        CURLcode res;
+
         /* Remove ourselves from the receive pipeline, if we are there. */
         Curl_removeHandleFromPipeline(data, data->easy_conn->recv_pipe);
         /* Check if we can move pending requests to send pipe */
         Curl_multi_process_pending_handles(multi);
 
         /* post-transfer command */
-        data->result = Curl_done(&data->easy_conn, CURLE_OK, FALSE);
+        res = Curl_done(&data->easy_conn, CURLE_OK, FALSE);
+
+        /* allow a previously set error code take precedence */
+        if(!data->result)
+          data->result = res;
+
         /*
          * If there are other handles on the pipeline, Curl_done won't set
          * easy_conn to NULL.  In such a case, curl_multi_remove_handle() can
@@ -1659,6 +1704,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       else if(data->easy_conn && Curl_pgrsUpdate(data->easy_conn)) {
         /* aborted due to progress callback return code must close the
            connection */
+        data->result = CURLE_ABORTED_BY_CALLBACK;
         data->easy_conn->bits.close = TRUE;
 
         /* if not yet in DONE state, go there, otherwise COMPLETED */
@@ -1701,6 +1747,7 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
   while(data) {
     CURLMcode result;
     struct WildcardData *wc = &data->wildcard;
+    SIGPIPE_VARIABLE(pipe_st);
 
     if(data->set.wildcardmatch) {
       if(!wc->filelist) {
@@ -1710,9 +1757,11 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
       }
     }
 
+    sigpipe_ignore(data, &pipe_st);
     do
       result = multi_runsingle(multi, now, data);
     while(CURLM_CALL_MULTI_PERFORM == result);
+    sigpipe_restore(&pipe_st);
 
     if(data->set.wildcardmatch) {
       /* destruct wildcard structures if it is needed */
@@ -1758,10 +1807,13 @@ static void close_all_connections(struct Curl_multi *multi)
 
   conn = Curl_conncache_find_first_connection(multi->conn_cache);
   while(conn) {
+    SIGPIPE_VARIABLE(pipe_st);
     conn->data = multi->closure_handle;
 
+    sigpipe_ignore(conn->data, &pipe_st);
     /* This will remove the connection from the cache */
     (void)Curl_disconnect(conn, FALSE);
+    sigpipe_restore(&pipe_st);
 
     conn = Curl_conncache_find_first_connection(multi->conn_cache);
   }
@@ -1774,12 +1826,18 @@ CURLMcode curl_multi_cleanup(CURLM *multi_handle)
   struct SessionHandle *nextdata;
 
   if(GOOD_MULTI_HANDLE(multi)) {
+    bool restore_pipe = FALSE;
+    SIGPIPE_VARIABLE(pipe_st);
+
     multi->type = 0; /* not good anymore */
 
     /* Close all the connections in the connection cache */
     close_all_connections(multi);
 
     if(multi->closure_handle) {
+      sigpipe_ignore(multi->closure_handle, &pipe_st);
+      restore_pipe = TRUE;
+
       multi->closure_handle->dns.hostcache = multi->hostcache;
       Curl_hostcache_clean(multi->closure_handle,
                            multi->closure_handle->dns.hostcache);
@@ -1824,6 +1882,8 @@ CURLMcode curl_multi_cleanup(CURLM *multi_handle)
     Curl_pipeline_set_server_blacklist(NULL, &multi->pipelining_server_bl);
 
     free(multi);
+    if(restore_pipe)
+      sigpipe_restore(&pipe_st);
 
     return CURLM_OK;
   }
@@ -2125,10 +2185,12 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
 
     /* walk through each easy handle and do the socket state change magic
        and callbacks */
-    data=multi->easyp;
-    while(data) {
-      singlesocket(multi, data);
-      data = data->next;
+    if(result != CURLM_BAD_HANDLE) {
+      data=multi->easyp;
+      while(data) {
+        singlesocket(multi, data);
+        data = data->next;
+      }
     }
 
     /* or should we fall-through and do the timer-based stuff? */
@@ -2147,6 +2209,8 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
          and just move on. */
       ;
     else {
+      SIGPIPE_VARIABLE(pipe_st);
+
       data = entry->easy;
 
       if(data->magic != CURLEASY_MAGIC_NUMBER)
@@ -2172,9 +2236,11 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
         /* set socket event bitmask if they're not locked */
         data->easy_conn->cselect_bits = ev_bitmask;
 
+      sigpipe_ignore(data, &pipe_st);
       do
         result = multi_runsingle(multi, now, data);
       while(CURLM_CALL_MULTI_PERFORM == result);
+      sigpipe_restore(&pipe_st);
 
       if(data->easy_conn &&
          !(data->easy_conn->handler->flags & PROTOPT_DIRLOCK))
@@ -2192,31 +2258,16 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
 
       data = NULL; /* set data to NULL again to avoid calling
                       multi_runsingle() in case there's no need to */
+      now = Curl_tvnow(); /* get a newer time since the multi_runsingle() loop
+                             may have taken some time */
     }
   }
-
-  /* Compensate for bad precision timers that might've triggered too early.
-
-     This precaution was added in commit 2c72732ebf3da5e as a result of bad
-     resolution in the windows function use(d).
-
-     The problematic case here is when using the multi_socket API and libcurl
-     has told the application about a timeout, and that timeout is what fires
-     off a bit early. As we don't have any IDs associated with the timeout we
-     can't tell which timeout that fired off but we only have the times to use
-     to check what to do. If it fires off too early, we don't run the correct
-     actions and we don't tell the application again about the same timeout as
-     was already first in the queue...
-
-     Originally we made the timeouts run 40 milliseconds early on all systems,
-     but now we have an #ifdef setup to provide a decent precaution inaccuracy
-     margin.
-  */
-
-  now.tv_usec += MULTI_TIMEOUT_INACCURACY;
-  if(now.tv_usec >= 1000000) {
-    now.tv_sec++;
-    now.tv_usec -= 1000000;
+  else {
+    /* Asked to run due to time-out. Clear the 'lastcall' variable to force
+       update_timer() to trigger a callback to the app again even if the same
+       timeout is still the one to run after this call. That handles the case
+       when the application asks libcurl to run the timeout prematurely. */
+    memset(&multi->timer_lastcall, 0, sizeof(multi->timer_lastcall));
   }
 
   /*
@@ -2227,9 +2278,13 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
   do {
     /* the first loop lap 'data' can be NULL */
     if(data) {
+      SIGPIPE_VARIABLE(pipe_st);
+
+      sigpipe_ignore(data, &pipe_st);
       do
         result = multi_runsingle(multi, now, data);
       while(CURLM_CALL_MULTI_PERFORM == result);
+      sigpipe_restore(&pipe_st);
 
       if(CURLM_OK >= result)
         /* get the socket(s) and check if the state has been changed since

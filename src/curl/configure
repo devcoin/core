@@ -11,7 +11,7 @@
 # This configure script is free software; the Free Software Foundation
 # gives unlimited permission to copy, distribute and modify it.
 #
-# Copyright (c) 1998 - 2013 Daniel Stenberg, <daniel@haxx.se>
+# Copyright (c) 1998 - 2014 Daniel Stenberg, <daniel@haxx.se>
 # This configure script may be copied, distributed and modified under the
 # terms of the curl license; see COPYING for more details
 
@@ -915,7 +915,6 @@ LIBMETALINK_LIBS
 CURL_CA_BUNDLE
 SSL_ENABLED
 USE_AXTLS
-HAVE_NSS_INITCONTEXT
 USE_NSS
 USE_CYASSL
 USE_POLARSSL
@@ -1901,9 +1900,9 @@ Optional Packages:
   --with-lber-lib=libname Specify name of lber lib file
   --with-spnego=DIR       Specify location of SPNEGO library fbopenssl
   --with-gssapi-includes=DIR
-                          Specify location of GSSAPI header
-  --with-gssapi-libs=DIR  Specify location of GSSAPI libs
-  --with-gssapi=DIR       Where to look for GSSAPI
+                          Specify location of GSS-API headers
+  --with-gssapi-libs=DIR  Specify location of GSS-API libs
+  --with-gssapi=DIR       Where to look for GSS-API
   --with-winssl           enable Windows native SSL/TLS
   --without-winssl        disable Windows native SSL/TLS
   --with-darwinssl        enable iOS/Mac OS X native SSL/TLS
@@ -2039,7 +2038,7 @@ Copyright (C) 2012 Free Software Foundation, Inc.
 This configure script is free software; the Free Software Foundation
 gives unlimited permission to copy, distribute and modify it.
 
-Copyright (c) 1998 - 2013 Daniel Stenberg, <daniel@haxx.se>
+Copyright (c) 1998 - 2014 Daniel Stenberg, <daniel@haxx.se>
 This configure script may be copied, distributed and modified under the
 terms of the curl license; see COPYING for more details
 _ACEOF
@@ -5467,6 +5466,7 @@ END
     as_fn_error $? "Your 'rm' program is bad, sorry." "$LINENO" 5
   fi
 fi
+
 ## ------------------------------------- ##
 ##  End of automake initialization code  ##
 ## ------------------------------------- ##
@@ -7576,7 +7576,7 @@ else
     We can't simply define LARGE_OFF_T to be 9223372036854775807,
     since some C++ compilers masquerading as C compilers
     incorrectly reject 9223372036854775807.  */
-#define LARGE_OFF_T (((off_t) 1 << 62) - 1 + ((off_t) 1 << 62))
+#define LARGE_OFF_T ((((off_t) 1 << 31) << 31) - 1 + (((off_t) 1 << 31) << 31))
   int off_t_is_large[(LARGE_OFF_T % 2147483629 == 721
 		       && LARGE_OFF_T % 2147483647 == 1)
 		      ? 1 : -1];
@@ -7621,7 +7621,7 @@ else
     We can't simply define LARGE_OFF_T to be 9223372036854775807,
     since some C++ compilers masquerading as C compilers
     incorrectly reject 9223372036854775807.  */
-#define LARGE_OFF_T (((off_t) 1 << 62) - 1 + ((off_t) 1 << 62))
+#define LARGE_OFF_T ((((off_t) 1 << 31) << 31) - 1 + (((off_t) 1 << 31) << 31))
   int off_t_is_large[(LARGE_OFF_T % 2147483629 == 721
 		       && LARGE_OFF_T % 2147483647 == 1)
 		      ? 1 : -1];
@@ -7644,7 +7644,7 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
     We can't simply define LARGE_OFF_T to be 9223372036854775807,
     since some C++ compilers masquerading as C compilers
     incorrectly reject 9223372036854775807.  */
-#define LARGE_OFF_T (((off_t) 1 << 62) - 1 + ((off_t) 1 << 62))
+#define LARGE_OFF_T ((((off_t) 1 << 31) << 31) - 1 + (((off_t) 1 << 31) << 31))
   int off_t_is_large[(LARGE_OFF_T % 2147483629 == 721
 		       && LARGE_OFF_T % 2147483647 == 1)
 		      ? 1 : -1];
@@ -7688,7 +7688,7 @@ else
     We can't simply define LARGE_OFF_T to be 9223372036854775807,
     since some C++ compilers masquerading as C compilers
     incorrectly reject 9223372036854775807.  */
-#define LARGE_OFF_T (((off_t) 1 << 62) - 1 + ((off_t) 1 << 62))
+#define LARGE_OFF_T ((((off_t) 1 << 31) << 31) - 1 + (((off_t) 1 << 31) << 31))
   int off_t_is_large[(LARGE_OFF_T % 2147483629 == 721
 		       && LARGE_OFF_T % 2147483647 == 1)
 		      ? 1 : -1];
@@ -7711,7 +7711,7 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
     We can't simply define LARGE_OFF_T to be 9223372036854775807,
     since some C++ compilers masquerading as C compilers
     incorrectly reject 9223372036854775807.  */
-#define LARGE_OFF_T (((off_t) 1 << 62) - 1 + ((off_t) 1 << 62))
+#define LARGE_OFF_T ((((off_t) 1 << 31) << 31) - 1 + (((off_t) 1 << 31) << 31))
   int off_t_is_large[(LARGE_OFF_T % 2147483629 == 721
 		       && LARGE_OFF_T % 2147483647 == 1)
 		      ? 1 : -1];
@@ -9945,7 +9945,7 @@ ia64-*-hpux*)
   rm -rf conftest*
   ;;
 
-x86_64-*kfreebsd*-gnu|x86_64-*linux*|ppc*-*linux*|powerpc*-*linux*| \
+x86_64-*kfreebsd*-gnu|x86_64-*linux*|powerpc*-*linux*| \
 s390*-*linux*|s390*-*tpf*|sparc*-*linux*)
   # Find out which ABI we are using.
   echo 'int i;' > conftest.$ac_ext
@@ -9970,7 +9970,10 @@ s390*-*linux*|s390*-*tpf*|sparc*-*linux*)
 		;;
 	    esac
 	    ;;
-	  ppc64-*linux*|powerpc64-*linux*)
+	  powerpc64le-*)
+	    LD="${LD-ld} -m elf32lppclinux"
+	    ;;
+	  powerpc64-*)
 	    LD="${LD-ld} -m elf32ppclinux"
 	    ;;
 	  s390x-*linux*)
@@ -9989,7 +9992,10 @@ s390*-*linux*|s390*-*tpf*|sparc*-*linux*)
 	  x86_64-*linux*)
 	    LD="${LD-ld} -m elf_x86_64"
 	    ;;
-	  ppc*-*linux*|powerpc*-*linux*)
+	  powerpcle-*)
+	    LD="${LD-ld} -m elf64lppc"
+	    ;;
+	  powerpc-*)
 	    LD="${LD-ld} -m elf64ppc"
 	    ;;
 	  s390*-*linux*|s390*-*tpf*)
@@ -20874,6 +20880,7 @@ else
  /* is AF_INET6 available? */
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <stdlib.h> /* for exit() */
 main()
 {
  if (socket(AF_INET6, SOCK_STREAM, 0) < 0)
@@ -21064,8 +21071,8 @@ fi
 
 
 save_CPPFLAGS="$CPPFLAGS"
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking if GSSAPI support is requested" >&5
-$as_echo_n "checking if GSSAPI support is requested... " >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking if GSS-API support is requested" >&5
+$as_echo_n "checking if GSS-API support is requested... " >&6; }
 if test x"$want_gss" = xyes; then
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
@@ -21136,8 +21143,8 @@ $as_echo "#define HAVE_GSSHEIMDAL 1" >>confdefs.h
 else
 
                             want_gss=no
-              { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: disabling GSSAPI since no header files was found" >&5
-$as_echo "$as_me: WARNING: disabling GSSAPI since no header files was found" >&2;}
+              { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: disabling GSS-API support since no header files were found" >&5
+$as_echo "$as_me: WARNING: disabling GSS-API support since no header files were found" >&2;}
 
 
 fi
@@ -21147,8 +21154,8 @@ fi
 
 $as_echo "#define HAVE_GSSMIT 1" >>confdefs.h
 
-                { $as_echo "$as_me:${as_lineno-$LINENO}: checking if gssapi headers declare GSS_C_NT_HOSTBASED_SERVICE" >&5
-$as_echo_n "checking if gssapi headers declare GSS_C_NT_HOSTBASED_SERVICE... " >&6; }
+                { $as_echo "$as_me:${as_lineno-$LINENO}: checking if GSS-API headers declare GSS_C_NT_HOSTBASED_SERVICE" >&5
+$as_echo_n "checking if GSS-API headers declare GSS_C_NT_HOSTBASED_SERVICE... " >&6; }
         cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -21201,7 +21208,7 @@ if test x"$want_gss" = xyes; then
 $as_echo "#define HAVE_GSSAPI 1" >>confdefs.h
 
 
-  curl_gss_msg="enabled (MIT/Heimdal)"
+  curl_gss_msg="enabled (MIT Kerberos/Heimdal)"
 
   if test -n "$gnu_gss"; then
     curl_gss_msg="enabled (GNU GSS)"
@@ -21211,6 +21218,12 @@ $as_echo "#define HAVE_GSSAPI 1" >>confdefs.h
      case $host in
      *-*-darwin*)
         LIBS="-lgssapi_krb5 -lresolv $LIBS"
+        ;;
+     *-hp-hpux*)
+        if test "$GSSAPI_ROOT" != "yes"; then
+           LDFLAGS="$LDFLAGS -L$GSSAPI_ROOT/lib$libsuff"
+        fi
+        LIBS="-lgss $LIBS"
         ;;
      *)
         if test -f "$GSSAPI_ROOT/bin/krb5-config"; then
@@ -21226,7 +21239,14 @@ $as_echo "#define HAVE_GSSAPI 1" >>confdefs.h
      esac
   else
      LDFLAGS="$LDFLAGS $GSSAPI_LIB_DIR"
-     LIBS="-lgssapi $LIBS"
+     case $host in
+     *-hp-hpux*)
+        LIBS="-lgss $LIBS"
+        ;;
+     *)
+        LIBS="-lgssapi $LIBS"
+        ;;
+     esac
   fi
 else
   CPPFLAGS="$save_CPPFLAGS"
@@ -21855,7 +21875,10 @@ fi
                     ENGINE_cleanup \
                     CRYPTO_cleanup_all_ex_data \
                     SSL_get_shutdown \
-                    SSLv2_client_method
+                    SSLv2_client_method \
+                    SSL_CTX_set_next_proto_select_cb \
+                    SSL_CTX_set_alpn_protos \
+                    SSL_CTX_set_alpn_select_cb
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -23397,6 +23420,53 @@ fi
       { $as_echo "$as_me:${as_lineno-$LINENO}: detected CyaSSL" >&5
 $as_echo "$as_me: detected CyaSSL" >&6;}
 
+            # The cast to long int works around a bug in the HP C Compiler
+# version HP92453-01 B.11.11.23709.GP, which incorrectly rejects
+# declarations like `int a3[[(sizeof (unsigned char)) >= 0]];'.
+# This bug is HP SR number 8606223364.
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking size of long long" >&5
+$as_echo_n "checking size of long long... " >&6; }
+if ${ac_cv_sizeof_long_long+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if ac_fn_c_compute_int "$LINENO" "(long int) (sizeof (long long))" "ac_cv_sizeof_long_long"        "$ac_includes_default"; then :
+
+else
+  if test "$ac_cv_type_long_long" = yes; then
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error 77 "cannot compute sizeof (long long)
+See \`config.log' for more details" "$LINENO" 5; }
+   else
+     ac_cv_sizeof_long_long=0
+   fi
+fi
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_sizeof_long_long" >&5
+$as_echo "$ac_cv_sizeof_long_long" >&6; }
+
+
+
+cat >>confdefs.h <<_ACEOF
+#define SIZEOF_LONG_LONG $ac_cv_sizeof_long_long
+_ACEOF
+
+
+
+            for ac_header in cyassl/error-ssl.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "cyassl/error-ssl.h" "ac_cv_header_cyassl_error_ssl_h" "$ac_includes_default"
+if test "x$ac_cv_header_cyassl_error_ssl_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_CYASSL_ERROR_SSL_H 1
+_ACEOF
+
+fi
+
+done
+
+
       LIBS="-lcyassl -lm $LIBS"
 
       if test -n "$cyassllib"; then
@@ -23598,9 +23668,9 @@ $as_echo "found" >&6; }
          CPPFLAGS="$CPPFLAGS $addcflags"
       fi
 
-            { $as_echo "$as_me:${as_lineno-$LINENO}: checking for PK11_CreateGenericObject in -lnss3" >&5
-$as_echo_n "checking for PK11_CreateGenericObject in -lnss3... " >&6; }
-if ${ac_cv_lib_nss3_PK11_CreateGenericObject+:} false; then :
+            { $as_echo "$as_me:${as_lineno-$LINENO}: checking for SSL_VersionRangeSet in -lnss3" >&5
+$as_echo_n "checking for SSL_VersionRangeSet in -lnss3... " >&6; }
+if ${ac_cv_lib_nss3_SSL_VersionRangeSet+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   ac_check_lib_save_LIBS=$LIBS
@@ -23612,26 +23682,26 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 #ifdef __cplusplus
 extern "C"
 #endif
-char PK11_CreateGenericObject ();
+char SSL_VersionRangeSet ();
 int main (void)
 {
-return PK11_CreateGenericObject ();
+return SSL_VersionRangeSet ();
  ;
  return 0;
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_nss3_PK11_CreateGenericObject=yes
+  ac_cv_lib_nss3_SSL_VersionRangeSet=yes
 else
-  ac_cv_lib_nss3_PK11_CreateGenericObject=no
+  ac_cv_lib_nss3_SSL_VersionRangeSet=no
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 LIBS=$ac_check_lib_save_LIBS
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_nss3_PK11_CreateGenericObject" >&5
-$as_echo "$ac_cv_lib_nss3_PK11_CreateGenericObject" >&6; }
-if test "x$ac_cv_lib_nss3_PK11_CreateGenericObject" = xyes; then :
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_nss3_SSL_VersionRangeSet" >&5
+$as_echo "$ac_cv_lib_nss3_SSL_VersionRangeSet" >&6; }
+if test "x$ac_cv_lib_nss3_SSL_VersionRangeSet" = xyes; then :
 
 
 $as_echo "#define USE_NSS 1" >>confdefs.h
@@ -23653,18 +23723,6 @@ fi
       if test "x$USE_NSS" = "xyes"; then
         { $as_echo "$as_me:${as_lineno-$LINENO}: detected NSS version $version" >&5
 $as_echo "$as_me: detected NSS version $version" >&6;}
-
-                        ac_fn_c_check_func "$LINENO" "NSS_InitContext" "ac_cv_func_NSS_InitContext"
-if test "x$ac_cv_func_NSS_InitContext" = xyes; then :
-
-
-$as_echo "#define HAVE_NSS_INITCONTEXT 1" >>confdefs.h
-
-          HAVE_NSS_INITCONTEXT=1
-
-
-fi
-
 
                                         if test "x$cross_compiling" != "xyes"; then
           LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$nssprefix/lib$libsuff"
@@ -23756,11 +23814,12 @@ $as_echo "#define USE_AXTLS 1" >>confdefs.h
       USE_AXTLS="yes"
       curl_ssl_msg="enabled (axTLS)"
 
-
-      LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$LIB_AXTLS"
-      export LD_LIBRARY_PATH
-      { $as_echo "$as_me:${as_lineno-$LINENO}: Added $LIB_AXTLS to LD_LIBRARY_PATH" >&5
+      if test "x$cross_compiling" != "xyes"; then
+        LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$LIB_AXTLS"
+        export LD_LIBRARY_PATH
+        { $as_echo "$as_me:${as_lineno-$LINENO}: Added $LIB_AXTLS to LD_LIBRARY_PATH" >&5
 $as_echo "$as_me: Added $LIB_AXTLS to LD_LIBRARY_PATH" >&6;}
+      fi
 
 else
 
@@ -24793,19 +24852,19 @@ $as_echo "$as_me: WARNING: You need an ld version supporting the --version-scrip
 $as_echo "yes" >&6; }
         if test "x$OPENSSL_ENABLED" = "x1"; then
           versioned_symbols_flavour="OPENSSL_"
-        elif test "x$GNUTLS_ENABLED" == "x1"; then
+        elif test "x$GNUTLS_ENABLED" = "x1"; then
           versioned_symbols_flavour="GNUTLS_"
-        elif test "x$NSS_ENABLED" == "x1"; then
+        elif test "x$NSS_ENABLED" = "x1"; then
           versioned_symbols_flavour="NSS_"
-        elif test "x$POLARSSL_ENABLED" == "x1"; then
+        elif test "x$POLARSSL_ENABLED" = "x1"; then
           versioned_symbols_flavour="POLARSSL_"
-        elif test "x$CYASSL_ENABLED" == "x1"; then
+        elif test "x$CYASSL_ENABLED" = "x1"; then
           versioned_symbols_flavour="CYASSL_"
-        elif test "x$AXTLS_ENABLED" == "x1"; then
+        elif test "x$AXTLS_ENABLED" = "x1"; then
           versioned_symbols_flavour="AXTLS_"
-        elif test "x$WINSSL_ENABLED" == "x1"; then
+        elif test "x$WINSSL_ENABLED" = "x1"; then
           versioned_symbols_flavour="WINSSL_"
-        elif test "x$DARWINSSL_ENABLED" == "x1"; then
+        elif test "x$DARWINSSL_ENABLED" = "x1"; then
           versioned_symbols_flavour="DARWINSSL_"
         else
           versioned_symbols_flavour=""
@@ -25428,7 +25487,7 @@ done
       IDN_ENABLED=1
 
       curl_idn_msg="enabled"
-      if test -n "$IDN_DIR"; then
+      if test -n "$IDN_DIR" -a "x$cross_compiling" != "xyes"; then
         LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$IDN_DIR"
         export LD_LIBRARY_PATH
         { $as_echo "$as_me:${as_lineno-$LINENO}: Added $IDN_DIR to LD_LIBRARY_PATH" >&5
@@ -25465,13 +25524,12 @@ fi
 
 case "$OPT_H2" in
   no)
-        want_idn="no"
+        want_h2="no"
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
     ;;
   default)
         want_h2="no"
-    want_h2_path="default"
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
     ;;
@@ -25483,19 +25541,18 @@ $as_echo "yes" >&6; }
     ;;
   *)
         want_h2="yes"
-    want_h2_path="$withval"
+    want_h2_path="$withval/lib/pkgconfig"
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes ($withval)" >&5
 $as_echo "yes ($withval)" >&6; }
     ;;
 esac
 
 curl_h2_msg="disabled (--with-nghttp2)"
-if test X"$OPT_H2" != Xno; then
+if test X"$want_h2" != Xno; then
     CLEANLDFLAGS="$LDFLAGS"
   CLEANCPPFLAGS="$CPPFLAGS"
   CLEANLIBS="$LIBS"
 
-  h2pcdir=${want_h2_path}/lib/pkgconfig
 
 
     PKGCONFIG="no"
@@ -25605,8 +25662,8 @@ fi
       { $as_echo "$as_me:${as_lineno-$LINENO}: checking for libnghttp2 options with pkg-config" >&5
 $as_echo_n "checking for libnghttp2 options with pkg-config... " >&6; }
             itexists=`
-    if test -n "$h2pcdir"; then
-      PKG_CONFIG_LIBDIR="$h2pcdir"
+    if test -n "$want_h2_path"; then
+      PKG_CONFIG_LIBDIR="$want_h2_path"
       export PKG_CONFIG_LIBDIR
     fi
          $PKGCONFIG --exists libnghttp2 >/dev/null 2>&1 && echo 1`
@@ -25624,8 +25681,8 @@ $as_echo "found" >&6; }
 
   if test "$PKGCONFIG" != "no" ; then
     LIB_H2=`
-    if test -n "$h2pcdir"; then
-      PKG_CONFIG_LIBDIR="$h2pcdir"
+    if test -n "$want_h2_path"; then
+      PKG_CONFIG_LIBDIR="$want_h2_path"
       export PKG_CONFIG_LIBDIR
     fi
 
@@ -25634,8 +25691,8 @@ $as_echo "found" >&6; }
 $as_echo "$as_me: -l is $LIB_H2" >&6;}
 
     CPP_H2=`
-    if test -n "$h2pcdir"; then
-      PKG_CONFIG_LIBDIR="$h2pcdir"
+    if test -n "$want_h2_path"; then
+      PKG_CONFIG_LIBDIR="$want_h2_path"
       export PKG_CONFIG_LIBDIR
     fi
        $PKGCONFIG --cflags-only-I libnghttp2`
@@ -25643,8 +25700,8 @@ $as_echo "$as_me: -l is $LIB_H2" >&6;}
 $as_echo "$as_me: -I is $CPP_H2" >&6;}
 
     LD_H2=`
-    if test -n "$h2pcdir"; then
-      PKG_CONFIG_LIBDIR="$h2pcdir"
+    if test -n "$want_h2_path"; then
+      PKG_CONFIG_LIBDIR="$want_h2_path"
       export PKG_CONFIG_LIBDIR
     fi
 
@@ -34336,7 +34393,7 @@ $as_echo "no" >&6; }
   tst_allow_poll="unknown"
   #
   case $host_os in
-    darwin*|interix*)
+    darwin[123456789].*|darwin10.*|darwin11.*|darwin12.*|interix*)
                               curl_disallow_poll="yes"
       ;;
   esac
@@ -38820,6 +38877,7 @@ $as_echo "no" >&6; }
 
 $as_echo "#define CURL_DISABLE_CRYPTO_AUTH 1" >>confdefs.h
 
+       CURL_DISABLE_CRYPTO_AUTH=1
        ;;
   *)   { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
@@ -39044,7 +39102,8 @@ fi
 if test "x$USE_WINDOWS_SSPI" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES SSPI"
 fi
-if test "x$CURL_DISABLE_HTTP" != "x1"; then
+if test "x$CURL_DISABLE_HTTP" != "x1" -a \
+	"x$CURL_DISABLE_CRYPTO_AUTH" != "x1"; then
   if test "x$USE_SSLEAY" = "x1" -o "x$USE_WINDOWS_SSPI" = "x1" \
       -o "x$GNUTLS_ENABLED" = "x1" -o "x$NSS_ENABLED" = "x1" \
       -o "x$DARWINSSL_ENABLED" = "x1"; then
@@ -39060,6 +39119,12 @@ fi
 
 if test "x$USE_NGHTTP2" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES HTTP2"
+fi
+if test "x$curl_spnego_msg" = "xenabled"; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES SPNEGO"
+fi
+if test "x$want_gss" = "xyes"; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES GSS-API"
 fi
 
 
@@ -42073,7 +42138,7 @@ done
   SSL support:      ${curl_ssl_msg}
   SSH support:      ${curl_ssh_msg}
   zlib support:     ${curl_zlib_msg}
-  GSSAPI support:   ${curl_gss_msg}
+  GSS-API support:  ${curl_gss_msg}
   SPNEGO support:   ${curl_spnego_msg}
   TLS-SRP support:  ${curl_tls_srp_msg}
   resolver:         ${curl_res_msg}
@@ -42103,7 +42168,7 @@ $as_echo "$as_me: Configured to build curl/libcurl:
   SSL support:      ${curl_ssl_msg}
   SSH support:      ${curl_ssh_msg}
   zlib support:     ${curl_zlib_msg}
-  GSSAPI support:   ${curl_gss_msg}
+  GSS-API support:  ${curl_gss_msg}
   SPNEGO support:   ${curl_spnego_msg}
   TLS-SRP support:  ${curl_tls_srp_msg}
   resolver:         ${curl_res_msg}

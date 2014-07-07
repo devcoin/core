@@ -30,5 +30,5 @@ qrc_*.cpp
 # Mac specific
 .DS_Store
 build
-
+!src/curl*/*
 !src/leveldb-*/Makefile
