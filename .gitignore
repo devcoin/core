@@ -13,7 +13,6 @@ src/test_devcoin
 
 # Compilation and Qt preprocessor part
 *.qm
-Makefile
 bitcoin-qt
 Bitcoin-Qt.app
 
