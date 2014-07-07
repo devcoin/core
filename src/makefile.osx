@@ -14,16 +14,13 @@ INCLUDEPATHS= \
  -I"$(CURDIR)" \
  -I"$(CURDIR)"/obj \
  -I"$(DEPSDIR)/include" \
- -I"$(DEPSDIR)/include/db48" \
- -I"$(CURDIR)/curl/include" 
+ -I"$(DEPSDIR)/include/db48"
 
 LIBPATHS= \
- -L"$(CURDIR)/curl/lib/.libs" \
- -L"$(CURDIR)/leveldb" \
  -L"$(DEPSDIR)/lib" \
  -L"$(DEPSDIR)/lib/db48"
 
-USE_UPNP:=-
+USE_UPNP:=1
 USE_IPV6:=1
 
 LIBS= -dead_strip
@@ -35,7 +32,6 @@ ifdef STATIC
 TESTLIBS += \
  $(DEPSDIR)/lib/libboost_unit_test_framework-mt.a
 LIBS += \
- -l leveldb \
  $(DEPSDIR)/lib/db48/libdb_cxx-4.8.a \
  $(DEPSDIR)/lib/libboost_system-mt.a \
  $(DEPSDIR)/lib/libboost_filesystem-mt.a \
@@ -45,12 +41,10 @@ LIBS += \
  $(DEPSDIR)/lib/libssl.a \
  $(DEPSDIR)/lib/libcrypto.a \
  -lz
- -l curl
 else
 TESTLIBS += \
  -lboost_unit_test_framework-mt
 LIBS += \
- -l leveldb \	
  -ldb_cxx-4.8 \
  -lboost_system-mt \
  -lboost_filesystem-mt \
@@ -60,7 +54,6 @@ LIBS += \
  -lssl \
  -lcrypto \
  -lz
- -l curl
 TESTDEFS += -DBOOST_TEST_DYN_LINK
 endif
 
@@ -111,8 +104,7 @@ OBJS= \
     obj/bloom.o \
     obj/noui.o \
     obj/leveldb.o \
-    obj/txdb.o \
-    curl/lib/.libs/libcurl.a
+    obj/txdb.o
 
 ifndef USE_UPNP
 	override USE_UPNP = -
@@ -141,15 +133,9 @@ test check: test_bitcoin FORCE
 LIBS += $(CURDIR)/leveldb/libleveldb.a $(CURDIR)/leveldb/libmemenv.a
 DEFS += $(addprefix -I,$(CURDIR)/leveldb/include)
 DEFS += $(addprefix -I,$(CURDIR)/leveldb/helpers)
-
-curl/lib/.libs/libcurl.a:
-	@echo "Building LibCurl ..."
-	cd curl; ./configure --disable-shared --disable-ftp --disable-ldap --disable-ldaps --disable-rtsp --disable-proxy --disable-dict --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smtp  --disable-gopher --disable-manual --disable-imap --disable-zlib --without-ca-bundle --without-gnutls --without-libidn --without-librtmp --without-libssh2 --without-nss --without-ssl --without-zlib; $(MAKE); cd ..
-	
 leveldb/libleveldb.a:
-	@echo "Building LevelDB ..."
-	cd leveldb; $(MAKE) CC=$(CC) CXX=$(CXX) OPT="$(CFLAGS)" libleveldb.a libmemenv.a; cd ..
-	
+	@echo "Building LevelDB ..." && cd leveldb && $(MAKE) CC=$(CC) CXX=$(CXX) OPT="$(CFLAGS)" libleveldb.a libmemenv.a && cd ..
+
 # auto-generated dependencies:
 -include obj/*.P
 -include obj-test/*.P
@@ -188,6 +174,6 @@ clean:
 	-rm -f obj/*.P
 	-rm -f obj-test/*.P
 	-rm -f obj/build.h
-	-cd curl; $(MAKE) clean; cd ..
-	-cd leveldb; $(MAKE) clean; cd ..
+	-cd leveldb && $(MAKE) clean || true
+
 FORCE:
