@@ -17,9 +17,10 @@
 
 CXX ?= g++
 
-USE_UPNP:=1
+USE_UPNP:=-
 USE_IPV6:=1
 
+DEPSDIR?=/usr/local
 BOOST_SUFFIX?=-mgw48-mt-s-1_54
 
 INCLUDEPATHS= \
