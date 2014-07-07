@@ -1,9 +1,8 @@
 TEMPLATE = app
-TARGET = Devcoin-qt
-macx:TARGET = "Devcoin-Qt"
-VERSION = 0.8.5-1
+TARGET = devcoin-qt
+macx:TARGET = "devcoin-qt"
+VERSION = 1.0.0rc1
 INCLUDEPATH += src src/json src/qt
-INCLUDEPATH += src/curl/include
 QT += network widgets
 DEFINES += QT_GUI BOOST_THREAD_USE_LIB BOOST_SPIRIT_THREADSAFE
 CONFIG += no_include_pwd
@@ -19,18 +18,21 @@ CONFIG += thread
 #    BOOST_INCLUDE_PATH, BOOST_LIB_PATH, BDB_INCLUDE_PATH,
 #    BDB_LIB_PATH, OPENSSL_INCLUDE_PATH and OPENSSL_LIB_PATH respectively
 
+## belovachap (July 6, 2014)
+## These settings cause the unix build to crash. Commenting out.
+##
+##BOOST_LIB_SUFFIX=-mgw48-mt-s-1_54
+##BOOST_INCLUDE_PATH=C:/MinGW/msys/1.0/home/jagdeep.sidhu/boost_1_54_0
+##BOOST_LIB_PATH=C:/MinGW/msys/1.0/home/jagdeep.sidhu/boost_1_54_0/stage/lib
+##BDB_INCLUDE_PATH=C:/MinGW/msys/1.0/home/jagdeep.sidhu/db-4.8.30.NC/build_unix
+##BDB_LIB_PATH=C:/MinGW/msys/1.0/home/jagdeep.sidhu/db-4.8.30.NC/build_unix
+##OPENSSL_INCLUDE_PATH=C:/MinGW/msys/1.0/home/jagdeep.sidhu/openssl-1.0.1f/include
+##OPENSSL_LIB_PATH=C:/MinGW/msys/1.0/home/jagdeep.sidhu/openssl-1.0.1f
+##MINIUPNPC_INCLUDE_PATH=C:/MinGW/msys/1.0/home/jagdeep.sidhu/
+##MINIUPNPC_LIB_PATH=C:/MinGW/msys/1.0/home/jagdeep.sidhu/miniupnpc
+##QRENCODE_INCLUDE_PATH=C:/MinGW/msys/1.0/home/jagdeep.sidhu/qrencode-3.4.3
+##QRENCODE_LIB_PATH=C:/MinGW/msys/1.0/home/jagdeep.sidhu/qrencode-3.4.3/.libs
 
-BOOST_LIB_SUFFIX=-mgw48-mt-s-1_54
-BOOST_INCLUDE_PATH=C:/MinGW/msys/1.0/home/jagdeep.sidhu/boost_1_54_0
-BOOST_LIB_PATH=C:/MinGW/msys/1.0/home/jagdeep.sidhu/boost_1_54_0/stage/lib
-BDB_INCLUDE_PATH=C:/MinGW/msys/1.0/home/jagdeep.sidhu/db-4.8.30.NC/build_unix
-BDB_LIB_PATH=C:/MinGW/msys/1.0/home/jagdeep.sidhu/db-4.8.30.NC/build_unix
-OPENSSL_INCLUDE_PATH=C:/MinGW/msys/1.0/home/jagdeep.sidhu/openssl-1.0.1f/include
-OPENSSL_LIB_PATH=C:/MinGW/msys/1.0/home/jagdeep.sidhu/openssl-1.0.1f
-MINIUPNPC_INCLUDE_PATH=C:/MinGW/msys/1.0/home/jagdeep.sidhu/
-MINIUPNPC_LIB_PATH=C:/MinGW/msys/1.0/home/jagdeep.sidhu/miniupnpc
-QRENCODE_INCLUDE_PATH=C:/MinGW/msys/1.0/home/jagdeep.sidhu/qrencode-3.4.3
-QRENCODE_LIB_PATH=C:/MinGW/msys/1.0/home/jagdeep.sidhu/qrencode-3.4.3/.libs
 OBJECTS_DIR = build
 MOC_DIR = build
 UI_DIR = build
@@ -112,7 +114,7 @@ contains(BITCOIN_NEED_QT_PLUGINS, 1) {
 }
 
 INCLUDEPATH += src/leveldb/include src/leveldb/helpers
-LIBS += $$PWD/src/leveldb/libleveldb.a $$PWD/src/leveldb/libmemenv.a $$PWD/src/curl/lib/.libs/libcurl.a
+LIBS += $$PWD/src/leveldb/libleveldb.a $$PWD/src/leveldb/libmemenv.a
 !win32 {
     # we use QMAKE_CXXFLAGS_RELEASE even without RELEASE=1 because we use RELEASE to indicate linking preferences not -O preferences
     genleveldb.commands = cd $$PWD/src/leveldb && CC=$$QMAKE_CC CXX=$$QMAKE_CXX $(MAKE) OPT=\"$$QMAKE_CXXFLAGS $$QMAKE_CXXFLAGS_RELEASE\" libleveldb.a libmemenv.a
@@ -223,7 +225,6 @@ HEADERS += src/qt/bitcoingui.h \
     src/clientversion.h \
     src/txdb.h \
     src/leveldb.h \
-    src/curl/include/curl/curl.h \
     src/threadsafety.h \
     src/limitedmap.h \
     src/qt/splashscreen.h
@@ -421,7 +422,7 @@ macx:QMAKE_INFO_PLIST = share/qt/Info.plist
 # Set libraries and includes at end, to use platform-defined defaults if not overridden
 INCLUDEPATH += $$BOOST_INCLUDE_PATH $$BDB_INCLUDE_PATH $$OPENSSL_INCLUDE_PATH $$QRENCODE_INCLUDE_PATH
 LIBS += $$join(BOOST_LIB_PATH,,-L,) $$join(BDB_LIB_PATH,,-L,) $$join(OPENSSL_LIB_PATH,,-L,) $$join(QRENCODE_LIB_PATH,,-L,)
-LIBS += -lssl -lcrypto -ldb_cxx$$BDB_LIB_SUFFIX
+LIBS += -lssl -lcrypto -ldb_cxx$$BDB_LIB_SUFFIX -lcurl
 # -lgdi32 has to happen after -lcrypto (see  #681)
 win32:LIBS += -lws2_32 -lshlwapi -lmswsock -lole32 -loleaut32 -luuid -lgdi32
 LIBS += -lboost_system$$BOOST_LIB_SUFFIX -lboost_filesystem$$BOOST_LIB_SUFFIX -lboost_program_options$$BOOST_LIB_SUFFIX -lboost_thread$$BOOST_THREAD_LIB_SUFFIX
