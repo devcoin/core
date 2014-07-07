@@ -28,12 +28,12 @@ exec_prefix=${prefix}
 libdir=${exec_prefix}/lib
 includedir=${prefix}/include
 supported_protocols="FILE HTTP"
-supported_features="IPv6"
+supported_features=""
 
 Name: libcurl
 URL: http://curl.haxx.se/
 Description: Library to transfer files with ftp, http, etc.
 Version: 7.33.0
 Libs: -L${libdir} -lcurl
-Libs.private: 
+Libs.private: -lws2_32
 Cflags: -I${includedir} -DCURL_STATICLIB

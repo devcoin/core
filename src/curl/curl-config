@@ -83,7 +83,7 @@ while test $# -gt 0; do
         ;;
 
     --feature|--features)
-        for feature in IPv6 ""; do
+        for feature in  ""; do
             test -n "$feature" && echo "$feature"
         done
         ;;
@@ -148,7 +148,7 @@ while test $# -gt 0; do
            CURLLIBDIR=""
         fi
         if test "Xyes" = "Xyes"; then
-          echo ${CURLLIBDIR}-lcurl 
+          echo ${CURLLIBDIR}-lcurl -lws2_32
         else
           echo ${CURLLIBDIR}-lcurl
         fi
@@ -156,7 +156,7 @@ while test $# -gt 0; do
 
     --static-libs)
         if test "Xyes" != "Xno" ; then
-          echo ${exec_prefix}/lib/libcurl.a  
+          echo ${exec_prefix}/lib/libcurl.a  -lws2_32
         else
           echo "curl was built with static libraries disabled" >&2
           exit 1
@@ -164,7 +164,7 @@ while test $# -gt 0; do
         ;;
 
     --configure)
-        echo " '--disable-shared' '--disable-ftp' '--disable-ldap' '--disable-ldapis' '--disable-rtsp' '--disable-proxy' '--disable-dict' '--disable-telnet' '--disable-tftp' '--disable-pop3' '--disable-smtp' '--disable-gopher' '--disable-manual' '--disable-imap' '--disable-zlib' '--without-ca-bundle' '--without-gnutls' '--without-libidn' '--without-librtmp' '--without-libssh2' '--without-nss' '--without-ssl' '--without-zlib'"
+        echo " '--disable-shared' '--disable-ftp' '--disable-ldap' '--disable-ldaps' '--disable-rtsp' '--disable-proxy' '--disable-dict' '--disable-telnet' '--disable-tftp' '--disable-pop3' '--disable-smtp' '--disable-gopher' '--disable-manual' '--disable-imap' '--disable-zlib' '--without-ca-bundle' '--without-gnutls' '--without-libidn' '--without-librtmp' '--without-libssh2' '--without-nss' '--without-ssl' '--without-zlib'"
         ;;
 
     *)
