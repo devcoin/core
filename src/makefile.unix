@@ -160,7 +160,7 @@ MAKEOVERRIDES =
 LIBS += $(CURDIR)/leveldb/libleveldb.a $(CURDIR)/leveldb/libmemenv.a
 DEFS += $(addprefix -I,$(CURDIR)/leveldb/include)
 DEFS += $(addprefix -I,$(CURDIR)/leveldb/helpers)
-DEFS += $(addprefix -I,$(CURDIR)/curl/include/curl)
+DEFS += $(addprefix -I,$(CURDIR)/curl/include)
 leveldb/libleveldb.a:
 	@echo "Building LevelDB ..."
 	cd leveldb; chmod +x build_detect_platform; $(MAKE) CC=$(CC) CXX=$(CXX) OPT="$(xCXXFLAGS)" libleveldb.a libmemenv.a; cd ..
