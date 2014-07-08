@@ -30,16 +30,17 @@ information or see http://opensource.org/licenses/MIT.
 Development process
 -------------------
 
-Developers work in their own trees, then submit pull requests when they think
-their feature or bug fix is ready.
+Developers work in their own repos and branches, then submit pull requests when
+they think their feature or bug fix is ready.
 
 If it is a simple/trivial/non-controversial change, then one of the Devcoin
 development team members simply pulls it.
 
-If it is a *more complicated or potentially controversial* change, then the patch
-submitter will be asked to start a discussion (if they haven't already) on the Devcoin forum current at https://bitcointalk.org/index.php?topic=233997.0
+If it is a *more complicated or potentially controversial* change, then the
+patch submitter will be asked to start a discussion (if they haven't already)
+on the Devcoin Development forum at http://coinzen.org/index.php/board,49.0.html
 
-The fork will be accepted if there is broad consensus that it is a good thing.
+The branch will be accepted if there is broad consensus that it is a good thing.
 Developers should expect to rework and resubmit patches if the code doesn't
 match the project's coding conventions (see `doc/coding.md`) or are
 controversial.
