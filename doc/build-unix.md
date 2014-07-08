@@ -87,6 +87,7 @@ for Ubuntu 13.10:
 	remove libboost1.54-all-dev and install libboost1.53-all-dev instead.
 
 for Debian 7 (Wheezy) and later:
+
  Method 1:
  
  The oldstable repository contains db4.8 packages.
@@ -94,6 +95,7 @@ for Debian 7 (Wheezy) and later:
  replacing [mirror] with any official debian mirror.
 
 	deb http://[mirror]/debian/ oldstable main
+
  Method 2:
  
  we can reach back into the Debian 6 (Squeeze) repository. Create a file to point to the Squeeze repo:
