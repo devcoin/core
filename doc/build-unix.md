@@ -111,7 +111,8 @@ for Debian 7 (Wheezy) and later:
 	sudo apt-get update
 	
  And get any package upgrades:
-	sudo apt-get update	
+
+	sudo apt-get upgrade	
 
 for other Debian & Ubuntu (with ppa):
 
