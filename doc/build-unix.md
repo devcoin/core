@@ -73,30 +73,51 @@ for Ubuntu 12.04 and later:
 	sudo apt-get install libboost-all-dev
 	(If using Boost 1.37, append -mt to the boost libraries in the makefile, see below how to build)
 
- db4.8 packages are available [here](https://launchpad.net/~bitcoin/+archive/bitcoin).
- You can add the repository using the following command:
-
-        sudo add-apt-repository ppa:bitcoin/bitcoin
-        sudo apt-get update
-
- Ubuntu 12.04 and later have packages for libdb5.1-dev and libdb5.1++-dev,
- but using these will break binary wallet compatibility, and is not recommended.
-
+ 
 for Ubuntu 13.10:
 	libboost1.54 will not work,
 	remove libboost1.54-all-dev and install libboost1.53-all-dev instead.
 
-for Debian 7 (Wheezy) and later:
+Install LibDB4.8:
+ It is recommended to remove any libdb version's other than 4.8. Some version's of Ubuntu come with newer version's of libdb4.8, although libdb5.3 should be ok we still recommend to use libdb4.8 as that is what we used to test and pass the quality verification of the devcoin core sourcecode. By doing one of these methods, you will be asked to remove the current libdb version, if it is not 4.8 we recommend doing so. Choose the method that best suits you. If one doesn't work you can use the next one down the list.
 
  Method 1:
- 
- The oldstable repository contains db4.8 packages.
- Add the following line to /etc/apt/sources.list,
- replacing [mirror] with any official debian mirror.
 
-	deb http://[mirror]/debian/ oldstable main
+	db4.8 packages are available [here](https://launchpad.net/~bitcoin/+archive/bitcoin).
+ You can add the repository using the following command:
+
+        sudo add-apt-repository ppa:bitcoin/bitcoin
+        sudo apt-get update
+	   sudo apt-get upgrade
+	   sudo apt-get install libdb4.8-dev libdb4.8++-dev	
+ 
 
  Method 2:
+ 
+ The oldstable repository contains db4.8 packages.
+
+ Open your sources.list to add the package from an official  debian repository:
+ 
+	sudo vi /etc/apt/sources.list
+	
+ And enter the following line into the text file and save it:	
+	
+	deb http://ftp.us.debian.org/debian/ oldstable main
+		
+ To enable the change run
+
+	sudo apt-get update
+	
+ And get any package upgrades:
+
+	sudo apt-get upgrade	
+
+ Install:
+
+	sudo apt-get install libdb4.8-dev libdb4.8++-dev
+
+
+ Method 3:
  
  we can reach back into the Debian 6 (Squeeze) repository. Create a file to point to the Squeeze repo:
  
@@ -114,10 +135,11 @@ for Debian 7 (Wheezy) and later:
 
 	sudo apt-get upgrade	
 
-for other Debian & Ubuntu (with ppa):
+ Install:
 
 	sudo apt-get install libdb4.8-dev libdb4.8++-dev
 
+	
 Optional:
 
 	sudo apt-get install libminiupnpc-dev (see --with-miniupnpc and --enable-upnp-default)
