@@ -148,7 +148,7 @@ For Qt 5 you need the following:
 
 libqrencode (optional) can be installed with:
 
-    sudo apt-get install libqrencode-dev
+    sudo apt-get install libpng-dev libqrencode-dev
 
 Once these are installed, you can build Devcoin-qt (GUI).
 
