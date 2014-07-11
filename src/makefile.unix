@@ -155,18 +155,17 @@ test check: test_bitcoin FORCE
 	./test_bitcoin
 
 #
-# LevelDB support
+# LevelDB/CURL support
 #
 MAKEOVERRIDES =
 LIBS += $(CURDIR)/leveldb/libleveldb.a $(CURDIR)/leveldb/libmemenv.a
+LIBS += $(CURDIR)/curl/lib/.libs/libcurl.a
 DEFS += $(addprefix -I,$(CURDIR)/leveldb/include)
 DEFS += $(addprefix -I,$(CURDIR)/leveldb/helpers)
+DEFS += $(addprefix -I,$(CURDIR)/curl/include)
 leveldb/libleveldb.a:
 	@echo "Building LevelDB ..."
 	cd leveldb; chmod +x build_detect_platform; $(MAKE) CC=$(CC) CXX=$(CXX) OPT="$(xCXXFLAGS)" libleveldb.a libmemenv.a; cd ..
-MAKEOVERRIDES =
-LIBS += $(CURDIR)/curl/lib/.libs/libcurl.a
-DEFS += $(addprefix -I,$(CURDIR)/curl/include)
 curl/lib/.libs/libcurl.a:
 	@echo "Building LibCurl ..."
 	cd curl; chmod +x configure; ./configure --disable-shared --disable-ftp --disable-ldap --disable-ldapis --disable-rtsp --disable-proxy --disable-dict --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smtp  --disable-gopher --disable-manual --disable-imap --disable-zlib --without-ca-bundle --without-gnutls --without-libidn --without-librtmp --without-libssh2 --without-nss --without-ssl --without-zlib; $(MAKE); cd ..
