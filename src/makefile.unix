@@ -13,15 +13,15 @@ USE_IPV6:=1
 
 LINK:=$(CXX)
 
-DEFS=-D_MT -DBOOST_THREAD_USE_LIB -DBOOST_SPIRIT_THREADSAFE  -D_FILE_OFFSET_BITS=64
+DEFS=-D_MT -DBOOST_THREAD_USE_LIB -DBOOST_SPIRIT_THREADSAFE  -D_FILE_OFFSET_BITS=64 -static
 
 DEFS += $(addprefix -I,$(CURDIR) $(CURDIR)/obj $(BOOST_INCLUDE_PATH) $(BDB_INCLUDE_PATH) $(OPENSSL_INCLUDE_PATH))
 LIBS = $(addprefix -L,$(BOOST_LIB_PATH) $(BDB_LIB_PATH) $(OPENSSL_LIB_PATH))
 
 TESTDEFS = -DTEST_DATA_DIR=$(abspath test/data)
 
-LMODE = dynamic
-LMODE2 = dynamic
+LMODE = static
+LMODE2 = static
 ifdef STATIC
 	LMODE = static
 	ifeq (${STATIC}, all)
@@ -165,6 +165,7 @@ leveldb/libleveldb.a:
 	@echo "Building LevelDB ..."
 	cd leveldb; chmod +x build_detect_platform; $(MAKE) CC=$(CC) CXX=$(CXX) OPT="$(xCXXFLAGS)" libleveldb.a libmemenv.a; cd ..
 MAKEOVERRIDES =
+LIBS += $(CURDIR)/curl/lib/.libs/libcurl.a
 DEFS += $(addprefix -I,$(CURDIR)/curl/include)
 curl/lib/.libs/libcurl.a:
 	@echo "Building LibCurl ..."
