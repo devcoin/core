@@ -32,3 +32,9 @@ qrc_*.cpp
 build
 !src/curl*/Makefile
 !src/leveldb-*/Makefile
+
+# devcoin build artifacts
+#
+/src/obj/*.P
+/src/obj/build.h
+/src/obj-test/*.P
