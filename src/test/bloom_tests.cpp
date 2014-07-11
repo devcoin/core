@@ -1,11 +1,12 @@
 #include <boost/test/unit_test.hpp>
 #include <vector>
 
-#include "bloom.h"
-#include "util.h"
-#include "key.h"
+#include "auxpow.h"
 #include "base58.h"
+#include "bloom.h"
+#include "key.h"
 #include "main.h"
+#include "util.h"
 
 using namespace std;
 using namespace boost::tuples;

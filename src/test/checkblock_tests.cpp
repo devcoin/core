@@ -8,10 +8,11 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/foreach.hpp>
 
+#include "auxpow.h"
 #include "main.h"
-#include "wallet.h"
 #include "net.h"
 #include "util.h"
+#include "wallet.h"
 
 BOOST_AUTO_TEST_SUITE(CheckBlock_tests)
 
