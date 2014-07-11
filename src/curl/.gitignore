@@ -1,0 +1,5 @@
+# @belovachap (July 10, 2014) I still think we should move away from having a
+# copy of curl in this repo. But as long as it's here we need to make a
+# .gitignore for it so we can keep developing smoothly.
+#
+*.lo
