@@ -1,8 +1,8 @@
-// Copyright (c) 2009-2012 The Bitcoin developers
-// Distributed under the MIT/X11 software license, see the accompanying
-// file COPYING or http://www.opensource.org/licenses/mit-license.php.
-#ifndef BITCOIN_CHECKPOINT_H
-#define BITCOIN_CHECKPOINT_H
+// From the many, one
+// From one, the source.
+//
+#ifndef DEVCOIN_CHECKPOINT_H
+#define DEVCOIN_CHECKPOINT_H
 
 #include <map>
 
@@ -11,6 +11,7 @@ class CBlockIndex;
 
 /** Block-chain checkpoints are compiled-in sanity checks.
  * They are updated every release or three.
+ * @belovachap (July 10, 2014) When's the last time we did this checkpointing?
  */
 namespace Checkpoints
 {

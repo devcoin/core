@@ -10,25 +10,45 @@
 
 using namespace std;
 
-BOOST_AUTO_TEST_SUITE(Checkpoints_tests)
+struct CheckPointHashes {
+    uint256 block_8900_hash; 
+    uint256 block_67720_hash;
+    int last_checkpoint_block;
 
-BOOST_AUTO_TEST_CASE(sanity)
+    CheckPointHashes() {
+        block_8900_hash = uint256("0x00000000001bb8090630fcabb82ad0ab75df3eb5b008956b3ae2a352a4324f19");
+        block_67720_hash = uint256("0x0a111b265d89f77b4c86fa6f44e3e2ad876547b1eccf19319cde922b42c1161e");
+        last_checkpoint_block = 145262;
+    }
+};
+
+BOOST_FIXTURE_TEST_SUITE(checkpoints_tests, CheckPointHashes)
+
+BOOST_AUTO_TEST_CASE(hash_of_checkpoint_block_at_checkpoint_passes)
 {
-    uint256 p11111 = uint256("0x0000000069e244f73d78e8fd29ba2fd2ed618bd6fa2ee92559f542fdb26e7c1d");
-    uint256 p134444 = uint256("0x00000000000005b12ffd4cd315cd34ffd4a594f430ac814c91184a0d42d2b0fe");
-    BOOST_CHECK(Checkpoints::CheckBlock(11111, p11111));
-    BOOST_CHECK(Checkpoints::CheckBlock(134444, p134444));
+    BOOST_CHECK(Checkpoints::CheckBlock(8900, block_8900_hash));
+    BOOST_CHECK(Checkpoints::CheckBlock(67720, block_67720_hash));
+}
 
-    
+BOOST_AUTO_TEST_CASE(wrong_hash_at_checkpoint_fails)
+{   
     // Wrong hashes at checkpoints should fail:
-    BOOST_CHECK(!Checkpoints::CheckBlock(11111, p134444));
-    BOOST_CHECK(!Checkpoints::CheckBlock(134444, p11111));
+    BOOST_CHECK(!Checkpoints::CheckBlock(8900, block_67720_hash));
+    BOOST_CHECK(!Checkpoints::CheckBlock(67720, block_8900_hash));
+}
 
-    // ... but any hash not at a checkpoint should succeed:
-    BOOST_CHECK(Checkpoints::CheckBlock(11111+1, p134444));
-    BOOST_CHECK(Checkpoints::CheckBlock(134444+1, p11111));
+BOOST_AUTO_TEST_CASE(any_hash_at_not_checkpoint_passes)
+{
+    // ... but any hash not at a checkpoint should pass:
+    BOOST_CHECK(Checkpoints::CheckBlock(8900+1, block_67720_hash));
+    BOOST_CHECK(Checkpoints::CheckBlock(67720+1, block_8900_hash));
+}
 
-    BOOST_CHECK(Checkpoints::GetTotalBlocksEstimate() >= 134444);
+BOOST_AUTO_TEST_CASE(total_blocks_estimate_at_least_last_checkpoint)
+{
+    // We should never produce an estimate less than the last bheckpoint block
+    // height.
+    BOOST_CHECK(Checkpoints::GetTotalBlocksEstimate() >= last_checkpoint_block);
 }    
 
 BOOST_AUTO_TEST_SUITE_END()

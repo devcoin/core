@@ -33,8 +33,7 @@ namespace Checkpoints
     //   (no blocks before with a timestamp after, none after with
     //    timestamp before)
     // + Contains no strange transactions
-    static MapCheckpoints mapCheckpoints =
-        boost::assign::map_list_of
+    static MapCheckpoints mapCheckpoints = boost::assign::map_list_of
 	// before block 14640, the retarget period in Devcoin was 1 week
 	// the function ComputeMinWork uses the current retarget period
 	// of 3 hours, this is no problem UNLESS someone adds a checkpoint before
@@ -45,17 +44,22 @@ namespace Checkpoints
 	( 8900, uint256("0x00000000001bb8090630fcabb82ad0ab75df3eb5b008956b3ae2a352a4324f19"))
 	( 23500, uint256("0x000000000b83c3c9753d2440b91121cb0ff220bb23c136c6d09a539207e292fb"))
 	( 54800, uint256("0x04e8dcc91ff2aa0f1197f88551b4cb24ccef02ea51081b4d05ab4e3a38554137"))
-	( 67720, uint256("0x0a111b265d89f77b4c86fa6f44e3e2ad876547b1eccf19319cde922b42c1161e"))	;
+	( 67720, uint256("0x0a111b265d89f77b4c86fa6f44e3e2ad876547b1eccf19319cde922b42c1161e"))
+    // @belovachap (July 10, 2014) Looks like we haven't done this for a while :p
+    //
+    ( 145262, uint256("0xad58090543c8a46c798936400537890901c2595e62a6717bb682ccc3c3ba801c"));
 
-    /* Devcoin had not testnet checkblocks, if they even start to exist, they can be added here */
+    // Devcoin has no testnet checkblocks, they can be added here when needed.
     static MapCheckpoints mapCheckpointsTestnet  = boost::assign::map_list_of 
 		(0,  uint256("0x00000000fc09a99bd5116e9cedcad35d2145962799e58bbfd66ebdeb4e95235f"));
     static const CCheckpointData data = {
         &mapCheckpoints,
-        1354231672, // * UNIX timestamp of last checkpoint block
-        936858,     // * total number of transactions between genesis and last checkpoint
+        1405049257, // * UNIX timestamp of last checkpoint block
+        292735,     // * total number of transactions between genesis and last checkpoint
                     //   (the tx=... number in the SetBestChain debug.log lines)
-        1000.0      // * estimated number of transactions per day after checkpoint
+        720.0       // * estimated number of transactions per day after checkpoint
+                    //   @belovachap (July 10, 2014) back-of-napkin calculations:
+                    //   5 transactions / block * 1 block / 10 minutes * 1440 minutes / day
     };
 
     static const CCheckpointData dataTestnet = {
