@@ -13,7 +13,7 @@ USE_IPV6:=1
 
 LINK:=$(CXX)
 
-DEFS=-D_MT -DBOOST_THREAD_USE_LIB -DBOOST_SPIRIT_THREADSAFE  -D_FILE_OFFSET_BITS=64 -static
+DEFS=-DBOOST_SPIRIT_THREADSAFE  -D_FILE_OFFSET_BITS=64
 
 DEFS += $(addprefix -I,$(CURDIR) $(CURDIR)/obj $(BOOST_INCLUDE_PATH) $(BDB_INCLUDE_PATH) $(OPENSSL_INCLUDE_PATH))
 LIBS = $(addprefix -L,$(BOOST_LIB_PATH) $(BDB_LIB_PATH) $(OPENSSL_LIB_PATH))
@@ -21,7 +21,7 @@ LIBS = $(addprefix -L,$(BOOST_LIB_PATH) $(BDB_LIB_PATH) $(OPENSSL_LIB_PATH))
 TESTDEFS = -DTEST_DATA_DIR=$(abspath test/data)
 
 LMODE = static
-LMODE2 = static
+LMODE2 = dynamic
 ifdef STATIC
 	LMODE = static
 	ifeq (${STATIC}, all)
@@ -38,7 +38,6 @@ LIBS += \
    -l boost_filesystem$(BOOST_LIB_SUFFIX) \
    -l boost_program_options$(BOOST_LIB_SUFFIX) \
    -l boost_thread$(BOOST_LIB_SUFFIX) \
-   -l boost_chrono$(BOOST_LIB_SUFFIX) \
    -l db_cxx$(BDB_LIB_SUFFIX) \
    -l ssl \
    -l crypto
