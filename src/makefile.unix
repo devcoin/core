@@ -13,7 +13,7 @@ USE_IPV6:=1
 
 LINK:=$(CXX)
 
-DEFS=-D_MT -DBOOST_THREAD_USE_LIB -DBOOST_SPIRIT_THREADSAFE  -D_FILE_OFFSET_BITS=64 -static
+DEFS=-DBOOST_SPIRIT_THREADSAFE  -D_FILE_OFFSET_BITS=64
 
 DEFS += $(addprefix -I,$(CURDIR) $(CURDIR)/obj $(BOOST_INCLUDE_PATH) $(BDB_INCLUDE_PATH) $(OPENSSL_INCLUDE_PATH))
 LIBS = $(addprefix -L,$(BOOST_LIB_PATH) $(BDB_LIB_PATH) $(OPENSSL_LIB_PATH))
@@ -21,7 +21,7 @@ LIBS = $(addprefix -L,$(BOOST_LIB_PATH) $(BDB_LIB_PATH) $(OPENSSL_LIB_PATH))
 TESTDEFS = -DTEST_DATA_DIR=$(abspath test/data)
 
 LMODE = static
-LMODE2 = static
+LMODE2 = dynamic
 ifdef STATIC
 	LMODE = static
 	ifeq (${STATIC}, all)
@@ -38,7 +38,6 @@ LIBS += \
    -l boost_filesystem$(BOOST_LIB_SUFFIX) \
    -l boost_program_options$(BOOST_LIB_SUFFIX) \
    -l boost_thread$(BOOST_LIB_SUFFIX) \
-   -l boost_chrono$(BOOST_LIB_SUFFIX) \
    -l db_cxx$(BDB_LIB_SUFFIX) \
    -l ssl \
    -l crypto
@@ -155,18 +154,17 @@ test check: test_bitcoin FORCE
 	./test_bitcoin
 
 #
-# LevelDB support
+# LevelDB/CURL support
 #
 MAKEOVERRIDES =
 LIBS += $(CURDIR)/leveldb/libleveldb.a $(CURDIR)/leveldb/libmemenv.a
+LIBS += $(CURDIR)/curl/lib/.libs/libcurl.a
 DEFS += $(addprefix -I,$(CURDIR)/leveldb/include)
 DEFS += $(addprefix -I,$(CURDIR)/leveldb/helpers)
+DEFS += $(addprefix -I,$(CURDIR)/curl/include)
 leveldb/libleveldb.a:
 	@echo "Building LevelDB ..."
 	cd leveldb; chmod +x build_detect_platform; $(MAKE) CC=$(CC) CXX=$(CXX) OPT="$(xCXXFLAGS)" libleveldb.a libmemenv.a; cd ..
-MAKEOVERRIDES =
-LIBS += $(CURDIR)/curl/lib/.libs/libcurl.a
-DEFS += $(addprefix -I,$(CURDIR)/curl/include)
 curl/lib/.libs/libcurl.a:
 	@echo "Building LibCurl ..."
 	cd curl; chmod +x configure; ./configure --disable-shared --disable-ftp --disable-ldap --disable-ldapis --disable-rtsp --disable-proxy --disable-dict --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smtp  --disable-gopher --disable-manual --disable-imap --disable-zlib --without-ca-bundle --without-gnutls --without-libidn --without-librtmp --without-libssh2 --without-nss --without-ssl --without-zlib; $(MAKE); cd ..
