@@ -1,9 +1,16 @@
-Devcoin integration/staging tree
-================================
+Devcoin Core Client
+===================
 
 http://www.devcoin.org
 
 Copyright (c) 2011-2014 Devcoin Developers
+
+https://travis-ci.org/coinzen/devcoin.svg?branch=belovachap_issue_11
+
+```
+From the many, one
+From one, the source
+```
 
 What is Devcoin?
 ----------------
