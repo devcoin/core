@@ -1,0 +1,21 @@
+language: cpp
+
+script: cd src; make -f makefile.unix check
+
+compiler:
+  - gcc
+
+os:
+  - linux   
+
+notifications:
+  receipients:
+    - chapman.shoop@gmail.com # @belovachap
+  email:
+    on_success: change
+    on_failure: always
+  irc:
+    channels:
+      - "chat.freenode.net#devcoin"
+    template:
+      - "%{repository}/%{branch} (%{commit} - %{author}): %{message}"
