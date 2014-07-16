@@ -1,5 +1,10 @@
 language: cpp
 
+before_script:
+  - sudo add-apt-repository ppa:bitcoin/ppa -q
+  - sudo apt-get update -q
+  - sudo apt-get install build-essential libboost-all-dev libdb4.8-dev libdb4.8++-dev -q
+
 script: cd src; make -f makefile.unix check
 
 compiler:
