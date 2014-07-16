@@ -5,7 +5,7 @@ http://www.devcoin.org
 
 Copyright (c) 2011-2014 Devcoin Developers
 
-https://travis-ci.org/coinzen/devcoin.svg?branch=belovachap_issue_11
+[![Build Status](https://travis-ci.org/coinzen/devcoin.svg?branch=belovachap_issue_11)](https://travis-ci.org/coinzen/devcoin)
 
 ```
 From the many, one
