@@ -1,0 +1,5 @@
+@belovachap July 19, 2014. Should we rename COutput to Coin since it's really
+                           just representing that idea anyway?
+@belovachap July 19, 2014. These modules need to get broken down into smaller,
+                           more focused files. Probably start grouping related
+                           ideas into folders under src? e.g. src/wallet/*.cpp
