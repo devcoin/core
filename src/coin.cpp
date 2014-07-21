@@ -1,40 +1,51 @@
 // From the many, one
 // From one, the source.
 //
+#include <stdlib.h>
+
 #include "coin.h"
+#include "util.h"
+#include "wallet.h"
 
 Coin::Coin(const CWalletTx *transaction, uint outputIndex, uint blockDepth)
 {
-    this.transaction = transaction;
-    this.outputIndex = outputIndex;
-    this.blockDepth = blockDepth;
+    this->transaction = transaction;
+    this->outputIndex = outputIndex;
+    this->blockDepth = blockDepth;
 }
 
-uint64 Coin::getValue() {
-    return 0;
-}
-
-const CWalletTx *Coin::getTransaction()
+uint64 Coin::getValue() const
 {
-    return this.transaction;
+    return this->transaction->vout[this->outputIndex].nValue;
 }
 
-uint Coin::getOutputIndex()
+const CWalletTx *Coin::getTransaction() const
 {
-    return this.outputIndex;
+    return this->transaction;
 }
 
-uint Coin::getBlockDepth()
+uint Coin::getOutputIndex() const
 {
-    return this.blockDepth;
+    return this->outputIndex;
+}
+
+uint Coin::getBlockDepth() const
+{
+    return this->blockDepth;
 }
 
 std::string Coin::ToString() const
 {
-    return strprintf("COutput(%s, %d, %d) [%s]", tx->GetHash().ToString().c_str(), i, nDepth, FormatMoney(tx->vout[i].nValue).c_str());
+    return strprintf(
+        "Coin(%s, %d, %d) [%s]",
+        this->transaction->GetHash().ToString().c_str(),
+        this->outputIndex,
+        this->blockDepth,
+        FormatMoney(this->getValue()).c_str()
+    );
 }
 
 void Coin::print() const
 {
-    printf("%s\n", ToString().c_str());
+    printf("%s\n", this->ToString().c_str());
 }

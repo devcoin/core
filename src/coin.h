@@ -32,11 +32,11 @@ public:
 
     Coin(const CWalletTx *transaction, uint outputIndex, uint blockDepth);
     
-    const CWalletTx *getTransaction();
-    uint getOutputIndex();
-    uint getBlockDepth();
+    const CWalletTx *getTransaction() const;
+    uint getOutputIndex() const;
+    uint getBlockDepth() const;
 
-    uint64 getValue();
+    uint64 getValue() const;
 
     std::string ToString() const;
     void print() const;

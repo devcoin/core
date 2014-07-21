@@ -16,7 +16,7 @@ If all tests succeed the last line of output will be:
 To run a specific suite of tests use the `--run_test` option:
     `./test_devcoin --log_level=test_suite --run_test=[suite name usually the file name]`
 For example:
-    `./test_devcoin --log_level=test_suite --run_test=CheckBlock_tests`
+    `./test_devcoin --log_level=test_suite --run_test=coin_tests`
 
 To add more tests, add `BOOST_AUTO_TEST_CASE` functions to the existing
 .cpp files in the test/ directory or add new .cpp files that

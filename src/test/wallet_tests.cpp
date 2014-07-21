@@ -18,60 +18,60 @@ typedef set<pair<const CWalletTx*,unsigned int> > CoinSet;
 
 BOOST_AUTO_TEST_SUITE(wallet_tests)
 
-// @belovachap (July 16, 2014) this already seems like a global variable
-// anti-pattern. refactor this?
-//
-static CWallet wallet;
-static vector<COutput> vCoins;
+// // @belovachap (July 16, 2014) this already seems like a global variable
+// // anti-pattern. refactor this?
+// //
+// static CWallet wallet;
+// static vector<COutput> vCoins;
 
-static void add_coin(int64 nValue, int nAge = 6*24, bool fIsFromMe = false, int nInput=0)
-{
-    static int nextLockTime = 0;
-    CTransaction tx;
-    tx.nLockTime = nextLockTime++; // so all transactions get different hashes
-    tx.vout.resize(nInput+1);
-    tx.vout[nInput].nValue = nValue;
-    CWalletTx* wtx = new CWalletTx(&wallet, tx);
-    if (fIsFromMe)
-    {
-        // IsFromMe() returns (GetDebit() > 0), and GetDebit() is 0 if vin.empty(),
-        // so stop vin being empty, and cache a non-zero Debit to fake out IsFromMe()
-        wtx->vin.resize(1);
-        wtx->fDebitCached = true;
-        wtx->nDebitCached = 1;
-    }
-    COutput output(wtx, nInput, nAge);
-    vCoins.push_back(output);
-}
+// static void add_coin(int64 nValue, int nAge = 6*24, bool fIsFromMe = false, int nInput=0)
+// {
+//     static int nextLockTime = 0;
+//     CTransaction tx;
+//     tx.nLockTime = nextLockTime++; // so all transactions get different hashes
+//     tx.vout.resize(nInput+1);
+//     tx.vout[nInput].nValue = nValue;
+//     CWalletTx* wtx = new CWalletTx(&wallet, tx);
+//     if (fIsFromMe)
+//     {
+//         // IsFromMe() returns (GetDebit() > 0), and GetDebit() is 0 if vin.empty(),
+//         // so stop vin being empty, and cache a non-zero Debit to fake out IsFromMe()
+//         wtx->vin.resize(1);
+//         wtx->fDebitCached = true;
+//         wtx->nDebitCached = 1;
+//     }
+//     COutput output(wtx, nInput, nAge);
+//     vCoins.push_back(output);
+// }
 
-static void empty_wallet(void)
-{
-    BOOST_FOREACH(COutput output, vCoins)
-        delete output.tx;
-    vCoins.clear();
-}
+// static void empty_wallet(void)
+// {
+//     BOOST_FOREACH(COutput output, vCoins)
+//         delete output.tx;
+//     vCoins.clear();
+// }
 
-static bool equal_sets(CoinSet a, CoinSet b)
-{
-    pair<CoinSet::iterator, CoinSet::iterator> ret = mismatch(a.begin(), a.end(), b.begin());
-    return ret.first == a.end() && ret.second == b.end();
-}
+// static bool equal_sets(CoinSet a, CoinSet b)
+// {
+//     pair<CoinSet::iterator, CoinSet::iterator> ret = mismatch(a.begin(), a.end(), b.begin());
+//     return ret.first == a.end() && ret.second == b.end();
+// }
 
 BOOST_AUTO_TEST_CASE(no_available_coins_with_empty_wallet)
 {
-    CWallet wallet;
-    set<COutput> availableCoins = wallet.availableCoins();
-    BOOST_CHECK(availableCoins.empty());
+    // CWallet wallet;
+    // set<COutput> availableCoins = wallet.availableCoins();
+    // BOOST_CHECK(availableCoins.empty());
 }
 
 BOOST_AUTO_TEST_CASE(empty_wallet_cannot_spend_one_cent)
 {
-    CWallet wallet;
+    // CWallet wallet;
 
-    BOOST_CHECK_THROW(
-        wallet.getCoinsForSendAmount(1 * CENT),
-        WalletCouldNotFindCoinsForTransaction
-    );
+    // BOOST_CHECK_THROW(
+    //     wallet.getCoinsForSendAmount(1 * CENT),
+    //     WalletCouldNotFindCoinsForTransaction
+    // );
 }
 
 // BOOST_AUTO_TEST_CASE(coin_selection_tests)
