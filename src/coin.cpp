@@ -7,8 +7,11 @@
 #include "util.h"
 #include "wallet.h"
 
-Coin::Coin(const CWalletTx *transaction, uint outputIndex, uint blockDepth)
-{
+Coin::Coin(
+    const CWalletTx *transaction,
+    unsigned int outputIndex,
+    unsigned int blockDepth
+) {
     this->transaction = transaction;
     this->outputIndex = outputIndex;
     this->blockDepth = blockDepth;
@@ -24,12 +27,12 @@ const CWalletTx *Coin::getTransaction() const
     return this->transaction;
 }
 
-uint Coin::getOutputIndex() const
+unsigned int Coin::getOutputIndex() const
 {
     return this->outputIndex;
 }
 
-uint Coin::getBlockDepth() const
+unsigned int Coin::getBlockDepth() const
 {
     return this->blockDepth;
 }

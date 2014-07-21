@@ -1,8 +1,8 @@
 // From the many, one
 // From one, the source.
 //
-#ifndef DEVCOIN_COIN_H
-#define DEVCOIN_COIN_H
+#ifndef COIN_H
+#define COIN_H
 
 #include "uint256.h"
 
@@ -21,20 +21,24 @@ private:
     
     // The index of transaction output that represents this coin.
     //
-    uint outputIndex;
+    unsigned int outputIndex;
 
     // The number of blocks that have been added to the blockchain since
     // transaction was included.
     //
-    uint blockDepth;
+    unsigned int blockDepth;
 
 public:
 
-    Coin(const CWalletTx *transaction, uint outputIndex, uint blockDepth);
+    Coin(
+        const CWalletTx *transaction,
+        unsigned int outputIndex,
+        unsigned int blockDepth
+    );
     
     const CWalletTx *getTransaction() const;
-    uint getOutputIndex() const;
-    uint getBlockDepth() const;
+    unsigned int getOutputIndex() const;
+    unsigned int getBlockDepth() const;
 
     uint64 getValue() const;
 

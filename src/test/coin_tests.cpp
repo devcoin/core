@@ -24,8 +24,8 @@ BOOST_AUTO_TEST_CASE(create_a_coin)
     tx_out.nValue = 1*CENT;
     transaction.vout.push_back(tx_out);
 
-    uint output_index = 0;
-    uint block_depth = 10;
+    unsigned int output_index = 0;
+    unsigned int block_depth = 10;
 
     Coin coin(
         &transaction,

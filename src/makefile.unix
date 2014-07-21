@@ -116,6 +116,7 @@ OBJS= \
     obj/auxpow.o \
     obj/alert.o \
     obj/coin.o \
+    obj/coinset.o \
     obj/version.o \
     obj/checkpoints.o \
     obj/netbase.o \

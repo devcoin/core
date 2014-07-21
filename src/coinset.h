@@ -1,8 +1,8 @@
 // From the many, one
 // From one, the source.
 //
-#ifndef DEVCOIN_COIN_H
-#define DEVCOIN_COIN_H
+#ifndef COINSET_H
+#define COINSET_H
 
 #include <set>
 
@@ -10,17 +10,13 @@
 
 class Coin;
 
-class CoinSet
+class CoinSet: public std::set<Coin *>
 {
-private:
-    std::set<Coin> coins;
-
 public:
-    CoinSet();
-    void addCoin(Coin coin);
-    void removeCoin(Coin coin);
-    bool hasCoin(Coin coin);
-    uint64 getValue();
+    void addCoin(Coin *coin);
+    void removeCoin(Coin *coin);
+    bool hasCoin(Coin *coin) const;
+    uint64 getValue() const;
 };
 
 #endif
