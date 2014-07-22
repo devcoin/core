@@ -20,7 +20,6 @@ class CDiskBlockIndex;
 class CMasterKey;
 class COutPoint;
 class CWallet;
-class CWalletTx;
 
 extern unsigned int nWalletDBUpdated;
 

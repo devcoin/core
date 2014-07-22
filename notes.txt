@@ -3,3 +3,8 @@
 @belovachap July 19, 2014. These modules need to get broken down into smaller,
                            more focused files. Probably start grouping related
                            ideas into folders under src? e.g. src/wallet/*.cpp
+
+@belovachap July 22, 2014. Alright, these files are too big to really work with.
+                           I started to pull out CWalletTx into
+                           wallet_transaction.cpp/h. Try building the test
+                           suite, there are more include things to work out :\

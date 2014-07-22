@@ -16,6 +16,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include "receiver.h"
+#include "wallet.h"
 
 using namespace std;
 using namespace boost;

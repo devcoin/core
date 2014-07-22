@@ -5,6 +5,7 @@
 #include "init.h"
 #include "wallet.h"
 #include "walletdb.h"
+#include "wallet_transaction.h"
 
 BOOST_AUTO_TEST_SUITE(accounting_tests)
 

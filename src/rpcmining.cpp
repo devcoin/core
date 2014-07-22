@@ -8,6 +8,7 @@
 #include "init.h"
 #include "bitcoinrpc.h"
 #include "auxpow.h"
+#include "wallet.h"
 
 using namespace json_spirit;
 using namespace std;

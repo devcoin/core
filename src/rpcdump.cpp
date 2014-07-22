@@ -6,6 +6,9 @@
 #include "bitcoinrpc.h"
 #include "ui_interface.h"
 #include "base58.h"
+#include "wallet.h"
+#include "wallet_transaction.h"
+
 
 #include <boost/lexical_cast.hpp>
 

@@ -138,9 +138,11 @@ OBJS= \
     obj/rpcrawtransaction.o \
     obj/script.o \
     obj/sync.o \
+    obj/unsorted_shared_code.o \
     obj/util.o \
     obj/wallet.o \
     obj/walletdb.o \
+    obj/wallet_transaction.o \
     obj/hash.o \
     obj/bloom.o \
     obj/noui.o \
