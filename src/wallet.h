@@ -18,10 +18,13 @@
 #include "util.h"
 #include "walletdb.h"
 
+class CoinSet;
 class CAccountingEntry;
 class CWalletTx;
 class CReserveKey;
 class COutput;
+
+typedef std::map<uint256, CWalletTx> transaction_map_t;
 
 /** (client) version numbers for particular wallet features */
 enum WalletFeature
@@ -111,7 +114,7 @@ public:
         nOrderPosNext = 0;
     }
 
-    std::map<uint256, CWalletTx> mapWallet;
+    transaction_map_t mapWallet;
     int64 nOrderPosNext;
     std::map<uint256, int> mapRequestCount;
 
@@ -123,6 +126,12 @@ public:
 
     // check whether we are allowed to upgrade (or already support) to the named feature
     bool CanSupportFeature(enum WalletFeature wf) { return nWalletMaxVersion >= wf; }
+
+    // availableCoins returns a set of coins that are confirmed and available
+    // to transfer. checkCoinConfirmation can be set to false to retrieve all
+    // available coins without checking their confirmation status.
+    //
+    CoinSet *availableCoins(bool checkConfirmation=true) const;
 
     void AvailableCoins(std::vector<COutput>& vCoins, bool fOnlyConfirmed=true) const;
     bool SelectCoinsMinConf(int64 nTargetValue, int nConfMine, int nConfTheirs, std::vector<COutput> vCoins, std::set<std::pair<const CWalletTx*,unsigned int> >& setCoinsRet, int64& nValueRet) const;

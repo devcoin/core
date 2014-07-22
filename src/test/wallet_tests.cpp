@@ -1,5 +1,6 @@
 #include <boost/test/unit_test.hpp>
 
+#include "coinset.h"
 #include "exceptions.h"
 #include "main.h"
 #include "wallet.h"
@@ -14,7 +15,7 @@
 
 using namespace std;
 
-typedef set<pair<const CWalletTx*,unsigned int> > CoinSet;
+// typedef set<pair<const CWalletTx*,unsigned int> > CoinSet;
 
 BOOST_AUTO_TEST_SUITE(wallet_tests)
 
@@ -59,20 +60,20 @@ BOOST_AUTO_TEST_SUITE(wallet_tests)
 
 BOOST_AUTO_TEST_CASE(no_available_coins_with_empty_wallet)
 {
-    // CWallet wallet;
-    // set<COutput> availableCoins = wallet.availableCoins();
-    // BOOST_CHECK(availableCoins.empty());
+    CWallet wallet;
+    CoinSet *available_coins = wallet.availableCoins();
+    BOOST_CHECK(available_coins->empty());
 }
 
-BOOST_AUTO_TEST_CASE(empty_wallet_cannot_spend_one_cent)
-{
-    // CWallet wallet;
+// BOOST_AUTO_TEST_CASE(empty_wallet_cannot_spend_one_cent)
+// {
+//     // CWallet wallet;
 
-    // BOOST_CHECK_THROW(
-    //     wallet.getCoinsForSendAmount(1 * CENT),
-    //     WalletCouldNotFindCoinsForTransaction
-    // );
-}
+//     // BOOST_CHECK_THROW(
+//     //     wallet.getCoinsForSendAmount(1 * CENT),
+//     //     WalletCouldNotFindCoinsForTransaction
+//     // );
+// }
 
 // BOOST_AUTO_TEST_CASE(coin_selection_tests)
 // {

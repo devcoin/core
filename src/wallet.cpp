@@ -2,13 +2,16 @@
 // Copyright (c) 2009-2012 The Bitcoin developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
+#include <boost/algorithm/string/replace.hpp>
+#include <boost/foreach.hpp>
 
+#include "coin.h"
+#include "coinset.h"
 #include "wallet.h"
 #include "walletdb.h"
 #include "crypter.h"
 #include "ui_interface.h"
 #include "base58.h"
-#include <boost/algorithm/string/replace.hpp>
 
 using namespace std;
 
@@ -953,6 +956,66 @@ int64 CWallet::GetImmatureBalance() const
     }
     return nTotal;
 }
+
+// availableCoins returns a set of coins that are confirmed and available
+// to transfer. checkConfirmation can be set to false to retrieve all
+// available coins without checking their confirmation status.
+//
+CoinSet *CWallet::availableCoins(bool checkConfirmation) const
+{
+    CoinSet *available_coins = new CoinSet();
+
+    { LOCK(cs_wallet);
+
+        BOOST_FOREACH(const transaction_map_t::value_type &mapped_tx, mapWallet)
+        {
+            const CWalletTx transaction = mapped_tx.second;
+
+            if (!transaction.IsFinal())
+            {
+                continue;
+            }
+
+            if (checkConfirmation && !transaction.IsConfirmed())
+            {
+                continue;
+            }
+
+            if (
+                transaction.IsCoinBase() &&
+                transaction.GetBlocksToMaturity() > 0
+            )
+            {
+                continue;
+            }
+
+            for (
+                unsigned int output_index = 0;
+                output_index < transaction.vout.size();
+                output_index++
+            )
+            {
+                // @belovachap July 21, 2014 These all seem like Coin methods
+                if (
+                    !(transaction.IsSpent(output_index)) &&
+                    IsMine(transaction.vout[output_index]) &&
+                    !IsLockedCoin(mapped_tx.first, output_index) &&
+                    transaction.vout[output_index].nValue > 0
+                )
+                {
+                    Coin *coin = new Coin(
+                        &transaction,
+                        output_index,
+                        transaction.GetDepthInMainChain()
+                    );
+                    available_coins->addCoin(coin);
+                }
+            }
+        }
+    }
+    return available_coins;
+}
+
 
 // populate vCoins with vector of spendable COutputs
 void CWallet::AvailableCoins(vector<COutput>& vCoins, bool fOnlyConfirmed) const
