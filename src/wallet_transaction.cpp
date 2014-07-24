@@ -6,7 +6,7 @@
 
 #include "script.h" // Gives us th typedef CTxDestination
 #include "wallet.h"
-#include "walletdb.h"
+#include "wallet_db.h"
 #include "wallet_transaction.h"
 
 using namespace std;

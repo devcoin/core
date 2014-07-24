@@ -4,13 +4,13 @@
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/foreach.hpp>
 
+#include "base58.h"
 #include "coin.h"
 #include "coinset.h"
-#include "wallet.h"
-#include "walletdb.h"
 #include "crypter.h"
 #include "ui_interface.h"
-#include "base58.h"
+#include "wallet.h"
+#include "wallet_db.h"
 #include "wallet_transaction.h"
 
 using namespace std;

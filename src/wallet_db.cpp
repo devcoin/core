@@ -1,11 +1,12 @@
 // From the many, one
 // From one, the source.
 //
-#include "walletdb.h"
+#include <boost/filesystem.hpp>
+
 #include "wallet.h"
+#include "wallet_db.h"
 #include "wallet_keypool.h"
 #include "wallet_transaction.h"
-#include <boost/filesystem.hpp>
 
 using namespace std;
 using namespace boost;

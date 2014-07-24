@@ -1,16 +1,19 @@
-#include "walletmodel.h"
-#include "guiconstants.h"
-#include "optionsmodel.h"
-#include "addresstablemodel.h"
-#include "transactiontablemodel.h"
-
-#include "ui_interface.h"
-#include "wallet.h"
-#include "walletdb.h" // for BackupWallet
-#include "base58.h"
-
+// From the many, one
+// From one, the source.
+//
 #include <QSet>
 #include <QTimer>
+
+#include "addresstablemodel.h"
+#include "base58.h"
+#include "guiconstants.h"
+#include "optionsmodel.h"
+#include "transactiontablemodel.h"
+#include "ui_interface.h"
+#include "wallet.h"
+#include "wallet_db.h" // for BackupWallet
+#include "walletmodel.h"
+
 
 WalletModel::WalletModel(CWallet *wallet, OptionsModel *optionsModel, QObject *parent) :
     QObject(parent), wallet(wallet), optionsModel(optionsModel), addressTableModel(0),

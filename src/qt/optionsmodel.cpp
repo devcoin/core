@@ -1,11 +1,14 @@
-#include "optionsmodel.h"
+// From the many, one
+// From one, the source.
+//
+#include <QSettings>
 
 #include "bitcoinunits.h"
-#include "init.h"
-#include "walletdb.h"
 #include "guiutil.h"
+#include "init.h"
+#include "optionsmodel.h"
+#include "wallet_db.h"
 
-#include <QSettings>
 
 OptionsModel::OptionsModel(QObject *parent) :
     QAbstractListModel(parent)

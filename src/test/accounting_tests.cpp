@@ -1,11 +1,14 @@
-#include <boost/test/unit_test.hpp>
-
+// From the many, one
+// From one, the source.
+//
 #include <boost/foreach.hpp>
+#include <boost/test/unit_test.hpp>
 
 #include "init.h"
 #include "wallet.h"
-#include "walletdb.h"
+#include "wallet_db.h"
 #include "wallet_transaction.h"
+
 
 BOOST_AUTO_TEST_SUITE(accounting_tests)
 
