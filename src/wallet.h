@@ -17,13 +17,15 @@
 #include "ui_interface.h"
 #include "unsorted_shared_code.h"
 #include "util.h"
-#include "walletdb.h"
+#include "wallet_db_errors.h"
 #include "wallet_transaction.h"
 
-class CoinSet;
 class CAccountingEntry;
-class CReserveKey;
+class CKeyPool;
 class COutput;
+class CReserveKey;
+class CWalletDB;
+class CoinSet;
 
 /** (client) version numbers for particular wallet features */
 enum WalletFeature
