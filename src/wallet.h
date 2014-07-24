@@ -4,14 +4,13 @@
 #ifndef WALLET_H
 #define WALLET_H
 
+#include <stdlib.h>
 #include <string>
 #include <vector>
 
-#include <stdlib.h>
-
-#include "main.h"
 #include "key.h"
 #include "keystore.h"
+#include "main.h"
 #include "script.h"
 #include "typedefs.h"
 #include "ui_interface.h"
@@ -294,29 +293,6 @@ public:
     boost::signals2::signal<void (CWallet *wallet, const uint256 &hashTx, ChangeType status)> NotifyTransactionChanged;
 };
 
-/** A key allocated from the key pool. */
-class CReserveKey
-{
-protected:
-    CWallet* pwallet;
-    int64 nIndex;
-    CPubKey vchPubKey;
-public:
-    CReserveKey(CWallet* pwalletIn)
-    {
-        nIndex = -1;
-        pwallet = pwalletIn;
-    }
-
-    ~CReserveKey()
-    {
-        ReturnKey();
-    }
-
-    void ReturnKey();
-    bool GetReservedKey(CPubKey &pubkey);
-    void KeepKey();
-};
 
 class COutput
 {

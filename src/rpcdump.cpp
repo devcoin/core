@@ -1,21 +1,20 @@
-// Copyright (c) 2009-2012 Bitcoin Developers
-// Distributed under the MIT/X11 software license, see the accompanying
-// file COPYING or http://www.opensource.org/licenses/mit-license.php.
+// From the many, one
+// From one, the source.
+//
+#include <boost/lexical_cast.hpp>
 
-#include "init.h" // for pwalletMain
-#include "bitcoinrpc.h"
-#include "ui_interface.h"
 #include "base58.h"
+#include "init.h" // for pwalletMain
+#include "rpc.h"
+#include "ui_interface.h"
 #include "wallet.h"
 #include "wallet_transaction.h"
-
-
-#include <boost/lexical_cast.hpp>
 
 #define printf OutputDebugStringF
 
 using namespace json_spirit;
 using namespace std;
+
 
 class CTxDump
 {

@@ -1,30 +1,39 @@
-// Copyright (c) 2009-2010 Satoshi Nakamoto
-// Copyright (c) 2009-2012 The Bitcoin developers
-// Distributed under the MIT/X11 software license, see the accompanying
-// file COPYING or http://www.opensource.org/licenses/mit-license.php.
-#ifndef BITCOIN_MAIN_H
-#define BITCOIN_MAIN_H
+// From the many, one
+// From one, the source.
+//
+#ifndef MAIN_H
+#define MAIN_H
+
+#include <boost/shared_ptr.hpp>
+#include <list>
 
 #include "bignum.h"
-#include "sync.h"
 #include "net.h"
 #include "script.h"
-
-#include <list>
-#include <boost/shared_ptr.hpp>
-
-class CWallet;
-class CBlock;
-class CBlockIndex;
-class CKeyItem;
-class CReserveKey;
+#include "sync.h"
 
 class CAddress;
-class CInv;
-class CNode;
 class CAuxPow;
+class CBlock;
+class CBlockIndex;
+class CBlockTreeDB;
+class CCoins;
+class CCoinsDB;
+class CCoinsView;
+class CCoinsViewCache;
+class CInv;
+class CKeyItem;
+class CNode;
+class CReserveKey;
+class CScriptCheck;
+class CTxUndo;
+class CValidationState;
+class CWallet;
 
 struct CBlockIndexWorkComparator;
+struct CBlockTemplate;
+struct CDiskBlockPos;
+
 
 /** The maximum allowed size for a serialized block, in bytes (network rule) */
 static const unsigned int MAX_BLOCK_SIZE = 1000000;
@@ -103,18 +112,6 @@ extern int64 nTransactionFee;
 static const uint64 nMinDiskSpace = 52428800;
 
 
-class CReserveKey;
-class CCoinsDB;
-class CBlockTreeDB;
-struct CDiskBlockPos;
-class CCoins;
-class CTxUndo;
-class CCoinsView;
-class CCoinsViewCache;
-class CScriptCheck;
-class CValidationState;
-
-struct CBlockTemplate;
 
 /** Register a wallet to receive updates from core */
 void RegisterWallet(CWallet* pwalletIn);

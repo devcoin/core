@@ -17,6 +17,7 @@
 #include "txdb.h"
 #include "ui_interface.h"
 #include "wallet.h"
+#include "wallet_reservekey.h"
 
 using namespace std;
 using namespace boost;

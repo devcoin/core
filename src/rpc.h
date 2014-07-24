@@ -1,23 +1,20 @@
-// Copyright (c) 2010 Satoshi Nakamoto
-// Copyright (c) 2009-2012 The Bitcoin developers
-// Distributed under the MIT/X11 software license, see the accompanying
-// file COPYING or http://www.opensource.org/licenses/mit-license.php.
+// From the many, one
+// From one, the source.
+//
+#ifndef RPC_H
+#define RPC_H
 
-#ifndef _BITCOINRPC_H_
-#define _BITCOINRPC_H_
-
-#include <string>
 #include <list>
 #include <map>
-
-class CBlockIndex;
-class CReserveKey;
+#include <string>
 
 #include "json/json_spirit_reader_template.h"
 #include "json/json_spirit_writer_template.h"
 #include "json/json_spirit_utils.h"
-
 #include "util.h"
+
+class CBlockIndex;
+class CReserveKey;
 
 // HTTP status codes
 enum HTTPStatusCode

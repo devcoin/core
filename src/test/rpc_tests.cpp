@@ -1,13 +1,17 @@
+// From the many, one
+// From one, the source.
+//
 #include <boost/algorithm/string.hpp>
 #include <boost/foreach.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "base58.h"
 #include "util.h"
-#include "bitcoinrpc.h"
+#include "rpc.h"
 
 using namespace std;
 using namespace json_spirit;
+
 
 BOOST_AUTO_TEST_SUITE(rpc_tests)
 

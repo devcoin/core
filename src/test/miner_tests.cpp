@@ -1,3 +1,6 @@
+// From the many, one
+// From one, the source.
+//
 #include <boost/test/unit_test.hpp>
 
 #include "init.h"
@@ -5,6 +8,7 @@
 #include "uint256.h"
 #include "util.h"
 #include "wallet.h"
+#include "wallet_reservekey.h"
 
 extern void SHA256Transform(void* pstate, void* pinput, const void* pinit);
 

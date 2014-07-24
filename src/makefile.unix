@@ -129,7 +129,7 @@ OBJS= \
     obj/main.o \
     obj/net.o \
     obj/protocol.o \
-    obj/bitcoinrpc.o \
+    obj/rpc.o \
     obj/rpcdump.o \
     obj/rpcnet.o \
     obj/rpcmining.o \
@@ -143,6 +143,7 @@ OBJS= \
     obj/wallet.o \
     obj/wallet_db.o \
     obj/wallet_keypool.o \
+    obj/wallet_reservekey.o \
     obj/wallet_transaction.o \
     obj/hash.o \
     obj/bloom.o \

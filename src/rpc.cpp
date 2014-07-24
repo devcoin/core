@@ -1,31 +1,30 @@
-// Copyright (c) 2010 Satoshi Nakamoto
-// Copyright (c) 2009-2012 The Bitcoin developers
-// Distributed under the MIT/X11 software license, see the accompanying
-// file COPYING or http://www.opensource.org/licenses/mit-license.php.
-
-#include "init.h"
-#include "auxpow.h"
-#include "util.h"
-#include "sync.h"
-#include "ui_interface.h"
-#include "base58.h"
-#include "bitcoinrpc.h"
-#include "db.h"
-#include "wallet.h"
-
+// From the many, one
+// From one, the source.
+//
+#include <boost/algorithm/string.hpp>
 #include <boost/asio.hpp>
 #include <boost/asio/ip/v6_only.hpp>
+#include <boost/asio/ssl.hpp>
 #include <boost/bind.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
 #include <boost/foreach.hpp>
 #include <boost/iostreams/concepts.hpp>
 #include <boost/iostreams/stream.hpp>
-#include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/asio/ssl.hpp>
-#include <boost/filesystem/fstream.hpp>
 #include <boost/shared_ptr.hpp>
 #include <list>
+
+#include "auxpow.h"
+#include "base58.h"
+#include "db.h"
+#include "rpc.h"
+#include "init.h"
+#include "sync.h"
+#include "ui_interface.h"
+#include "util.h"
+#include "wallet.h"
+#include "wallet_reservekey.h"
 
 using namespace std;
 using namespace boost;

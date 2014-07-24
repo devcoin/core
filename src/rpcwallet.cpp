@@ -4,10 +4,11 @@
 #include <boost/assign/list_of.hpp>
 
 #include "base58.h"
-#include "bitcoinrpc.h"
 #include "init.h"
+#include "rpc.h"
 #include "wallet.h"
 #include "wallet_db.h"
+#include "wallet_reservekey.h"
 
 using namespace std;
 using namespace boost;

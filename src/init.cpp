@@ -8,9 +8,9 @@
 #include <boost/interprocess/sync/file_lock.hpp>
 #include <openssl/crypto.h>
 
-#include "bitcoinrpc.h"
 #include "init.h"
 #include "net.h"
+#include "rpc.h"
 #include "txdb.h"
 #include "ui_interface.h"
 #include "util.h"
