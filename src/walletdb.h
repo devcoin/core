@@ -7,8 +7,8 @@
 
 #include "db.h"
 #include "base58.h"
+#include "wallet_keypool.h"
 
-class CKeyPool;
 class CAccount;
 class CAccountingEntry;
 class CWallet;

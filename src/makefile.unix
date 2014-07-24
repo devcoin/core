@@ -142,6 +142,7 @@ OBJS= \
     obj/util.o \
     obj/wallet.o \
     obj/walletdb.o \
+    obj/wallet_keypool.o \
     obj/wallet_transaction.o \
     obj/hash.o \
     obj/bloom.o \
