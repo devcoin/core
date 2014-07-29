@@ -11,9 +11,23 @@ src/test_devcoin
 *.patch
 .devcoin
 
+# Ignore autotools artifacts
+#
+/src/configure
+/src/Makefile
+/src/Makefile.in
+/src/src/Makefile
+/src/src/Makefile.in
+/src/src/test/Makefile
+/src/src/test/Makefile.in
+/src/src/qt/Makefile
+/src/src/qt/Makefile.in
+/src/src/qt/test/Makefile
+/src/src/qt/test/Makefile.in
+
+
 # Compilation and Qt preprocessor part
 *.qm
-Makefile
 bitcoin-qt
 Bitcoin-Qt.app
 
