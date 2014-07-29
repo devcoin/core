@@ -1,7 +1,17 @@
 // From the many, one
 // From one, the source
 //
-#import "devcoin_util.h"
+#include "devcoin_util.h"
+
+#include <boost/asio.hpp>
+#include <boost/filesystem.hpp>
+#include <curl/curl.h>
+#include <fstream>
+
+#include "chainparams.h"
+
+using namespace boost;
+using namespace std;
 
 // Get the share address for this round
 //
@@ -18,7 +28,7 @@ vector<string> getCoinAddressStrings(
     bool isCoinSection = false;
     string oldToken = string();
 
-    for (int lineIndex = 0; lineIndex < textLines.size(); lineIndex++)
+    for (uint lineIndex = 0; lineIndex < textLines.size(); lineIndex++)
     {
         string firstLowerSpaceless = string();
         string line = textLines[lineIndex];
@@ -95,10 +105,10 @@ bool getIsSufficientAmount(
 
     int64_t sharePerAddress = share / (int64_t)coinAddressStrings.size();
 
-    for (int i = 0; i < coinAddressStrings.size(); i++)
+    for (uint i = 0; i < coinAddressStrings.size(); i++)
         receiverMap[coinAddressStrings[i]] = (int64_t)0;
 
-    for (int i = 0; i < addressStrings.size(); i++)
+    for (uint i = 0; i < addressStrings.size(); i++)
     {
         string addressString = addressStrings[i];
 
@@ -106,7 +116,7 @@ bool getIsSufficientAmount(
             receiverMap[addressString] += amounts[i];
     }
 
-    for (int i = 0; i < coinAddressStrings.size(); i++)
+    for (uint i = 0; i < coinAddressStrings.size(); i++)
     {
         if (receiverMap[coinAddressStrings[i]] < sharePerAddress)
         {
@@ -118,17 +128,17 @@ bool getIsSufficientAmount(
             cout << "The expected addresses are:" << endl;
             cout << "The receiverMap shows that they should get " << receiverMap[coinAddressStrings[i]] << " coins" << endl;
             cout << "The shares per address however are set to " << sharePerAddress << endl;
-            for (int i = 0; i < coinAddressStrings.size(); i++)
+            for (uint i = 0; i < coinAddressStrings.size(); i++)
                 cout << coinAddressStrings[i] << endl;
 
             cout << endl << "The given addresses are:" << endl;
 
-            for (int i = 0; i < addressStrings.size(); i++)
+            for (uint i = 0; i < addressStrings.size(); i++)
                 cout << addressStrings[i] << endl;
 
             cout << endl << "The given amounts are:" << endl;
 
-            for (int i = 0; i < amounts.size(); i++)
+            for (uint i = 0; i < amounts.size(); i++)
                 cout << amounts[i] << endl;
 
             cout << endl;
@@ -152,7 +162,7 @@ string getCachedText(const string& fileName)
 vector<string> getCommaDividedWords(const string& text)
 {
     vector<string> commaDividedWords;
-    int commaIndex = text.find(',');
+    size_t commaIndex = text.find(',');
 
     if (commaIndex == string::npos)
     {
@@ -171,7 +181,7 @@ string getCommonOutputByText(const string& fileText, const string& suffix)
     if (suffix == string("0") || suffix == string("1"))
     {
         string receiverFileName; 
-        if(fTestNet == true)
+        if(TestNet() == true)
         {
             receiverFileName = string("receiverTestNet_") + suffix + string(".csv");
         }
@@ -303,6 +313,23 @@ string getFileText(const string& fileName)
     return fileText;
 }
 
+// Callback function writes data to a std::ostream.
+size_t curlWriteFunction(void* buf, size_t size, size_t nmemb, void* userp)
+{
+    if(userp)
+    {
+        std::ostream& os = *static_cast<std::ostream*>(userp);
+        std::streamsize len = size * nmemb;
+
+        if(os.write(static_cast<char*>(buf), len))
+        {
+            return len;            
+        }
+    }
+
+    return 0;
+}
+
 // Get the entire text of an https page.
 string getHttpsText(const string& address)
 {
@@ -381,7 +408,7 @@ vector<string> getLocationTexts(vector<string> addresses)
 {
     vector<string> locationTexts;
 
-    for(int addressIndex = 0; addressIndex < addresses.size(); addressIndex++)
+    for(uint addressIndex = 0; addressIndex < addresses.size(); addressIndex++)
         locationTexts.push_back(getLocationText(addresses[addressIndex]));
 
     return locationTexts;
@@ -408,7 +435,7 @@ vector<string> getPeerNames(const string& text)
     vector<string> peerNames;
     vector<string> textLines = getTextLines(text);
 
-    for (int lineIndex = 0; lineIndex < textLines.size(); lineIndex++)
+    for (uint lineIndex = 0; lineIndex < textLines.size(); lineIndex++)
     {
         string firstLowerSpaceless = string();
         string line = textLines[lineIndex];
@@ -611,10 +638,12 @@ string getSuffixedFileName(const string& fileName, const string& suffix)
     if (suffix == string())
         return fileName;
 
-    int lastDotIndex = fileName.rfind(".");
+    size_t lastDotIndex = fileName.rfind(".");
 
     if (lastDotIndex == string::npos)
-        return fileName + suffix;
+    {
+        return fileName + suffix;        
+    }
     return fileName.substr(0, lastDotIndex) + string("_") + suffix + fileName.substr(lastDotIndex);
 }
 
@@ -623,10 +652,10 @@ vector<string> getSuffixedFileNames(vector<string> fileNames, const string& suff
 {
     vector<string> suffixedFileNames;
 
-    for(int fileNameIndex = 0; fileNameIndex < fileNames.size(); fileNameIndex++)
+    for(uint fileNameIndex = 0; fileNameIndex < fileNames.size(); fileNameIndex++)
     {
         string fileName = fileNames[fileNameIndex];
-        int doNotAddSuffixIndex = fileName.find("_do_not_add_suffix_");
+        size_t doNotAddSuffixIndex = fileName.find("_do_not_add_suffix_");
 
         if (doNotAddSuffixIndex == string::npos)
             suffixedFileNames.push_back(getSuffixedFileName(fileName, suffix));
