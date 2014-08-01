@@ -2,13 +2,14 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file license.txt or http://www.opensource.org/licenses/mit-license.php.
 #include "script.h"
-#include "auxpow.h"
 #include "init.h"
+#include "core.h"
 
 using namespace std;
 using namespace boost;
 
 unsigned char pchMergedMiningHeader[] = { 0xfa, 0xbe, 'm', 'm' } ;
+
 
 void RemoveMergedMiningHeader(vector<unsigned char>& vchAux)
 {
@@ -16,13 +17,16 @@ void RemoveMergedMiningHeader(vector<unsigned char>& vchAux)
         throw runtime_error("merged mining aux too short");
     vchAux.erase(vchAux.begin(), vchAux.begin() + sizeof(pchMergedMiningHeader));
 }
-
+uint256 CAuxPow::GetParentBlockHash()
+{
+    return parentBlockHeader.GetHash();
+}
 bool CAuxPow::Check(uint256 hashAuxBlock, int nChainID)
 {
     if (nIndex != 0)
         return error("AuxPow is not a generate");
 
-    if (!fTestNet && parentBlockHeader.GetChainID() == nChainID)
+    if (!TestNet() && parentBlockHeader.GetChainID() == nChainID)
         return error("Aux POW parent has our chain ID");
 
     if (vChainMerkleBranch.size() > 30)
