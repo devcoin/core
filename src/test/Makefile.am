@@ -41,6 +41,7 @@ test_bitcoin_SOURCES = \
   bloom_tests.cpp \
   canonical_tests.cpp \
   checkblock_tests.cpp \
+  core_tests.cpp \
   Checkpoints_tests.cpp \
   compress_tests.cpp \
   DoS_tests.cpp \
