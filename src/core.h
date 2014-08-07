@@ -636,6 +636,8 @@ public:
         block.nTime          = nTime;
         block.nBits          = nBits;
         block.nNonce         = nNonce;
+		// DEVCOIN fix for MSG_FILTERED_BLOCK getdata requests for spv thin clients?
+		block.auxpow		 = auxpow;
         return block;
     }
 
