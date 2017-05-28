@@ -1,6 +1,15 @@
-UNIX BUILD NOTES [Debian 7 (Wheezy), Linux Mint 17 (Qiana) and Ubuntu 14.04 (Trusty)]
-=====================================================================================
-Some notes on how to build Devcoin in Unix. 
+UNIX BUILD NOTES
+====================
+Some notes on how to build Bitcoin in Unix. 
+
+To Build
+---------------------
+
+	./autogen.sh
+	./configure
+	make
+
+This will build bitcoin-qt as well if the dependencies are met.
 
 Dependencies
 ---------------------
@@ -12,6 +21,7 @@ Dependencies
  libboost    | Boost            | C++ Library
  miniupnpc   | UPnP Support     | Optional firewall-jumping support
  qt          | GUI              | GUI toolkit
+ protobuf    | Payments in GUI  | Data interchange format used for payment protocol
  libqrencode | QR codes in GUI  | Optional for generating QR codes
 
 [miniupnpc](http://miniupnp.free.fr/) may be used for UPnP port mapping.  It can be downloaded from [here](
@@ -34,135 +44,65 @@ System requirements
 --------------------
 
 C++ compilers are memory-hungry. It is recommended to have at least 1 GB of
-memory available when compiling Devcoin Core. With 512MB of memory or less
+memory available when compiling Bitcoin Core. With 512MB of memory or less
 compilation will take much longer due to swap thrashing.
-
-internal compiler error: Killed (program cc1plus)
-[ 1377.575785] Out of memory: Kill process 12305 (cc1plus) score 905 or sacrifice child
-[ 1377.575800] Killed process 12305 (cc1plus) total-vm:579928kB, anon-rss:546144kB, file-rss:0kB
-
-If you see output like this, your machine does not have enough memory to compile. You can fix this by adding more swap. To add a 1gb swap file, in /swapfile:
-
-sudo dd if=/dev/zero of=/swapfile bs=64M count=16
-sudo mkswap /swapfile
-sudo swapon /swapfile
-
-After compiling, remove swapfile:
-
-sudo swapoff /swapfile
-sudo rm /swapfile
-
-
 
 Dependency Build Instructions: Ubuntu & Debian
 ----------------------------------------------
-Update your openssl (heart bleed bug fix):
-
-	sudo apt-get install openssl
-	
 Build requirements:
 
-	sudo apt-get install build-essential libtool pkg-config libssl-dev
-	
-Get libcurl dependencies:
+	sudo apt-get install build-essential
+	sudo apt-get install libtool autotools-dev autoconf
+	sudo apt-get install libssl-dev
 
-	sudo apt-get build-dep curl	
-	
 for Ubuntu 12.04 and later:
 
 	sudo apt-get install libboost-all-dev
-	(If using Boost 1.37, append -mt to the boost libraries in the makefile, see below how to build)
 
- 
-for Ubuntu 13.10:
-	libboost1.54 will not work,
-	remove libboost1.54-all-dev and install libboost1.53-all-dev instead.
-
-Install LibDB4.8:
- It is recommended to remove any libdb version's other than 4.8. Some version's of Ubuntu come with newer version's of libdb4.8, although libdb5.3 should be ok we still recommend to use libdb4.8 as that is what we used to test and pass the quality verification of the devcoin core sourcecode. By doing one of these methods, you will be asked to remove the current libdb version, if it is not 4.8 we recommend doing so. Choose the method that best suits you. If one doesn't work you can use the next one down the list.
-
- Method 1:
-
-	db4.8 packages are available [here](https://launchpad.net/~bitcoin/+archive/bitcoin).
+ db4.8 packages are available [here](https://launchpad.net/~bitcoin/+archive/bitcoin).
  You can add the repository using the following command:
 
         sudo add-apt-repository ppa:bitcoin/bitcoin
         sudo apt-get update
-	   sudo apt-get upgrade
-	   sudo apt-get install libdb4.8-dev libdb4.8++-dev	
- 
 
- Method 2:
- 
+ Ubuntu 12.04 and later have packages for libdb5.1-dev and libdb5.1++-dev,
+ but using these will break binary wallet compatibility, and is not recommended.
+
+for Ubuntu 13.10:
+	libboost1.54 will not work,
+	remove libboost1.54-all-dev and install libboost1.53-all-dev instead.
+
+for Debian 7 (Wheezy) and later:
  The oldstable repository contains db4.8 packages.
+ Add the following line to /etc/apt/sources.list,
+ replacing [mirror] with any official debian mirror.
 
- Open your sources.list to add the package from an official  debian repository:
- 
-	sudo vi /etc/apt/sources.list
-	
- And enter the following line into the text file and save it:	
-	
-	deb http://ftp.us.debian.org/debian/ oldstable main
-		
- To enable the change run
+	deb http://[mirror]/debian/ oldstable main
+
+To enable the change run
 
 	sudo apt-get update
-	
- And get any package upgrades:
 
-	sudo apt-get upgrade	
+for other Ubuntu & Debian:
 
- Install:
+	sudo apt-get install libdb4.8-dev
+	sudo apt-get install libdb4.8++-dev
 
-	sudo apt-get install libdb4.8-dev libdb4.8++-dev
-
-
- Method 3:
- 
- we can reach back into the Debian 6 (Squeeze) repository. Create a file to point to the Squeeze repo:
- 
-	sudo vi /etc/apt/sources.list.d/debian-squeeze.list
-	
- And enter the following line into the text file and save it:	
-	
-	deb http://ftp.us.debian.org/debian/ squeeze main
-		
- To enable the change run
-
-	sudo apt-get update
-	
- And get any package upgrades:
-
-	sudo apt-get upgrade	
-
- Install:
-
-	sudo apt-get install libdb4.8-dev libdb4.8++-dev
-
-	
 Optional:
 
 	sudo apt-get install libminiupnpc-dev (see --with-miniupnpc and --enable-upnp-default)
 
-Build Devcoind:
-
-	git clone --depth=1 https://github.com/coinzen/devcoin.git
-	cd devcoin
-	cd src
-	make -f makefile.unix clean
-	make -f makefile.unix USE_UPNP=-
-
 Dependencies for the GUI: Ubuntu & Debian
 -----------------------------------------
 
-If you want to build Devcoin-Qt, make sure that the required packages for Qt development
+If you want to build Bitcoin-Qt, make sure that the required packages for Qt development
 are installed. Either Qt 4 or Qt 5 are necessary to build the GUI.
-If both Qt 4 and Qt 5 are installed, Qt 4 will be used. Please make sure Devcoind has already 
-compiling before you try to build the GUI.
+If both Qt 4 and Qt 5 are installed, Qt 4 will be used. Pass `--with-gui=qt5` to configure to choose Qt5.
+To build without GUI pass `--without-gui`.
 
 To build with Qt 4 you need the following:
 
-    sudo apt-get install libqt4-dev qt4-qmake
+    sudo apt-get install libqt4-dev libprotobuf-dev protobuf-compiler
 
 For Qt 5 you need the following:
 
@@ -170,19 +110,14 @@ For Qt 5 you need the following:
 
 libqrencode (optional) can be installed with:
 
-    sudo apt-get install libpng-dev libqrencode-dev
+    sudo apt-get install libqrencode-dev
 
-Once these are installed, you can build Devcoin-qt (GUI).
-
-Build Devcoin GUI:
-
-	cd ~/devcoin
-	qmake USE_UPNP=0 USE_DBUS=1 USE_QRCODE=1
-	make
+Once these are installed, they will be found by configure and a bitcoin-qt executable will be
+built by default.
 
 Notes
 -----
-The release is built with GCC and then "strip Devcoind" to strip the debug
+The release is built with GCC and then "strip bitcoind" to strip the debug
 symbols, which reduces the executable size by about 90%.
 
 
@@ -200,10 +135,10 @@ Berkeley DB
 It is recommended to use Berkeley DB 4.8. If you have to build it yourself:
 
 ```bash
-Devcoin_ROOT=$(pwd)
+BITCOIN_ROOT=$(pwd)
 
-# Pick some path to install BDB to, here we create a directory within the Devcoin directory
-BDB_PREFIX="${Devcoin_ROOT}/db4"
+# Pick some path to install BDB to, here we create a directory within the bitcoin directory
+BDB_PREFIX="${BITCOIN_ROOT}/db4"
 mkdir -p $BDB_PREFIX
 
 # Fetch the source and verify that it is not tampered with
@@ -218,8 +153,8 @@ cd db-4.8.30.NC/build_unix/
 ../dist/configure --enable-cxx --disable-shared --with-pic --prefix=$BDB_PREFIX
 make install
 
-# Configure Devcoin Core to use our own-built instance of BDB
-cd $Devcoin_ROOT
+# Configure Bitcoin Core to use our own-built instance of BDB
+cd $BITCOIN_ROOT
 ./configure (other args...) LDFLAGS="-L${BDB_PREFIX}/lib/" CPPFLAGS="-I${BDB_PREFIX}/include/"
 ```
 
@@ -236,7 +171,7 @@ If you need to build Boost yourself:
 
 Security
 --------
-To help make your Devcoin installation more secure by making certain attacks impossible to
+To help make your bitcoin installation more secure by making certain attacks impossible to
 exploit even if a vulnerability is found, binaries are hardened by default.
 This can be disabled with:
 
@@ -260,7 +195,7 @@ Hardening enables the following features:
 
     To test that you have built PIE executable, install scanelf, part of paxutils, and use:
 
-    	scanelf -e ./Devcoin
+    	scanelf -e ./bitcoin
 
     The output should contain:
      TYPE
@@ -268,16 +203,29 @@ Hardening enables the following features:
 
 * Non-executable Stack
     If the stack is executable then trivial stack based buffer overflow exploits are possible if
-    vulnerable buffers are found. By default, Devcoin should be built with a non-executable stack
+    vulnerable buffers are found. By default, bitcoin should be built with a non-executable stack
     but if one of the libraries it uses asks for an executable stack or someone makes a mistake
     and uses a compiler extension which requires an executable stack, it will silently build an
     executable without the non-executable stack protection.
 
     To verify that the stack is non-executable after compiling use:
-    `scanelf -e ./Devcoin`
+    `scanelf -e ./bitcoin`
 
     the output should contain:
 	STK/REL/PTL
 	RW- R-- RW-
 
     The STK RW- means that the stack is readable and writeable but not executable.
+
+Disable-wallet mode
+--------------------
+When the intention is to run only a P2P node without a wallet, bitcoin may be compiled in
+disable-wallet mode with:
+
+    ./configure --disable-wallet
+
+In this case there is no dependency on Berkeley DB 4.8.
+
+Mining is also possible in disable-wallet mode, but only using the `getblocktemplate` RPC
+call not `getwork`.
+

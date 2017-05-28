@@ -1,112 +1,118 @@
-Devcoin integration/staging tree
-================================
+Bitcoin Core integration/staging tree
+=====================================
 
-http://www.devcoin.org
+http://www.bitcoin.org
 
-Copyright (c) 2011-2014 Devcoin Developers
+Copyright (c) 2009-2014 Bitcoin Core Developers
 
-What is Devcoin?
+What is Bitcoin?
 ----------------
 
-Devcoin is a experimental digital currency that enables instant payments to
-anyone, anywhere in the world. Devcoin uses peer-to-peer technology to operate
+Bitcoin is an experimental new digital currency that enables instant payments to
+anyone, anywhere in the world. Bitcoin uses peer-to-peer technology to operate
 with no central authority: managing transactions and issuing money are carried
-out collectively by the network. Devcoin is also the name of the open source
+out collectively by the network. Bitcoin Core is the name of open source
 software which enables the use of this currency.
 
-It is an ethically inspired cryptocurrency created in 2011 to support open source projects by programmers, hardware developers, writers, musicians, painters, graphic artists and filmmakers worldwide.
-
-Devcoin is merge mined with Bitcoin making it one of the longest running blockchain based digital currencies.
-
 For more information, as well as an immediately useable, binary version of
-the Devcoin client sofware, see http://www.devcoin.org.
+the Bitcoin Core software, see http://www.bitcoin.org/en/download.
 
 License
 -------
 
-Devcoin is released under the terms of the MIT license. See `COPYING` for more
+Bitcoin Core is released under the terms of the MIT license. See [COPYING](COPYING) for more
 information or see http://opensource.org/licenses/MIT.
 
 Development process
 -------------------
 
-Developers work in their own repos and branches, then submit pull requests when
-they think their feature or bug fix is ready.
+Developers work in their own trees, then submit pull requests when they think
+their feature or bug fix is ready.
 
-If it is a simple/trivial/non-controversial change, then one of the Devcoin
+If it is a simple/trivial/non-controversial change, then one of the Bitcoin
 development team members simply pulls it.
 
-If it is a *more complicated or potentially controversial* change, then the
-patch submitter will be asked to start a discussion (if they haven't already)
-on the Devcoin Development forum at http://coinzen.org/index.php/board,49.0.html
+If it is a *more complicated or potentially controversial* change, then the patch
+submitter will be asked to start a discussion (if they haven't already) on the
+[mailing list](http://sourceforge.net/mailarchive/forum.php?forum_name=bitcoin-development).
 
-The branch will be accepted if there is broad consensus that it is a good thing.
+The patch will be accepted if there is broad consensus that it is a good thing.
 Developers should expect to rework and resubmit patches if the code doesn't
-match the project's coding conventions (see `doc/coding.md`) or are
+match the project's coding conventions (see [doc/coding.md](doc/coding.md)) or are
 controversial.
 
 The `master` branch is regularly built and tested, but is not guaranteed to be
-completely stable.
+completely stable. [Tags](https://github.com/bitcoin/bitcoin/tags) are created
+regularly to indicate new official, stable release versions of Bitcoin.
 
-Building
+Testing
 -------
-QT Build (Statically linked)
 
-Depedencies (you can use later version(s) if you know they are backwards compatible):
+Testing and code review is the bottleneck for development; we get more pull
+requests than we can review and test. Please be patient and help out, and
+remember this is a security-critical project where any mistake might cost people
+lots of money.
 
--MingW 4.8 
--Boost 1.54.0 
--DB 4.8.30 
--OpenSSL 1.0.0d 
--QT 5.2.0 
--Python 2.7 (installed binary) 
--libcurl 7.33.0 (included in src) 
--ActivePerl 5.16.3 Build 1603 (64 bit)  (installed binary)
--Miniupnpc 1.8.20131209 -
--Qrencode 3.4.3
--leveldb (included in src)
+### Automated Testing
 
-Follow this quide to build on Windows and also to get idea about how to build dependencies. Also there need to be patches done to certain files (that are already done) but you can confirm, see this link:
-https://bitcointalk.org/index.php?topic=149479.0
+Developers are strongly encouraged to write unit tests for new code, and to
+submit new unit tests for old code. Unit tests can be compiled and run (assuming they weren't disabled in configure) with: `make check`
 
-Building Boost:
+Every pull request is built for both Windows and Linux on a dedicated server,
+and unit and sanity tests are automatically run. The binaries produced may be
+used for manual QA testing — a link to them will appear in a comment on the
+pull request posted by [BitcoinPullTester](https://github.com/BitcoinPullTester). See https://github.com/TheBlueMatt/test-scripts
+for the build/test scripts.
 
-    Same as tutorial
+### Manual Quality Assurance (QA) Testing
 
-Building DB:
-    ensure you add --enable-static field with configure
+Large changes should have a test plan, and should be tested by somebody other
+than the developer who wrote the code.
+See https://github.com/bitcoin/QA/ for how to create a test plan.
 
-Building UPNPC:
-    Same as tutorial
+Translations
+------------
 
-Building Qrencode:
-    Same as tutorial
-    
-Add -static option to LDFLAGS in makefile.mingw to compile a statically linked executable.
-Code:
+Changes to translations as well as new translations can be submitted to
+[Bitcoin Core's Transifex page](https://www.transifex.com/projects/p/bitcoin/).
 
-LDFLAGS=-Wl,--dynamicbase -Wl,--nxcompat -Wl,--large-address-aware -static
+Periodically the translations are pulled from Transifex and merged into the git repository. See the
+[translation process](doc/translation_process.md) for details on how this works.
 
-Building QT:
-    Same as tutorial 
+**Important**: We do not accept translation changes as github pull request because the next
+pull from Transifex would automatically overwrite them again.
 
+Development tips and tricks
+---------------------------
 
+**compiling for debugging**
 
-The daemon code is in `src/`. To compile and run for win32:
+Run configure with the --enable-debug option, then make. Or run configure with
+CXXFLAGS="-g -ggdb -O0" or whatever debug flags you need.
 
-    cd src; make -f makefile.mingw devcoind.exe
-    strip devcoind.exe
+**debug.log**
 
-To rebuild:
-	make -f makefile.mingw clean
-	make -f makefile.mingw devcoind.exe
-	strip devcoind.exe
+If the code is behaving strangely, take a look in the debug.log file in the data directory;
+error and debugging message are written there.
 
-The QT code is in 'src/qt'. To compile and run the GUI for win32 (with features UPNP and QRCODE enabled):
+The -debug=... command-line option controls debugging; running with just -debug will turn
+on all categories (and give you a very large debug.log file).
 
-    qmake USE_QRCODE=1 bitcoin-qt.pro
-    make -f Makefile.release
-    
-    The executable should be in the .\release directory.
+The Qt code routes qDebug() output to debug.log under category "qt": run with -debug=qt
+to see it.
 
-If you are trying to build for other platforms please use the makefile.mingw as a base as this is the one that is tested, all compiler links and preprocessor define's are in this file and need to be ported over to other platform makefile's if they should be.	
+**testnet and regtest modes**
+
+Run with the -testnet option to run with "play bitcoins" on the test network, if you
+are testing multi-machine code that needs to operate across the internet.
+
+If you are testing something that can run on one machine, run with the -regtest option.
+In regression test mode blocks can be created on-demand; see qa/rpc-tests/ for tests
+that run in -regest mode.
+
+**DEBUG_LOCKORDER**
+
+Bitcoin Core is a multithreaded application, and deadlocks or other multithreading bugs
+can be very difficult to track down. Compiling with -DDEBUG_LOCKORDER (configure
+CXXFLAGS="-DDEBUG_LOCKORDER -g") inserts run-time checks to keep track of what locks
+are held, and adds warning to the debug.log file if inconsistencies are detected.
