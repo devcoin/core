@@ -1189,7 +1189,6 @@ void MapPort(bool)
 static const char *strMainNetDNSSeed[][14] = {
 	{"public.txn.co.in", "dvc.public.txn.co.in"},
 	{"21stcenturymoneytalk.org", "dvc-seed.21stcenturymoneytalk.org"},
-	{"devtome.com", "dvcstable01.devtome.com"},
 	{"dvcnode.org", "dvcstable01.dvcnode.org"},
 	{"dvcnode.org", "dvcstable02.dvcnode.org"},
 	{"dvcnode.org", "dvcstable03.dvcnode.org"},
