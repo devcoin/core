@@ -584,7 +584,6 @@ string getStepText(const string& dataDirectory, const string& fileName, int heig
 			string peerText = string("_beginpeers\n");
 			peerText += string("http://galaxies.mygamesonline.org/receiver.csv\n");
 			peerText += string("http://devcoinpool.btc-music.com/receiver/receiver.csv\n");
-			peerText += string("http://devcoinblockexplorer.info/receiver/receiver.csv\n");
 			peerText += string("http://devcoin.darkgamex.ch/receiver.csv\n");
 			peerText += string("_endpeers\n");
 			stepText = getCommonOutputByText(peerText, string("0"));
