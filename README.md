@@ -3,7 +3,7 @@ Devcoin core (devcoind)
 
 http://www.devcoin.org
 
-Copyright (c) 2011-2014 Devcoin Developers
+Devcoin Developers © since 2011
 
 What is Devcoin?
 ----------------
