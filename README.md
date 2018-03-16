@@ -1,5 +1,5 @@
-Devcoin integration/staging tree
-================================
+Devcoin core (devcoind)
+=======================
 
 http://www.devcoin.org
 
