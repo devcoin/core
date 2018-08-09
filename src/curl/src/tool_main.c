@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -25,6 +25,11 @@
 
 #ifdef HAVE_SIGNAL_H
 #include <signal.h>
+#endif
+
+#ifdef USE_NSS
+#include <nspr.h>
+#include <plarenas.h>
 #endif
 
 #define ENABLE_CURLX_PRINTF
@@ -56,6 +61,15 @@
  */
 int vms_show = 0;
 #endif
+
+#ifdef __MINGW32__
+/*
+ * There seems to be no way to escape "*" in command-line arguments with MinGW
+ * when command-line argument globbing is enabled under the MSYS shell, so turn
+ * it off.
+ */
+int _CRT_glob = 0;
+#endif /* __MINGW32__ */
 
 /* if we build a static library for unit tests, there is no main() function */
 #ifndef UNITTESTS
@@ -133,6 +147,7 @@ static CURLcode main_init(struct GlobalConfig *config)
   /* Initialise the global config */
   config->showerror = -1;             /* Will show errors */
   config->errors = stderr;            /* Default errors to stderr */
+  config->styled_output = TRUE;       /* enable detection */
 
   /* Allocate the initial operate config */
   config->first = config->last = malloc(sizeof(struct OperationConfig));
@@ -205,6 +220,14 @@ static void main_free(struct GlobalConfig *config)
   curl_global_cleanup();
   convert_cleanup();
   metalink_cleanup();
+#ifdef USE_NSS
+  if(PR_Initialized()) {
+    /* prevent valgrind from reporting still reachable mem from NSRP arenas */
+    PL_ArenaFinish();
+    /* prevent valgrind from reporting possibly lost memory (fd cache, ...) */
+    PR_Cleanup();
+  }
+#endif
   free_config_fields(config);
 
   /* Free the config structures */
@@ -253,7 +276,7 @@ int main(int argc, char *argv[])
 #endif
 
 #ifdef __VMS
-  vms_special_exit(res, vms_show);
+  vms_special_exit(result, vms_show);
 #else
   return (int)result;
 #endif
