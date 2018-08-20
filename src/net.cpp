@@ -1203,8 +1203,8 @@ static const char *strMainNetDNSSeed[][14] = {
 };
 
 static const char *strTestNetDNSSeed[][14] = {
-    {NULL, NULL},
-    {NULL, NULL},
+	{"devcoin.cloud", "node1.devcoin.cloud"},
+	{"devcoinresource.com", "phoenix.devcoinresource.com"},
 	{NULL, NULL},
 	{NULL, NULL},
 	{NULL, NULL},
