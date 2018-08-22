@@ -59,9 +59,8 @@ common_CFLAGS := -Wpointer-arith -Wwrite-strings -Wunused -Winline -Wnested-exte
 include $(CLEAR_VARS)
 include $(LOCAL_PATH)/lib/Makefile.inc
 CURL_HEADERS := \
-	curlbuild.h \
 	curl.h \
-	curlrules.h \
+	system.h \
 	curlver.h \
 	easy.h \
 	mprintf.h \
@@ -104,7 +103,7 @@ LOCAL_SYSTEM_SHARED_LIBRARIES := libc
 
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/include $(LOCAL_PATH)/lib
 
-# This may also need to include $(CURLX_ONES) in order to correctly link
+# This may also need to include $(CURLX_CFILES) in order to correctly link
 # if libcurl is changed to be built as a dynamic library
 LOCAL_CFLAGS += $(common_CFLAGS)
 
