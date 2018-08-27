@@ -113,6 +113,7 @@ $! Required product dependencies.
 $!----------------------------------
 $ vmsprd = "DEC"
 $ if base .eqs. "I64VMS" then vmsprd = "HP"
+$ vsiprd = "VSI"
 $!
 $ write pdsc "   software ''vmsprd' ''base' VMS ;"
 $ arch_type = f$getsyi("ARCH_NAME")
@@ -126,8 +127,11 @@ $ if dashver .eqs. "-" then dashver = ""
 $ vmstag = majver + minver + dashver
 $ code = f$extract(0, 1, arch_type)
 $ arch_code = f$extract(0, 1, arch_type)
-$ write pdsc -
- "   if (not <software ''vmsprd' ''base' VMS version minimum ''node_swvers'>) ;"
+$ line_out = -
+ "   if ((not <software ''vsiprd' ''base' VMS version minimum" + -
+ " ''node_swvers'>) and" + -
+ " (not <software ''vmsprd' ''base' VMS version minimum ''node_swvers'>));"
+$ write pdsc line_out
 $ write pdsc "      error NEED_VMS''vmstag';"
 $ write pdsc "   end if;"
 $!
@@ -347,7 +351,7 @@ $           endif
 $       endif
 $   endif
 $!
-$!  Filenames with $ in them are VMS special and do not need to be lowercased.
+$!  Filenames with $ in them are VMS special and do not need to be lowercase.
 $!  --------------------------------------------------------------------------
 $   if f$locate("$", pathname) .lt. f$length(pathname) then goto inst_file_loop
 $!

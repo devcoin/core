@@ -167,7 +167,7 @@ leveldb/libleveldb.a:
 	cd leveldb; chmod +x build_detect_platform; $(MAKE) CC=$(CC) CXX=$(CXX) OPT="$(xCXXFLAGS)" libleveldb.a libmemenv.a; cd ..
 curl/lib/.libs/libcurl.a:
 	@echo "Building LibCurl ..."
-	cd curl; chmod +x configure; ./configure --disable-shared --disable-ftp --disable-ldap --disable-ldapis --disable-rtsp --disable-proxy --disable-dict --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smtp  --disable-gopher --disable-manual --disable-imap --disable-zlib --without-ca-bundle --without-gnutls --without-libidn --without-librtmp --without-libssh2 --without-nss --without-ssl --without-zlib; $(MAKE); cd ..
+	cd curl; chmod +x buildconf; ./buildconf; chmod +x configure; ./configure --disable-shared --disable-ftp --disable-ldap --disable-ldapis --disable-rtsp --disable-proxy --disable-dict --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smtp  --disable-gopher --disable-manual --disable-imap --disable-zlib --without-ca-bundle --without-gnutls --without-libidn --without-librtmp --without-libssh2 --without-nss --without-ssl --without-zlib; $(MAKE); cd ..
 	
 # auto-generated dependencies:
 -include obj/*.P
