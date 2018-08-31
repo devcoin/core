@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -46,11 +46,9 @@ static char *my_get_line(FILE *fp);
 /* return 0 on everything-is-fine, and non-zero otherwise */
 int parseconfig(const char *filename, struct GlobalConfig *global)
 {
-  int res;
   FILE *file;
   char filebuffer[512];
-  bool usedarg;
-  char *home;
+  bool usedarg = FALSE;
   int rc = 0;
   struct OperationConfig *operation = global->first;
 
@@ -58,8 +56,8 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
     /* NULL or no file name attempts to load .curlrc from the homedir! */
 
 #ifndef __AMIGA__
+    char *home = homedir();    /* portable homedir finder */
     filename = CURLRC;   /* sensible default */
-    home = homedir();    /* portable homedir finder */
     if(home) {
       if(strlen(home) < (sizeof(filebuffer) - strlen(CURLRC))) {
         snprintf(filebuffer, sizeof(filebuffer),
@@ -69,7 +67,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
         /* Check if the file exists - if not, try CURLRC in the same
          * directory as our executable
          */
-        file = fopen(filebuffer, "r");
+        file = fopen(filebuffer, FOPEN_READTEXT);
         if(file != NULL) {
           fclose(file);
           filename = filebuffer;
@@ -79,7 +77,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
            * already declared via inclusions done in setup header file.
            * We assume that we are using the ASCII version here.
            */
-          int n = GetModuleFileName(0, filebuffer, sizeof(filebuffer));
+          int n = GetModuleFileNameA(0, filebuffer, sizeof(filebuffer));
           if(n > 0 && n < (int)sizeof(filebuffer)) {
             /* We got a valid filename - get the directory part */
             char *lastdirchar = strrchr(filebuffer, '\\');
@@ -114,8 +112,8 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
 #endif
   }
 
-  if(strcmp(filename,"-"))
-    file = fopen(filename, "r");
+  if(strcmp(filename, "-"))
+    file = fopen(filename, FOPEN_READTEXT);
   else
     file = stdin;
 
@@ -125,13 +123,13 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
     char *option;
     char *param;
     int lineno = 0;
-    bool alloced_param;
     bool dashed_option;
 
     while(NULL != (aline = my_get_line(file))) {
+      int res;
+      bool alloced_param = FALSE;
       lineno++;
       line = aline;
-      alloced_param=FALSE;
 
       /* line with # in the first non-blank column is a comment! */
       while(*line && ISSPACE(*line))
@@ -187,33 +185,32 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
         param = line; /* parameter starts here */
         while(*line && !ISSPACE(*line))
           line++;
-        *line = '\0'; /* zero terminate */
 
-        /* to detect mistakes better, see if there's data following */
-        line++;
-        /* pass all spaces */
-        while(*line && ISSPACE(*line))
+        if(*line) {
+          *line = '\0'; /* zero terminate */
+
+          /* to detect mistakes better, see if there's data following */
           line++;
+          /* pass all spaces */
+          while(*line && ISSPACE(*line))
+            line++;
 
-        switch(*line) {
-        case '\0':
-        case '\r':
-        case '\n':
-        case '#': /* comment */
-          break;
-        default:
-          warnf(operation, "%s:%d: warning: '%s' uses unquoted white space in"
-                " the line that may cause side-effects!\n",
-                filename, lineno, option);
+          switch(*line) {
+          case '\0':
+          case '\r':
+          case '\n':
+          case '#': /* comment */
+            break;
+          default:
+            warnf(operation->global, "%s:%d: warning: '%s' uses unquoted "
+                  "white space in the line that may cause side-effects!\n",
+                  filename, lineno, option);
+          }
         }
-      }
-
-      if(param && !*param) {
-        /* do this so getparameter can check for required parameters.
-           Otherwise it always thinks there's a parameter. */
-        if(alloced_param)
-          Curl_safefree(param);
-        param = NULL;
+        if(!*param)
+          /* do this so getparameter can check for required parameters.
+             Otherwise it always thinks there's a parameter. */
+          param = NULL;
       }
 
 #ifdef DEBUG_CONFIG
@@ -221,7 +218,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
 #endif
       res = getparameter(option, param, &usedarg, global, operation);
 
-      if(param && *param && !usedarg)
+      if(!res && param && *param && !usedarg)
         /* we passed in a parameter that wasn't used! */
         res = PARAM_GOT_EXTRA_PARAMETER;
 
@@ -254,14 +251,14 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
       if(res != PARAM_OK && res != PARAM_NEXT_OPERATION) {
         /* the help request isn't really an error */
         if(!strcmp(filename, "-")) {
-          filename = (char *)"<stdin>";
+          filename = "<stdin>";
         }
         if(res != PARAM_HELP_REQUESTED &&
            res != PARAM_MANUAL_REQUESTED &&
            res != PARAM_VERSION_INFO_REQUESTED &&
            res != PARAM_ENGINES_REQUESTED) {
           const char *reason = param2text(res);
-          warnf(operation, "%s:%d: warning: '%s' %s\n",
+          warnf(operation->global, "%s:%d: warning: '%s' %s\n",
                 filename, lineno, option, reason);
         }
       }

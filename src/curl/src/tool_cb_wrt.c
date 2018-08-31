@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -31,15 +31,55 @@
 
 #include "memdebug.h" /* keep this as LAST include */
 
+/* create a local file for writing, return TRUE on success */
+bool tool_create_output_file(struct OutStruct *outs,
+                             bool append)
+{
+  struct GlobalConfig *global = outs->config->global;
+  FILE *file;
+
+  if(!outs->filename || !*outs->filename) {
+    warnf(global, "Remote filename has no length!\n");
+    return FALSE;
+  }
+
+  if(outs->is_cd_filename && !append) {
+    /* don't overwrite existing files */
+    file = fopen(outs->filename, "rb");
+    if(file) {
+      fclose(file);
+      warnf(global, "Refusing to overwrite %s: %s\n", outs->filename,
+            strerror(EEXIST));
+      return FALSE;
+    }
+  }
+
+  /* open file for writing */
+  file = fopen(outs->filename, append?"ab":"wb");
+  if(!file) {
+    warnf(global, "Failed to create the file %s: %s\n", outs->filename,
+          strerror(errno));
+    return FALSE;
+  }
+  outs->s_isreg = TRUE;
+  outs->fopened = TRUE;
+  outs->stream = file;
+  outs->bytes = 0;
+  outs->init = 0;
+  return TRUE;
+}
+
 /*
 ** callback for CURLOPT_WRITEFUNCTION
 */
 
-size_t tool_write_cb(void *buffer, size_t sz, size_t nmemb, void *userdata)
+size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
 {
   size_t rc;
   struct OutStruct *outs = userdata;
   struct OperationConfig *config = outs->config;
+  size_t bytes = sz * nmemb;
+  bool is_tty = config->global->isatty;
 
   /*
    * Once that libcurl has called back tool_write_cb() the returned value
@@ -47,21 +87,27 @@ size_t tool_write_cb(void *buffer, size_t sz, size_t nmemb, void *userdata)
    * it does not match then it fails with CURLE_WRITE_ERROR. So at this
    * point returning a value different from sz*nmemb indicates failure.
    */
-  const size_t failure = (sz * nmemb) ? 0 : 1;
-
-  if(!config)
-    return failure;
+  const size_t failure = bytes ? 0 : 1;
 
 #ifdef DEBUGBUILD
-  if(config->include_headers) {
-    if(sz * nmemb > (size_t)CURL_MAX_HTTP_HEADER) {
-      warnf(config, "Header data size exceeds single call write limit!\n");
+  {
+    char *tty = curlx_getenv("CURL_ISATTY");
+    if(tty) {
+      is_tty = TRUE;
+      curl_free(tty);
+    }
+  }
+
+  if(config->show_headers) {
+    if(bytes > (size_t)CURL_MAX_HTTP_HEADER) {
+      warnf(config->global, "Header data size exceeds single call write "
+            "limit!\n");
       return failure;
     }
   }
   else {
-    if(sz * nmemb > (size_t)CURL_MAX_WRITE_SIZE) {
-      warnf(config, "Data size exceeds single call write limit!\n");
+    if(bytes > (size_t)CURL_MAX_WRITE_SIZE) {
+      warnf(config->global, "Data size exceeds single call write limit!\n");
       return failure;
     }
   }
@@ -90,50 +136,31 @@ size_t tool_write_cb(void *buffer, size_t sz, size_t nmemb, void *userdata)
         check_fails = TRUE;
     }
     if(check_fails) {
-      warnf(config, "Invalid output struct data for write callback\n");
+      warnf(config->global, "Invalid output struct data for write callback\n");
       return failure;
     }
   }
 #endif
 
-  if(!outs->stream) {
-    FILE *file;
+  if(!outs->stream && !tool_create_output_file(outs, FALSE))
+    return failure;
 
-    if(!outs->filename || !*outs->filename) {
-      warnf(config, "Remote filename has no length!\n");
+  if(is_tty && (outs->bytes < 2000) && !config->terminal_binary_ok) {
+    /* binary output to terminal? */
+    if(memchr(buffer, 0, bytes)) {
+      warnf(config->global, "Binary output can mess up your terminal. "
+            "Use \"--output -\" to tell curl to output it to your terminal "
+            "anyway, or consider \"--output <FILE>\" to save to a file.\n");
+      config->synthetic_error = ERR_BINARY_TERMINAL;
       return failure;
     }
-
-    if(outs->is_cd_filename) {
-      /* don't overwrite existing files */
-      file = fopen(outs->filename, "rb");
-      if(file) {
-        fclose(file);
-        warnf(config, "Refusing to overwrite %s: %s\n", outs->filename,
-              strerror(EEXIST));
-        return failure;
-      }
-    }
-
-    /* open file for writing */
-    file = fopen(outs->filename, "wb");
-    if(!file) {
-      warnf(config, "Failed to create the file %s: %s\n", outs->filename,
-            strerror(errno));
-      return failure;
-    }
-    outs->s_isreg = TRUE;
-    outs->fopened = TRUE;
-    outs->stream = file;
-    outs->bytes = 0;
-    outs->init = 0;
   }
 
   rc = fwrite(buffer, sz, nmemb, outs->stream);
 
-  if((sz * nmemb) == rc)
+  if(bytes == rc)
     /* we added this amount of data to the output */
-    outs->bytes += (sz * nmemb);
+    outs->bytes += bytes;
 
   if(config->readbusy) {
     config->readbusy = FALSE;
@@ -149,4 +176,3 @@ size_t tool_write_cb(void *buffer, size_t sz, size_t nmemb, void *userdata)
 
   return rc;
 }
-
