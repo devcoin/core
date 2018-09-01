@@ -9,7 +9,6 @@ using namespace std;
 
 
 static map<string, string> globalCacheMap;
-static int globalDownloadIndex = 10;
 static const double globalMinimumIdenticalProportion = 0.500001;
 static const int globalStepDefault = 4000;
 static int globalTimeOut = 10;
