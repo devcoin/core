@@ -8,18 +8,18 @@ FROM debian:7
 MAINTAINER Fernando Paredes Garcia <fernando@develcuy.com>
 
 # Add squeeze packages
-RUN echo "deb http://ftp.us.debian.org/debian/ squeeze main" > /etc/apt/sources.list.d/squeeze.list
+RUN echo "deb http://archive.debian.org/debian/ squeeze main" > /etc/apt/sources.list.d/squeeze.list
 
 # Update packages
 RUN apt-get update
 RUN apt-get dist-upgrade -y
 
 # Install package dependencies
-RUN apt-get install -y libdb4.8-dev libdb4.8++-dev build-essential libboost-all-dev git supervisor
+RUN apt-get install -y --force-yes libdb4.8-dev libdb4.8++-dev build-essential libboost-all-dev git supervisor
 RUN apt-get install -y procps
 
 # Download Devcoind source
-RUN git clone --depth=1 https://github.com/coinzen/devcoin.git /usr/local/src/devcoin
+RUN git clone --depth=1 https://github.com/devcoin/core.git /usr/local/src/devcoin
 
 # Configure Devcoind
 RUN useradd devcoin
