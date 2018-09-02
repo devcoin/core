@@ -590,7 +590,7 @@ inline const CBigNum operator%(const CBigNum& a, const CBigNum& b)
 {
     CAutoBN_CTX pctx;
     CBigNum r;
-    if (!BN_div(r.get(), NULL, a.cget(), b.cget(), pctx))
+    if (!BN_mod(r.get(), a.cget(), b.cget(), pctx))
         throw bignum_error("CBigNum::operator% : BN_div failed");
     return r;
 }
