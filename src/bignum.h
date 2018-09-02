@@ -52,7 +52,8 @@ class CBigNum
 {
 private:
     BIGNUM *self = nullptr;
-     void init()
+
+    void init()
     {
         if (self) BN_clear_free(self);
         self = BN_new();
@@ -128,7 +129,6 @@ public:
 
 
     int getint() const
-
     {
         unsigned long n = BN_get_word(self);
         if (!BN_is_negative(self))
