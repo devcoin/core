@@ -326,7 +326,8 @@ bool CKey::SignCompact(uint256 hash, std::vector<unsigned char>& vchSig)
     sig_r = sig->r;
     sig_s = sig->s;
     #endif
-     int nBitsR = BN_num_bits(sig_r);
+
+    int nBitsR = BN_num_bits(sig_r);
     int nBitsS = BN_num_bits(sig_s);
     if (nBitsR <= 256 && nBitsS <= 256)
     {
