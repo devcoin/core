@@ -603,6 +603,12 @@ inline const CBigNum operator<<(const CBigNum& a, unsigned int shift)
     return r;
 }
 
+inline const CBigNum operator>>(const CBigNum& a, unsigned int shift)
+{
+    CBigNum r = a;
+    r >>= shift;
+    return r;
+}
 
 inline bool operator==(const CBigNum& a, const CBigNum& b) { return (BN_cmp(a.cget(), b.cget()) == 0); }
 inline bool operator!=(const CBigNum& a, const CBigNum& b) { return (BN_cmp(a.cget(), b.cget()) != 0); }
