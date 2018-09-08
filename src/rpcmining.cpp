@@ -12,7 +12,56 @@
 using namespace json_spirit;
 using namespace std;
 
-Value getgenerate(const Array& params, bool fHelp)
+Value GetNetworkHashPS(int lookup, int height) {
+     CBlockIndex *pb = pindexBest;
+ 
+     if (height >= 0 && height < nBestHeight)
+         pb = FindBlockByHeight(height);
+ 
+     if (pb == NULL || !pb->nHeight)
+         return 0;
+ 
+     // If lookup is not a positive number of blocks, then use approximately two weeks of blocks.
+     if (lookup <= 0)
+         lookup = pb->nHeight % 2016 + 1;
+ 
+     // If lookup is larger than chain, then set it to chain length.
+     if (lookup > pb->nHeight)
+         lookup = pb->nHeight;
+ 
+     CBlockIndex *pb0 = pb;
+     int64 minTime = pb0->GetBlockTime();
+     int64 maxTime = minTime;
+     for (int i = 0; i < lookup; i++) {
+         pb0 = pb0->pprev;
+         int64 time = pb0->GetBlockTime();
+         minTime = std::min(time, minTime);
+         maxTime = std::max(time, maxTime);
+     }
+ 
+     // In case there's a situation where minTime == maxTime, we don't want a divide by zero exception.
+     if (minTime == maxTime)
+         return 0;
+ 
+     uint256 workDiff = pb->nChainWork - pb0->nChainWork;
+     int64 timeDiff = maxTime - minTime;
+ 
+     return (boost::int64_t)(workDiff.getdouble() / timeDiff);
+ }
+ 
+ Value getnetworkhashps(const Array& params, bool fHelp)
+ {
+     if (fHelp || params.size() > 2)
+         throw runtime_error(
+             "getnetworkhashps [blocks] [height]\n"
+             "Returns the estimated network hashes per second based on approximately two weeks of blocks.\n"
+             "Pass in [blocks] to override # of blocks.\n"
+             "Pass in [height] to estimate the network speed at the time when a certain block was found.");
+ 
+     return GetNetworkHashPS(params.size() > 0 ? params[0].get_int() : 120, params.size() > 1 ? params[1].get_int() : -1);
+ }
+
+ Value getgenerate(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() != 0)
         throw runtime_error(
