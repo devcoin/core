@@ -146,7 +146,7 @@ Optional:
 
 Build Devcoind:
 
-	git clone --depth=1 https://github.com/coinzen/devcoin.git
+	git clone --depth=1 https://github.com/devcoin/core.git
 	cd devcoin
 	cd src
 	make -f makefile.unix clean
