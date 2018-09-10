@@ -144,7 +144,7 @@ DEFS += $(addprefix -I,$(CURDIR)/leveldb/helpers)
 
 curl/lib/.libs/libcurl.a:
 	@echo "Building LibCurl ..."
-	cd curl; ./buildconf; ./configure --disable-shared --disable-ftp --disable-ldap --disable-ldaps --disable-rtsp --disable-proxy --disable-dict --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smtp  --disable-gopher --disable-manual --disable-imap --disable-zlib --without-ca-bundle --without-gnutls --without-libidn --without-librtmp --without-libssh2 --without-nss --without-ssl --without-zlib; $(MAKE); cd ..
+	cd curl; ./buildconf; ./configure --disable-shared --disable-ftp --disable-ldap --disable-ldaps --disable-rtsp --disable-proxy --disable-dict --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smtp  --disable-gopher --disable-manual --disable-imap --disable-zlib --without-ca-bundle --without-gnutls --without-libidn --without-librtmp --without-libssh2 --without-nss --without-zlib; $(MAKE); cd ..
 	
 leveldb/libleveldb.a:
 	@echo "Building LevelDB ..."
