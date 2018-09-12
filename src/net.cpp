@@ -374,7 +374,7 @@ bool GetMyExternalIP(CNetAddr& ipRet)
         }
         else if (nHost == 2)
         {
-            addrConnect = CService("104.28.19.248", 80); // ifconfig.co
+            addrConnect = CService("ifconfig.co", 80); 
 
             if (nLookup == 1)
             {
