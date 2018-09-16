@@ -1,5 +1,6 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2012 The Bitcoin developers
+// Copyright (c) 2011-2017 The Peercoin developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 #ifndef BITCOIN_BIGNUM_H
@@ -51,7 +52,7 @@ public:
 class CBigNum
 {
 private:
-    BIGNUM *self = nullptr;
+    BIGNUM *self;
 
     void init()
     {
@@ -65,12 +66,12 @@ public:
     BIGNUM* get() { return self; }
     const BIGNUM* cget() const { return self; }
 
-    CBigNum()
+    CBigNum() : self(NULL)
     {
         init();
     }
 
-    CBigNum(const CBigNum& b)
+    CBigNum(const CBigNum& b) : self(NULL)
     {
         init();
         if (!BN_copy(self, b.cget()))
@@ -93,19 +94,19 @@ public:
     }
 
     //CBigNum(char n) is not portable.  Use 'signed char' or 'unsigned char'.
-    CBigNum(signed char n)      { init(); if (n >= 0) setulong(n); else setint64(n); }
-    CBigNum(short n)            { init(); if (n >= 0) setulong(n); else setint64(n); }
-    CBigNum(int n)              { init(); if (n >= 0) setulong(n); else setint64(n); }
-    CBigNum(long n)             { init(); if (n >= 0) setulong(n); else setint64(n); }
-    CBigNum(int64 n)            { init(); setint64(n); }
-    CBigNum(unsigned char n)    { init(); setulong(n); }
-    CBigNum(unsigned short n)   { init(); setulong(n); }
-    CBigNum(unsigned int n)     { init(); setulong(n); }
-    CBigNum(unsigned long n)    { init(); setulong(n); }
-    CBigNum(uint64 n)           { init(); setuint64(n); }
-    explicit CBigNum(uint256 n) { init(); setuint256(n); }
+    CBigNum(signed char n) : self(NULL)      { init(); if (n >= 0) setulong(n); else setint64(n); }
+    CBigNum(short n) : self(NULL)            { init(); if (n >= 0) setulong(n); else setint64(n); }
+    CBigNum(int n) : self(NULL)              { init(); if (n >= 0) setulong(n); else setint64(n); }
+    CBigNum(long n) : self(NULL)             { init(); if (n >= 0) setulong(n); else setint64(n); }
+    CBigNum(int64 n) : self(NULL)            { init(); setint64(n); }
+    CBigNum(unsigned char n) : self(NULL)    { init(); setulong(n); }
+    CBigNum(unsigned short n) : self(NULL)   { init(); setulong(n); }
+    CBigNum(unsigned int n) : self(NULL)     { init(); setulong(n); }
+    CBigNum(unsigned long n) : self(NULL)    { init(); setulong(n); }
+    CBigNum(uint64 n) : self(NULL)           { init(); setuint64(n); }
+    explicit CBigNum(uint256 n) : self(NULL) { init(); setuint256(n); }
 
-    explicit CBigNum(const std::vector<unsigned char>& vch)
+    explicit CBigNum(const std::vector<unsigned char>& vch) : self(NULL)
     {
         init();
         setvch(vch);
@@ -126,7 +127,6 @@ public:
     {
         return BN_get_word(self);
     }
-
 
     int getint() const
     {
