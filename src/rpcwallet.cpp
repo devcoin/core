@@ -18,6 +18,7 @@ using namespace json_spirit;
 
 int64 nWalletUnlockTime;
 static CCriticalSection cs_nWalletUnlockTime;
+static const int step = 4000; // See main.cpp
 
 std::string HelpRequiringPassphrase()
 {
@@ -86,6 +87,7 @@ Value getinfo(const Array& params, bool fHelp)
     if (pwalletMain->IsCrypted())
         obj.push_back(Pair("unlocked_until", (boost::int64_t)nWalletUnlockTime / 1000));
     obj.push_back(Pair("errors",        GetWarnings("statusbar")));
+    obj.push_back(Pair("round",         (int)((int)nBestHeight / step)));
     return obj;
 }
 
