@@ -584,7 +584,6 @@ string getStepText(const string& dataDirectory, const string& fileName, int heig
 			peerText += string("http://galaxies.mygamesonline.org/receiver.csv\n");
 			peerText += string("http://devcoinpool.btc-music.com/receiver/receiver.csv\n");
 			peerText += string("http://devcoin.darkgamex.ch/receiver.csv\n");
-			peerText += string("http://node1.devcoin.cloud/receiver_files/receiver.csv\n");
 			peerText += string("_endpeers\n");
 			stepText = getCommonOutputByText(peerText, string("0"));
 			if (getStartsWith(stepText, string("Format,pluribusunum")))
@@ -594,7 +593,6 @@ string getStepText(const string& dataDirectory, const string& fileName, int heig
 		{
 			cout << "Downloading " << stepFileName << " base file." << directorySubName << endl;
 			string peerText = string("_beginpeers\n");
-			peerText += string("http://node1.devcoin.cloud/testnet_receiver_files/receiverTestNet.csv\n");
 			peerText += string("http://devcoinresource.com/testnet_receiver_files/receiverTestNet.csv\n");
 			peerText += string("_endpeers\n");
 			stepText = getCommonOutputByText(peerText, string("0"));
