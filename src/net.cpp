@@ -1187,17 +1187,17 @@ void MapPort(bool)
 // The first name is used as information source for addrman.
 // The second name should resolve to a list of seed addresses.
 static const char *strMainNetDNSSeed[][14] = {
-	{"public.txn.co.in", "dvc.public.txn.co.in"},
+	{"d.evco.in", "dvcnode1.d.evco.in"},
 	{"dvcnode.org", "dvcstable01.dvcnode.org"},
 	{"dvcnode.org", "dvcstable02.dvcnode.org"},
-	{"dvcnode.org", "dvcstable03.dvcnode.org"},
-	{"dvcnode.org", "dvcstable04.dvcnode.org"},
-	{"dvcnode.org", "dvcstable05.dvcnode.org"},
+	{NULL, NULL},
+	{NULL, NULL},
+	{NULL, NULL},
 	{"dvcnode.org", "dvcstable06.dvcnode.org"},
-	{"dvcnode.org", "dvcstable07.dvcnode.org"},
-	{"dvcnode.com", "node01.dvcnode.com"},
-	{"dvcnode.com", "node02.dvcnode.com"},
-	{"dvcnode.com", "node03.dvcnode.com"},
+	{NULL, NULL},
+	{NULL, NULL},
+	{NULL, NULL},
+	{NULL, NULL},
 	{NULL, NULL},
 	{NULL, NULL},
 	{NULL, NULL}
