@@ -1198,11 +1198,14 @@ static const char *strMainNetDNSSeed[][14] = {
 	{"dvcnode.com", "node01.dvcnode.com"},
 	{"dvcnode.com", "node02.dvcnode.com"},
 	{"dvcnode.com", "node03.dvcnode.com"},
-    {NULL, NULL}
+	{NULL, NULL},
+	{NULL, NULL},
+	{NULL, NULL}
 };
 
 static const char *strTestNetDNSSeed[][14] = {
 	{"devcoinresource.com", "phoenix.devcoinresource.com"},
+	{NULL, NULL},
 	{NULL, NULL},
 	{NULL, NULL},
 	{NULL, NULL},
