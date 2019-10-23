@@ -584,6 +584,7 @@ string getStepText(const string& dataDirectory, const string& fileName, int heig
 			peerText += string("http://galaxies.mygamesonline.org/receiver.csv\n");
 			peerText += string("http://devcoinpool.btc-music.com/receiver/receiver.csv\n");
 			peerText += string("http://devcoin.darkgamex.ch/receiver.csv\n");
+			peerText += string("http://d.evco.in/receiver/receiver.csv\n");
 			peerText += string("_endpeers\n");
 			stepText = getCommonOutputByText(peerText, string("0"));
 			if (getStartsWith(stepText, string("Format,pluribusunum")))
