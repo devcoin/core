@@ -1186,17 +1186,22 @@ void MapPort(bool)
 // Each pair gives a source name and a seed name.
 // The first name is used as information source for addrman.
 // The second name should resolve to a list of seed addresses.
+// WARNING! This list of hostnames should hardly be changed. Rather,
+// the DNS records should be updated with the new seed nodes IP
+// addresses when required. Also, there are two different root domain
+// names for better reliability of the blockchain. If dvcnode.org falls,
+// we still have devcoin.org, and the reverse.
 static const char *strMainNetDNSSeed[][14] = {
-	{"d.evco.in", "dvcnode1.d.evco.in"},
 	{"dvcnode.org", "dvcstable01.dvcnode.org"},
 	{"dvcnode.org", "dvcstable02.dvcnode.org"},
-	{NULL, NULL},
-	{NULL, NULL},
-	{NULL, NULL},
+	{"dvcnode.org", "dvcstable03.dvcnode.org"},
+	{"dvcnode.org", "dvcstable04.dvcnode.org"},
+	{"dvcnode.org", "dvcstable05.dvcnode.org"},
 	{"dvcnode.org", "dvcstable06.dvcnode.org"},
-	{NULL, NULL},
-	{NULL, NULL},
-	{NULL, NULL},
+	{"devcoin.org", "seed01.devcoin.org"},
+	{"devcoin.org", "seed02.devcoin.org"},
+	{"devcoin.org", "seed03.devcoin.org"},
+	{"devcoin.org", "seed04.devcoin.org"},
 	{NULL, NULL},
 	{NULL, NULL},
 	{NULL, NULL},
