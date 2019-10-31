@@ -20,7 +20,7 @@ RUN apt-get install -y --force-yes git libdb++-dev libdb-dev libboost-all-dev bu
 RUN git clone --depth=1 https://github.com/devcoin/core.git /usr/local/src/devcoin
 
 # Create devcoin user
-RUN useradd devcoin
+RUN useradd devcoin; chsh -s /bin/bash devcoin
 RUN mkdir -p /home/devcoin/.devcoin
 
 # Setup devcoind
