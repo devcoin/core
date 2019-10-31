@@ -75,10 +75,6 @@ EXPOSE 52332
 # Use baseimage-docker's init process.
 CMD ["/sbin/my_init"]
 
-# REMOVE THIS ->
-RUN apt-get install -y --force-yes vim
-# <- REMOVE THIS
-
 # Clean up APT when done.
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
