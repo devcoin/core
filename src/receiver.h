@@ -205,6 +205,10 @@ string getCommonOutputByText(const string& fileText, const string& suffix)
 			cout << "Number of identical pages in getCommonOutputByText: " << (*pageMapIterator).second << endl << endl;
 			return (*pageMapIterator).first;
 		}
+		else
+		{
+			cout << "DEBUG: Identical pages in getCommonOutputByText: " <<  (*pageMapIterator).second << endl << endl;
+		}
 
 	cout << "Insufficient identical pages in getCommonOutputByText." << endl;
 	return string();
@@ -430,8 +434,12 @@ vector<string> getLocationTexts(vector<string> addresses)
 {
 	vector<string> locationTexts;
 
-	for(int addressIndex = 0; addressIndex < addresses.size(); addressIndex++)
-		locationTexts.push_back(getLocationText(addresses[addressIndex]));
+	for(unsigned int addressIndex = 0; addressIndex < addresses.size(); addressIndex++) {
+		cout << "DEBUG: Fetching " << addresses[addressIndex] << " ... ";
+		const string locationText = getLocationText(addresses[addressIndex]);
+		cout << "got " << locationText.length() << " bytes" << endl << endl;
+		locationTexts.push_back(locationText);
+	}
 
 	return locationTexts;
 }
