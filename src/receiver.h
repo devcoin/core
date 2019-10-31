@@ -314,7 +314,7 @@ string getHttpsText(const string& address)
 		std::ostringstream oss;
 //		curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 //		curl_easy_setopt(curl, CURLOPT_HEADER, 1L);
-		curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 0L);
+		curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
 		curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
 		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
