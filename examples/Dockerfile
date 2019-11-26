@@ -42,15 +42,17 @@ FROM osixia/light-baseimage:1.1.2
 
 COPY --from=builder /usr/local/bin/devcoind /usr/local/bin/devcoind
 # Update packages and install package dependencies
-RUN apt-get update && apt-get install -y \
-        libboost-system1.62.0 libboost-filesystem1.62.0 libboost-program-options1.62.0 libboost-thread1.62.0 \
-    && rm -rf /var/lib/apt/lists/*;
+RUN apt-get -y update \
+    && /container/tool/add-multiple-process-stack \
+    && LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+       libboost-system1.62.0 libboost-filesystem1.62.0 libboost-program-options1.62.0 libboost-thread1.62.0 \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Create devcoin user
-RUN useradd devcoin; chsh -s /bin/bash devcoin
-RUN mkdir -p /home/devcoin/.devcoin
+RUN useradd devcoin; chsh -s /bin/bash devcoin; mkdir -p /home/devcoin/.devcoin
 
-# Setup devcoind
+# Configure devcoind settings
 RUN echo '#Noob config file for devcoind, should be enough!\n\
 server=1\n\
 daemon=0\n\
@@ -72,11 +74,19 @@ txindex=1\n\
 > /home/devcoin/.devcoin/devcoin.conf
 RUN chown devcoin: -R /home/devcoin
 
-# Configure service
-RUN mkdir -p /container/service/devcoind
-RUN echo '#!/bin/bash -e\n\
-exec /bin/su devcoin -c "/usr/local/bin/devcoind"\n'\
-> /container/service/devcoind/process.sh
-RUN chmod +x /container/service/devcoind/process.sh
+# Setup devcoind service
+ENV DEVCOIND /container/run/process/devcoind
+RUN mkdir /var/log/devcoind; mkdir -p $DEVCOIND/log; echo '#!/bin/sh\n\
+\n\
+exec 2>&1\n\
+\n\
+cd /home/devcoin/; exec /sbin/setuser devcoin devcoind\n\
+'\
+> $DEVCOIND/run
+RUN echo '#!/bin/sh\n\
+exec /usr/bin/svlogd -tt /var/log/devcoind\n\
+'\
+> $DEVCOIND/log/run
+RUN chmod +x $DEVCOIND/run; chmod +x $DEVCOIND/log/run; ln -s $DEVCOIND /etc/service/
 
 EXPOSE 52332
