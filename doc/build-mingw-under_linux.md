@@ -6,7 +6,7 @@ This guide was made on Ubuntu Bionic 18.04
 
 Let's have a folder to build dependencies and the wallet.
 ```
-$ export BUILD_DIR="${HOME}/Devcoin-win64"
+$ export BUILD_DIR="${HOME}/Devcoin-build"
 $ mkdir -p "${BUILD_DIR}"
 ```
 We also have to choose the target architecture.
@@ -104,7 +104,7 @@ For Windows 32bit:
 
 ```
 $ cd "${BUILD_DIR}"
-$ https://curl.haxx.se/windowsi/dl-7.68.0/curl-7.68.0-win32-mingw.tar.xz
+$ https://curl.haxx.se/windows/dl-7.68.0/curl-7.68.0-win32-mingw.tar.xz
 $ tar xf curl-7.68.0-win32-mingw.tar.xz
 ```
 
@@ -112,7 +112,7 @@ For Windows 64bit:
 
 ```
 $ cd "${BUILD_DIR}"
-$ https://curl.haxx.se/windowsi/dl-7.68.0/curl-7.68.0-win64-mingw.tar.xz
+$ https://curl.haxx.se/windows/dl-7.68.0/curl-7.68.0-win64-mingw.tar.xz
 $ tar xf curl-7.68.0-win64-mingw.tar.xz
 ```
 
