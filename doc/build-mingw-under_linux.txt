@@ -1,86 +1,128 @@
-# Environment setup #
+# How to build Devcoin for Windows on Linux (MinGW)
 
-(Debian squeeze on Oct 28th 2012)
+This guide was made on Ubuntu Bionic 18.04
 
+## Enviroment setup
 
-sudo apt-get install gcc-mingw32 mingw32-binutils mingw32-runtime
+Let's have a folder to build dependencies and the wallet.
+```
+$ export BUILD_DIR="${HOME}/Devcoin-win64"
+$ mkdir -p "${BUILD_DIR}"
+```
+We also have to choose the target architecture.
 
-mkdir -p ~/lib/i586-mingw32msvc ~/downloads/terracoin/i586-mingw32msvc
+For 32-bit:
 
+```
+$ export TARGET_ARCH=i686
+```
 
-# Thirdparty libraries #
+For 64-bit:
 
-## openssl ##
-
-Download page: http://www.openssl.org/source/
-wget 'http://www.openssl.org/source/openssl-1.0.1c.tar.gz' -O ~/downloads/terracoin/i586-mingw32msvc/openssl-1.0.1c.tar.gz
-
-cd ~/lib/i586-mingw32msvc
-tar zxvf ~/downloads/terracoin/i586-mingw32msvc/openssl-1.0.1c.tar.gz
-cd openssl-1.0.1c/
-CROSS_COMPILE="i586-mingw32msvc-" ./Configure mingw no-asm no-shared --prefix=/usr/i586-mingw32msvc
-PATH=$PATH:/usr/i586-mingw32msvc/bin make depend
-PATH=$PATH:/usr/i586-mingw32msvc/bin make
-
-
-## berkeley DB ##
-
-Download page: http://www.oracle.com/technetwork/products/berkeleydb/downloads/index-082944.html
-wget 'http://download.oracle.com/berkeley-db/db-4.8.30.NC.tar.gz' -O ~/downloads/terracoin/i586-mingw32msvc/db-4.8.30.NC.tar.gz
-
-cd ~/lib/i586-mingw32msvc
-tar zxvf /home/terra/downloads/terracoin/i586-mingw32msvc/db-4.8.30.NC.tar.gz
-cd db-4.8.30.NC/build_unix/
-
-sh ../dist/configure --host=i586-mingw32msvc --enable-cxx --enable-mingw
-make
-
-# (previous line may generate multiple warnings but that should be ok)
+```
+$ export TARGET_ARCH=x86_64
+```
 
 
-## miniupnpc ##
+## Install dependencies
 
-Download page: http://miniupnp.tuxfamily.org/files/
-wget 'http://miniupnp.tuxfamily.org/files/download.php?file=miniupnpc-1.6.tar.gz' -O ~/downloads/terracoin/i586-mingw32msvc/miniupnpc-1.6.tar.gz
-
-# if you _really_ want upnp support .. first install wine:
-# apt-get install wine
-
-cd ~/lib/i586-mingw32msvc
-tar zxvf /home/terra/downloads/terracoin/i586-mingw32msvc/miniupnpc-1.6.tar.gz
-cd miniupnpc-1.6
-
-sed -i 's/CC = gcc/CC = i586-mingw32msvc-gcc/' Makefile.mingw
-sed -i 's/wingenminiupnpcstrings \$/wine \.\/wingenminiupnpcstrings \$/' Makefile.mingw
-sed -i 's/dllwrap/i586-mingw32msvc-dllwrap/' Makefile.mingw
-sed -i 's/driver-name gcc/driver-name i586-mingw32msvc-gcc/' Makefile.mingw
-
-AR=i586-mingw32msvc-ar make -f Makefile.mingw
+```
+$ sudo apt install g++-mingw-w64-${TARGET_ARCH} mingw-w64-${TARGET_ARCH}-dev curl
+$ sudo update-alternatives --config ${TARGET_ARCH}-w64-mingw32-gcc # choose gcc-posix
+$ sudo update-alternatives --config ${TARGET_ARCH}-w64-mingw32-g++ # choose g++-posix
+```
 
 
-## boost ##
+## Boost
 
-Download page: http://www.boost.org/users/download/
-wget 'http://sourceforge.net/projects/boost/files/boost/1.50.0/boost_1_50_0.tar.bz2/download' -O ~/downloads/terracoin/i586-mingw32msvc/boost_1_50_0.tar.bz2
+For Windows 32bit:
 
-cd ~/lib/i586-mingw32msvc
-tar jxvf ~/downloads/terracoin/i586-mingw32msvc/boost_1_50_0.tar.bz2
-cd boost_1_50_0/
+```
+$ cd "${BUILD_DIR}"
+$ wget http://dl.bintray.com/boostorg/release/1.65.0/source/boost_1_65_0.tar.bz2
+$ tar xjfp boost_1_65_0.tar.bz2
+$ cd boost_1_65_0
+$ ./bootstrap.sh --without-icu
+$ echo "using gcc : 7.3 : ${TARGET_ARCH}-w64-mingw32-g++ : <rc>${TARGET_ARCH}-64-mingw32-windres <archiver>${TARGET_ARCH}-w64-mingw32-ar ;" > user-config.jam
+$ ./bjam toolset=gcc target-os=windows variant=release threading=multi threadapi=win32 --user-config=user-config.jam -j 2 --without-mpi --without-python -sNO_BZIP2=1 -sNO_ZLIB=1 --layout=tagged stage
+```
 
-./bootstrap.sh --without-icu
-echo "using gcc : 4.4 : i586-mingw32msvc-g++ : <rc>i586-mingw32msvc-windres <archiver>i586-mingw32msvc-ar ;" > user-config.jam
+For Windows 64bit:
 
-./bjam toolset=gcc target-os=windows variant=release threading=multi threadapi=win32 --user-config=user-config.jam -j 2 --without-mpi --without-python -sNO_BZIP2=1 -sNO_ZLIB=1 --layout=tagged stage
+```
+$ cd "${BUILD_DIR}"
+$ wget http://dl.bintray.com/boostorg/release/1.68.0/source/boost_1_68_0.tar.bz2
+$ tar xjfp boost_1_68_0.tar.bz2
+$ cd boost_1_68_0
+$ ./bootstrap.sh --without-icu
+$ echo "using gcc : 7.3 : ${TARGET_ARCH}-w64-mingw32-g++ : <rc>${TARGET_ARCH}-w64-mingw32-windres <archiver>${TARGET_ARCH}-w64-mingw32-ar ;" > user-config.jam
+$ ./bjam toolset=gcc target-os=windows address-model=64 architecture=x86 variant=release threading=multi threadapi=win32 --user-config=user-config.jam -j 2 --without-mpi --without-python -sNO_BZIP2=1 -sNO_ZLIB=1 --layout=tagged stage
+```
 
-# watch 4 seasons of breaking bad, while you wait :)
+
+## SSL 
+
+There are working binaries provided by the official CURL repository.
+
+```
+$ cd "${BUILD_DIR}"
+$ wget https://curl.haxx.se/windows/dl-7.68.0/openssl-1.1.1d-win64-mingw.tar.xz
+$ tar xf openssl-1.1.1d-win64-mingw.tar.xz
+```
 
 
-## terracoin ##
+## BerkeleyDB
 
-### daemon ###
-cd terracoin/src/leveldb/
-PATH=/usr/i586-mingw32msvc/bin/:$PATH TARGET_OS="OS_WINDOWS_CROSSCOMPILE" CXX=i586-mingw32msvc-c++ CC=i586-mingw32msvc-cc LD=i586-mingw32msvc-ld OPT="-I/home/terra/lib/i586-mingw32msvc/boost_1_50_0" make libmemenv.a libleveldb.a
-cd ../
-make -f makefile.linux-mingw
-/usr/i586-mingw32msvc/bin/strip terracoind.exe
+```
+$ cd "${BUILD_DIR}"
+$ wget http://anduin.linuxfromscratch.org/BLFS/bdb/db-5.3.28.tar.gz
+$ tar xzfp db-5.3.28.tar.gz
+$ cd db-5.3.28/
+$ sed -i.old 's/__atomic_compare_exchange/__atomic_compare_exchange_db/' src/dbinc/atomic.h
+$ sed -i.old 's/WinIoCtl\.h/winioctl\.h/g' src/dbinc/win_db.h
+$ cd build_unix/
+$ sh ../dist/configure --host=${TARGET_ARCH}-w64-mingw32 --enable-cxx --enable-mingw
+$ make -j2
+```
+
+
+## Curl
+
+There are working binaries provided by the official CURL repository.
+
+```
+$ cd "${BUILD_DIR}"
+$ https://curl.haxx.se/windows/dl-7.68.0/curl-7.68.0-win64-mingw.tar.xz
+$ tar xf curl-7.68.0-win64-mingw.tar.xz
+```
+
+
+## Make devcoind.exe
+
+Download devcoin source code:
+
+```
+$ git clone --depth=1 https://github.com/devcoin/core/
+```
+
+First should build LevelDB (included in Devcoin source code):
+
+```
+$ cd "${BUILD_DIR}/core/src/leveldb"
+$ chmod +x build_detect_platform
+$ TARGET_OS=NATIVE_WINDOWS make libleveldb.a libmemenv.a CC=${TARGET_ARCH}-w64-mingw32-gcc CXX=${TARGET_ARCH}-w64-mingw32-g++
+$ ${TARGET_ARCH}-w64-mingw32-ranlib libleveldb.a && ${TARGET_ARCH}-w64-mingw32-ranlib libmemenv.a
+
+```
+Now build Devcoind.exe
+
+```
+$ cd "${BUILD_DIR}/core/src"
+$ make -f makefile.linux-mingw -j8 CROSS_COMPILE=${TARGET_ARCH}-w64-mingw32- CXXFLAGS="-static-libgcc -static-libstdc++" LMODE=dynamic
+```
+
+## Make devcoin-qt.exe
+```
+TODO
+```
 
