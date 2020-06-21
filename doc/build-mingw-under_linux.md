@@ -151,6 +151,33 @@ $ cd "${BUILD_DIR}/core/src"
 $ make -f makefile.linux-mingw64 -j8 CROSS_COMPILE=${TARGET_ARCH}-w64-mingw32- CXXFLAGS="-static-libgcc -static-libstdc++" LMODE=dynamic
 ```
 
+Let's package Devcoind.exe along its runtime dependencies into a zip file.
+
+For Windows 32bit:
+
+```
+$ cd "${BUILD_DIR}"
+$ mkdir Devcoin-win32
+$ cp "${BUILD_DIR}"/core/src/Devcoind.exe Devcoin-win32
+$ cp "${BUILD_DIR}"/curl-7.68.0-win64-mingw/bin/libcurl.dll Devcoin-win32
+$ cp "${BUILD_DIR}"/openssl-1.1.1d-win64-mingw/*.dll Devcoin-win32
+$ cp /usr/x86_64-w64-mingw32/lib/libwinpthread-1.dll Devcoin-win32
+$ zip "${BUILD_DIR}"/Devcoin-win32.zip Devcoin-win32/*
+```
+
+For Windows 64bit:
+
+```
+$ cd "${BUILD_DIR}"
+$ mkdir Devcoin-win64
+$ cp "${BUILD_DIR}"/core/src/Devcoind.exe Devcoin-win64
+$ cp "${BUILD_DIR}"/curl-7.68.0-win64-mingw/bin/libcurl-x64.dll Devcoin-win64
+$ cp "${BUILD_DIR}"/openssl-1.1.1d-win64-mingw/*.dll Devcoin-win64
+$ cp /usr/x86_64-w64-mingw32/lib/libwinpthread-1.dll Devcoin-win64
+$ zip "${BUILD_DIR}"/Devcoin-win64.zip Devcoin-win64/*
+```
+
+
 ## Build devcoin-qt.exe
 ```
 TODO
