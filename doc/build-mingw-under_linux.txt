@@ -64,6 +64,16 @@ $ ./bjam toolset=gcc target-os=windows address-model=64 architecture=x86 variant
 
 There are working binaries provided by the official CURL repository.
 
+For Windows 32bit:
+
+```
+$ cd "${BUILD_DIR}"
+$ wget https://curl.haxx.se/windows/dl-7.68.0/openssl-1.1.1d-win32-mingw.tar.xz
+$ tar xf openssl-1.1.1d-win32-mingw.tar.xz
+```
+
+For Windows 64bit:
+
 ```
 $ cd "${BUILD_DIR}"
 $ wget https://curl.haxx.se/windows/dl-7.68.0/openssl-1.1.1d-win64-mingw.tar.xz
@@ -90,9 +100,19 @@ $ make -j2
 
 There are working binaries provided by the official CURL repository.
 
+For Windows 32bit:
+
 ```
 $ cd "${BUILD_DIR}"
-$ https://curl.haxx.se/windows/dl-7.68.0/curl-7.68.0-win64-mingw.tar.xz
+$ https://curl.haxx.se/windowsi/dl-7.68.0/curl-7.68.0-win32-mingw.tar.xz
+$ tar xf curl-7.68.0-win32-mingw.tar.xz
+```
+
+For Windows 64bit:
+
+```
+$ cd "${BUILD_DIR}"
+$ https://curl.haxx.se/windowsi/dl-7.68.0/curl-7.68.0-win64-mingw.tar.xz
 $ tar xf curl-7.68.0-win64-mingw.tar.xz
 ```
 
@@ -114,14 +134,24 @@ $ TARGET_OS=NATIVE_WINDOWS make libleveldb.a libmemenv.a CC=${TARGET_ARCH}-w64-m
 $ ${TARGET_ARCH}-w64-mingw32-ranlib libleveldb.a && ${TARGET_ARCH}-w64-mingw32-ranlib libmemenv.a
 
 ```
-Now build Devcoind.exe
+
+Now build Devcoind.exe.
+
+For Windows 32bit:
 
 ```
 $ cd "${BUILD_DIR}/core/src"
 $ make -f makefile.linux-mingw -j8 CROSS_COMPILE=${TARGET_ARCH}-w64-mingw32- CXXFLAGS="-static-libgcc -static-libstdc++" LMODE=dynamic
 ```
 
-## Make devcoin-qt.exe
+For Windows 64bit:
+
+```
+$ cd "${BUILD_DIR}/core/src"
+$ make -f makefile.linux-mingw64 -j8 CROSS_COMPILE=${TARGET_ARCH}-w64-mingw32- CXXFLAGS="-static-libgcc -static-libstdc++" LMODE=dynamic
+```
+
+## Build devcoin-qt.exe
 ```
 TODO
 ```
