@@ -2,10 +2,10 @@
 # Distributed under the MIT/X11 software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-DEPSDIR:=/usr/i586-mingw32msvc
+DEPSDIR:=$(BUILD_DIR)
 
-CC := i586-mingw32msvc-gcc
-CXX := i586-mingw32msvc-g++
+CC := $(CROSS_COMPILE)gcc
+CXX := $(CROSS_COMPILE)g++
 
 USE_UPNP:=-
 USE_IPV6:=1
@@ -13,23 +13,27 @@ USE_IPV6:=1
 INCLUDEPATHS= \
  -I"$(CURDIR)" \
  -I"$(CURDIR)"/obj \
- -I"$(DEPSDIR)/boost_1_50_0" \
- -I"$(DEPSDIR)/db-4.8.30.NC/build_unix" \
- -I"$(DEPSDIR)/openssl-1.0.1f/include" \
+ -I"$(DEPSDIR)/boost_1_65_0" \
+ -I"$(DEPSDIR)/curl-7.68.0-win32-mingw/include" \
+ -I"$(DEPSDIR)/db-5.3.28/build_unix" \
+ -I"$(DEPSDIR)/openssl-1.1.1d-win32-mingw/include" \
  -I"$(DEPSDIR)"
 
 LIBPATHS= \
- -L"$(DEPSDIR)/boost_1_50_0/stage/lib" \
- -L"$(DEPSDIR)/db-4.8.30.NC/build_unix" \
- -L"$(DEPSDIR)/openssl-1.0.1f"
+ -L"$(DEPSDIR)/boost_1_65_0/stage/lib" \
+ -L"$(DEPSDIR)/curl-7.68.0-win32-mingw/lib" \
+ -L"$(DEPSDIR)/openssl-1.1.1d-win32-mingw/lib" \
+ -L"$(DEPSDIR)/db-5.3.28/build_unix"
 
 LIBS= \
   $(CURDIR)/leveldb/libleveldb.a $(CURDIR)/leveldb/libmemenv.a \
- -l boost_system-mt-s \
- -l boost_filesystem-mt-s \
- -l boost_program_options-mt-s \
- -l boost_thread_win32-mt-s \
- -l boost_chrono-mt-s \
+ -Wl,-B$(LMODE) \
+ -l boost_system-mt \
+ -l boost_filesystem-mt \
+ -l boost_program_options-mt \
+ -l boost_thread_win32-mt \
+ -l boost_chrono-mt \
+ -l curl \
  -l db_cxx \
  -l ssl \
  -l crypto
@@ -98,8 +102,6 @@ all: Devcoind.exe
 
 DEFS += -I"$(CURDIR)/leveldb/include"
 DEFS += -I"$(CURDIR)/leveldb/helpers"
-leveldb/libleveldb.a:
-	@echo "Building LevelDB ..." && cd leveldb && TARGET_OS=OS_WINDOWS_CROSSCOMPILE $(MAKE) CC=$(CC) CXX=$(CXX) OPT="$(xCXXFLAGS)" libleveldb.a libmemenv.a && i586-mingw32msvc-ranlib libleveldb.a && i586-mingw32msvc-ranlib libmemenv.a && cd ..
 
 obj/build.h: FORCE
 	/bin/sh ../share/genbuild.sh obj/build.h
@@ -127,6 +129,5 @@ clean:
 	-rm -f obj-test/*.o
 	-rm -f test_Devcoin.exe
 	-rm -f obj/build.h
-	cd leveldb && TARGET_OS=OS_WINDOWS_CROSSCOMPILE $(MAKE) clean && cd ..
 
 FORCE:
