@@ -14,7 +14,9 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 #else
+#if !defined(__MINGW32__) || !defined(_PID_T_) || defined(_NO_OLDNAMES)
 typedef int pid_t; /* define for Windows compatibility */
+#endif
 #endif
 #include <map>
 #include <list>
