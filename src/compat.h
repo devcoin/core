@@ -25,8 +25,9 @@
 #include <netinet/in.h>
 #include <ifaddrs.h>
 #endif
-
+#if !defined(__MINGW32__) || !defined(_PID_T_) || defined(_NO_OLDNAMES)
 typedef u_int SOCKET;
+#endif
 #ifdef WIN32
 #define MSG_NOSIGNAL        0
 #define MSG_DONTWAIT        0
