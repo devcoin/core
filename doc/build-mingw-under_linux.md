@@ -51,9 +51,9 @@ For Windows 64bit:
 
 ```
 $ cd "${BUILD_DIR}"
-$ wget http://dl.bintray.com/boostorg/release/1.68.0/source/boost_1_68_0.tar.bz2
-$ tar xjfp boost_1_68_0.tar.bz2
-$ cd boost_1_68_0
+$ wget http://dl.bintray.com/boostorg/release/1.65.0/source/boost_1_65_0.tar.bz2
+$ tar xjfp boost_1_65_0.tar.bz2
+$ cd boost_1_65_0
 $ ./bootstrap.sh --without-icu
 $ echo "using gcc : 7.3 : ${TARGET_ARCH}-w64-mingw32-g++ : <rc>${TARGET_ARCH}-w64-mingw32-windres <archiver>${TARGET_ARCH}-w64-mingw32-ar ;" > user-config.jam
 $ ./bjam toolset=gcc target-os=windows address-model=64 architecture=x86 variant=release threading=multi threadapi=win32 --user-config=user-config.jam -j 2 --without-mpi --without-python -sNO_BZIP2=1 -sNO_ZLIB=1 --layout=tagged stage

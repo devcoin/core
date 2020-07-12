@@ -13,14 +13,14 @@ USE_IPV6:=1
 INCLUDEPATHS= \
  -I"$(CURDIR)" \
  -I"$(CURDIR)"/obj \
- -I"$(DEPSDIR)/boost_1_68_0" \
+ -I"$(DEPSDIR)/boost_1_65_0" \
  -I"$(DEPSDIR)/curl-7.68.0-win64-mingw/include" \
  -I"$(DEPSDIR)/db-5.3.28/build_unix" \
  -I"$(DEPSDIR)/openssl-1.1.1d-win64-mingw/include" \
  -I"$(DEPSDIR)"
 
 LIBPATHS= \
- -L"$(DEPSDIR)/boost_1_68_0/stage/lib" \
+ -L"$(DEPSDIR)/boost_1_65_0/stage/lib" \
  -L"$(DEPSDIR)/curl-7.68.0-win64-mingw/lib" \
  -L"$(DEPSDIR)/openssl-1.1.1d-win64-mingw/lib" \
  -L"$(DEPSDIR)/db-5.3.28/build_unix"
