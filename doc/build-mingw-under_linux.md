@@ -42,8 +42,10 @@ $ cd "${BUILD_DIR}"
 $ wget http://dl.bintray.com/boostorg/release/1.65.0/source/boost_1_65_0.tar.bz2
 $ tar xjfp boost_1_65_0.tar.bz2
 $ cd boost_1_65_0
+$ wget https://gist.githubusercontent.com/develCuy/311475bf4d34013f1b4ba4970a272d47/raw/0b308c2e7311c9ab887268b8b6aada3dba8dc0d2/devcoin_boost_1.65.0.patch
+$ patch -p1 < devcoin_boost_1.65.0.patch
 $ ./bootstrap.sh --without-icu
-$ echo "using gcc : 7.3 : ${TARGET_ARCH}-w64-mingw32-g++ : <rc>${TARGET_ARCH}-64-mingw32-windres <archiver>${TARGET_ARCH}-w64-mingw32-ar ;" > user-config.jam
+$ echo "using gcc : 7.3 : ${TARGET_ARCH}-w64-mingw32-g++ : <rc>${TARGET_ARCH}-w64-mingw32-windres <archiver>${TARGET_ARCH}-w64-mingw32-ar ;" > user-config.jam
 $ ./bjam toolset=gcc target-os=windows variant=release threading=multi threadapi=win32 --user-config=user-config.jam -j 2 --without-mpi --without-python -sNO_BZIP2=1 -sNO_ZLIB=1 --layout=tagged stage
 ```
 
@@ -54,6 +56,8 @@ $ cd "${BUILD_DIR}"
 $ wget http://dl.bintray.com/boostorg/release/1.65.0/source/boost_1_65_0.tar.bz2
 $ tar xjfp boost_1_65_0.tar.bz2
 $ cd boost_1_65_0
+$ wget https://gist.githubusercontent.com/develCuy/311475bf4d34013f1b4ba4970a272d47/raw/0b308c2e7311c9ab887268b8b6aada3dba8dc0d2/devcoin_boost_1.65.0.patch
+$ patch -p1 < devcoin_boost_1.65.0.patch
 $ ./bootstrap.sh --without-icu
 $ echo "using gcc : 7.3 : ${TARGET_ARCH}-w64-mingw32-g++ : <rc>${TARGET_ARCH}-w64-mingw32-windres <archiver>${TARGET_ARCH}-w64-mingw32-ar ;" > user-config.jam
 $ ./bjam toolset=gcc target-os=windows address-model=64 architecture=x86 variant=release threading=multi threadapi=win32 --user-config=user-config.jam -j 2 --without-mpi --without-python -sNO_BZIP2=1 -sNO_ZLIB=1 --layout=tagged stage
@@ -104,7 +108,7 @@ For Windows 32bit:
 
 ```
 $ cd "${BUILD_DIR}"
-$ https://curl.haxx.se/windows/dl-7.68.0/curl-7.68.0-win32-mingw.tar.xz
+$ wget https://curl.haxx.se/windows/dl-7.68.0/curl-7.68.0-win32-mingw.tar.xz
 $ tar xf curl-7.68.0-win32-mingw.tar.xz
 ```
 
@@ -112,7 +116,7 @@ For Windows 64bit:
 
 ```
 $ cd "${BUILD_DIR}"
-$ https://curl.haxx.se/windows/dl-7.68.0/curl-7.68.0-win64-mingw.tar.xz
+$ wget https://curl.haxx.se/windows/dl-7.68.0/curl-7.68.0-win64-mingw.tar.xz
 $ tar xf curl-7.68.0-win64-mingw.tar.xz
 ```
 
@@ -159,9 +163,9 @@ For Windows 32bit:
 $ cd "${BUILD_DIR}"
 $ mkdir Devcoin-win32
 $ cp "${BUILD_DIR}"/core/src/Devcoind.exe Devcoin-win32
-$ cp "${BUILD_DIR}"/curl-7.68.0-win64-mingw/bin/libcurl.dll Devcoin-win32
-$ cp "${BUILD_DIR}"/openssl-1.1.1d-win64-mingw/*.dll Devcoin-win32
-$ cp /usr/x86_64-w64-mingw32/lib/libwinpthread-1.dll Devcoin-win32
+$ cp "${BUILD_DIR}"/curl-7.68.0-win32-mingw/bin/libcurl.dll Devcoin-win32
+$ cp "${BUILD_DIR}"/openssl-1.1.1d-win32-mingw/*.dll Devcoin-win32
+$ cp /usr/${TARGET_ARCH}-w64-mingw32/lib/libwinpthread-1.dll Devcoin-win32
 $ zip "${BUILD_DIR}"/Devcoin-win32.zip Devcoin-win32/*
 ```
 
@@ -173,7 +177,7 @@ $ mkdir Devcoin-win64
 $ cp "${BUILD_DIR}"/core/src/Devcoind.exe Devcoin-win64
 $ cp "${BUILD_DIR}"/curl-7.68.0-win64-mingw/bin/libcurl-x64.dll Devcoin-win64
 $ cp "${BUILD_DIR}"/openssl-1.1.1d-win64-mingw/*.dll Devcoin-win64
-$ cp /usr/x86_64-w64-mingw32/lib/libwinpthread-1.dll Devcoin-win64
+$ cp /usr/${TARGET_ARCH}-w64-mingw32/lib/libwinpthread-1.dll Devcoin-win64
 $ zip "${BUILD_DIR}"/Devcoin-win64.zip Devcoin-win64/*
 ```
 
