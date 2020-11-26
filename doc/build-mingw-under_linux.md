@@ -1,7 +1,7 @@
 # How to build Devcoin for Windows on Linux (MinGW)
 
-This guide was made on Archlinux. First you need to setup your system like this:
-https://hub.docker.com/r/burningdaylight/docker-mingw-qt5/dockerfile
+This guide depends on Docker: https://docs.docker.com/engine/install/
+
 
 ## Enviroment setup
 
@@ -23,6 +23,28 @@ For 64-bit:
 ```
 $ export TARGET_ARCH=x86_64
 ```
+
+## Launch the Docker container
+
+The following command creates a container named `builder`:
+```
+$ docker run -tid \
+             --name builder \
+             --cpuset-cpus 0 \
+             -e "DISPLAY=unix${DISPLAY}" \
+             -v /dev/shm:/dev/shm \
+             --cpuset-cpus 2 \
+             -v $BUILD_DIR:/workdir \
+             -v /tmp/.X11-unix:/tmp/.X11-unix \
+             -e BUILD_DIR="/workdir" -e TARGET_ARCH="$TARGET_ARCH" \
+             burningdaylight/docker-mingw-qt5 /bin/bash
+```
+
+Now you can enter the container:
+```
+$ docker exec -ti builder bash
+```
+
 
 ## Boost
 
@@ -111,6 +133,7 @@ $ wget https://curl.haxx.se/windows/dl-7.68.0/curl-7.68.0-win64-mingw.tar.xz
 $ tar xf curl-7.68.0-win64-mingw.tar.xz
 ```
 
+
 ## libqrencode
 
 ```
@@ -119,9 +142,10 @@ $ wget https://fukuchi.org/works/qrencode/qrencode-3.4.4.tar.gz
 $ tar xzfp qrencode-3.4.4.tar.gz
 $ cd qrencode-3.4.4
 $ ./configure --host=${TARGET_ARCH}-w64-mingw32
-$ make
+$ make -j2
 
 ```
+
 
 ## Make devcoind.exe
 
@@ -136,7 +160,7 @@ First should build LevelDB (included in Devcoin source code):
 ```
 $ cd "${BUILD_DIR}/core/src/leveldb"
 $ chmod +x build_detect_platform
-$ TARGET_OS=NATIVE_WINDOWS make libleveldb.a libmemenv.a CC=${TARGET_ARCH}-w64-mingw32-gcc CXX=${TARGET_ARCH}-w64-mingw32-g++
+$ TARGET_OS=NATIVE_WINDOWS make -j2 libleveldb.a libmemenv.a CC=${TARGET_ARCH}-w64-mingw32-gcc CXX=${TARGET_ARCH}-w64-mingw32-g++
 $ ${TARGET_ARCH}-w64-mingw32-ranlib libleveldb.a && ${TARGET_ARCH}-w64-mingw32-ranlib libmemenv.a
 
 ```
@@ -157,52 +181,66 @@ $ cd "${BUILD_DIR}/core/src"
 $ make -f makefile.linux-mingw64 -j8 CROSS_COMPILE=${TARGET_ARCH}-w64-mingw32- CXXFLAGS="-static-libgcc -static-libstdc++" LMODE=dynamic
 ```
 
+
 ## Build devcoin-qt.exe
 
 
 ```
-$ cd "${BUILD_DIR}"
+$ cd "${BUILD_DIR}/core"
 $ x86_64-w64-mingw32-qmake-qt5 USE_UPNP=- USE_DBUS=0 USE_QRCODE=1 BUILD_DIR="$BUILD_DIR" devcoin-qt_win.pro
-$ make
+$ make -j4
 ```
 
+
+## Build the package
+
 Let's package Devcoind.exe along its runtime dependencies into a zip file.
+
+
+First we need a folder for the package:
+```
+$ cd "${BUILD_DIR}"
+$ export BUNDLE_DIR="Devcoin-${TARGET_ARCH}"
+```
 
 For Windows 32bit:
 
 ```
-$ cd "${BUILD_DIR}"
-$ mkdir Devcoin-win32
-$ cp "${BUILD_DIR}"/core/src/Devcoind.exe Devcoin-win32
-$ cp "${BUILD_DIR}"/curl-7.68.0-win32-mingw/bin/libcurl.dll Devcoin-win32
-$ cp "${BUILD_DIR}"/openssl-1.1.1d-win32-mingw/*.dll Devcoin-win32
-$ cp /usr/${TARGET_ARCH}-w64-mingw32/lib/libwinpthread-1.dll Devcoin-win32
-$ zip "${BUILD_DIR}"/Devcoin-win32.zip Devcoin-win32/*
+$ cp "${BUILD_DIR}"/curl-7.68.0-win32-mingw/bin/libcurl.dll "${BUNDLE_DIR}"
+$ cp "${BUILD_DIR}"/openssl-1.1.1d-win32-mingw/*.dll "${BUNDLE_DIR}"
 ```
 
 For Windows 64bit:
 
 ```
-$ cd "${BUILD_DIR}"
-$ mkdir Devcoin-win64
-$ cp "${BUILD_DIR}"/core/src/Devcoind.exe Devcoin-win64
-$ cp "${BUILD_DIR}"/core/release/devcoin-qt.exe Devcoin-win64
-$ cp "${BUILD_DIR}"/curl-7.68.0-win64-mingw/bin/libcurl-x64.dll Devcoin-win64
-$ cp "${BUILD_DIR}"/openssl-1.1.1d-win64-mingw/*.dll Devcoin-win64
-$ cp -r /usr/${TARGET_ARCH}-w64-mingw32/lib/qt/plugins/platforms/ Devcoin-win64
-$ cp /usr/${TARGET_ARCH}-w64-mingw32/bin/libwinpthread-1.dll Devcoin-win64
-$ cp /usr/${TARGET_ARCH}-w64-mingw32/bin/libgcc_s_seh-1.dll Devcoin-win64
-$ cp /usr/${TARGET_ARCH}-w64-mingw32/bin/libssp-0.dll Devcoin-win64
-$ cp /usr/${TARGET_ARCH}-w64-mingw32/bin/libstdc++-6.dll Devcoin-win64
-$ cp /usr/${TARGET_ARCH}-w64-mingw32/bin/libharfbuzz-0.dll Devcoin-win64
-$ cp /usr/${TARGET_ARCH}-w64-mingw32/bin/libiconv-2.dll Devcoin-win64
-$ cp /usr/${TARGET_ARCH}-w64-mingw32/bin/libpcre2-16-0.dll Devcoin-win64
-$ cp /usr/${TARGET_ARCH}-w64-mingw32/bin/libpng16-16.dll Devcoin-win64
-$ cp /usr/${TARGET_ARCH}-w64-mingw32/bin/Qt5Core.dll Devcoin-win64
-$ cp /usr/${TARGET_ARCH}-w64-mingw32/bin/Qt5Gui.dll Devcoin-win64
-$ cp /usr/${TARGET_ARCH}-w64-mingw32/bin/Qt5Network.dll Devcoin-win64
-$ cp /usr/${TARGET_ARCH}-w64-mingw32/bin/Qt5Widgets.dll Devcoin-win64
-$ cp /usr/${TARGET_ARCH}-w64-mingw32/bin/zlib1.dll Devcoin-win64
-$ zip "${BUILD_DIR}"/Devcoin-win64.zip Devcoin-win64/*
+$ cp "${BUILD_DIR}"/curl-7.68.0-win64-mingw/bin/libcurl-x64.dll "${BUNDLE_DIR}"
+$ cp "${BUILD_DIR}"/openssl-1.1.1d-win64-mingw/*.dll "${BUNDLE_DIR}"
+```
+
+Remaining dependencies:
+
+```
+$ cp "${BUILD_DIR}"/core/src/Devcoind.exe "${BUNDLE_DIR}"
+$ cp "${BUILD_DIR}"/core/release/devcoin-qt.exe "${BUNDLE_DIR}"
+$ cp -r /usr/${TARGET_ARCH}-w64-mingw32/lib/qt/plugins/platforms/ "${BUNDLE_DIR}"
+$ cp /usr/${TARGET_ARCH}-w64-mingw32/bin/libwinpthread-1.dll "${BUNDLE_DIR}"
+$ cp /usr/${TARGET_ARCH}-w64-mingw32/bin/libgcc_s_seh-1.dll "${BUNDLE_DIR}"
+$ cp /usr/${TARGET_ARCH}-w64-mingw32/bin/libssp-0.dll "${BUNDLE_DIR}"
+$ cp /usr/${TARGET_ARCH}-w64-mingw32/bin/libstdc++-6.dll "${BUNDLE_DIR}"
+$ cp /usr/${TARGET_ARCH}-w64-mingw32/bin/libharfbuzz-0.dll "${BUNDLE_DIR}"
+$ cp /usr/${TARGET_ARCH}-w64-mingw32/bin/libiconv-2.dll "${BUNDLE_DIR}"
+$ cp /usr/${TARGET_ARCH}-w64-mingw32/bin/libpcre2-16-0.dll "${BUNDLE_DIR}"
+$ cp /usr/${TARGET_ARCH}-w64-mingw32/bin/libpng16-16.dll "${BUNDLE_DIR}"
+$ cp /usr/${TARGET_ARCH}-w64-mingw32/bin/Qt5Core.dll "${BUNDLE_DIR}"
+$ cp /usr/${TARGET_ARCH}-w64-mingw32/bin/Qt5Gui.dll "${BUNDLE_DIR}"
+$ cp /usr/${TARGET_ARCH}-w64-mingw32/bin/Qt5Network.dll "${BUNDLE_DIR}"
+$ cp /usr/${TARGET_ARCH}-w64-mingw32/bin/Qt5Widgets.dll "${BUNDLE_DIR}"
+$ cp /usr/${TARGET_ARCH}-w64-mingw32/bin/zlib1.dll "${BUNDLE_DIR}"
+```
+
+Wrap everything into a single package:
+
+```
+$ zip "${BUILD_DIR}/${BUNDLE_DIR}".zip "${BUNDLE_DIR}"/*
 ```
 
