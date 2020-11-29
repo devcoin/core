@@ -40,11 +40,18 @@ $ docker run -tid \
              burningdaylight/docker-mingw-qt5 /bin/bash
 ```
 
+Nex we update and install dependencies:
+
+NOTE: You need to enter a differ
+
+```
+$ docker exec -u 0 -it builder pacman -Syyu zip
+```
+
 Now you can enter the container:
 ```
 $ docker exec -ti builder bash
 ```
-
 
 ## Boost
 
@@ -201,6 +208,7 @@ First we need a folder for the package:
 ```
 $ cd "${BUILD_DIR}"
 $ export BUNDLE_DIR="Devcoin-${TARGET_ARCH}"
+$ mkdir -p "${BUNDLE_DIR}"
 ```
 
 For Windows 32bit:
