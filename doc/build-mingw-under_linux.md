@@ -239,6 +239,12 @@ $ cp /usr/${TARGET_ARCH}-w64-mingw32/bin/libharfbuzz-0.dll "${BUNDLE_DIR}"
 $ cp /usr/${TARGET_ARCH}-w64-mingw32/bin/libiconv-2.dll "${BUNDLE_DIR}"
 $ cp /usr/${TARGET_ARCH}-w64-mingw32/bin/libpcre2-16-0.dll "${BUNDLE_DIR}"
 $ cp /usr/${TARGET_ARCH}-w64-mingw32/bin/libpng16-16.dll "${BUNDLE_DIR}"
+$ cp /usr/${TARGET_ARCH}-w64-mingw32/bin/libfreetype-6.dll "${BUNDLE_DIR}"
+$ cp /usr/${TARGET_ARCH}-w64-mingw32/bin/libglib-2.0-0.dll "${BUNDLE_DIR}"
+$ cp /usr/${TARGET_ARCH}-w64-mingw32/bin/libgraphite2.dll "${BUNDLE_DIR}"
+$ cp /usr/${TARGET_ARCH}-w64-mingw32/bin/libbz2-1.dll "${BUNDLE_DIR}"
+$ cp /usr/${TARGET_ARCH}-w64-mingw32/bin/libpcre-1.dll "${BUNDLE_DIR}"
+$ cp /usr/${TARGET_ARCH}-w64-mingw32/bin/libintl-8.dll "${BUNDLE_DIR}"
 $ cp /usr/${TARGET_ARCH}-w64-mingw32/bin/Qt5Core.dll "${BUNDLE_DIR}"
 $ cp /usr/${TARGET_ARCH}-w64-mingw32/bin/Qt5Gui.dll "${BUNDLE_DIR}"
 $ cp /usr/${TARGET_ARCH}-w64-mingw32/bin/Qt5Network.dll "${BUNDLE_DIR}"
@@ -249,6 +255,6 @@ $ cp /usr/${TARGET_ARCH}-w64-mingw32/bin/zlib1.dll "${BUNDLE_DIR}"
 Wrap everything into a single package:
 
 ```
-$ zip "${BUILD_DIR}/${BUNDLE_DIR}".zip "${BUNDLE_DIR}"/*
+$ zip -r "${BUILD_DIR}/${BUNDLE_DIR}".zip "${BUNDLE_DIR}"/*
 ```
 
