@@ -3,7 +3,7 @@ Devcoin integration/staging tree
 
 http://www.devcoin.org
 
-Copyright (c) 2011-2014 Devcoin Developers
+Copyright (c) 2009-2020 The Bitcoin and Devcoin developers
 
 What is Devcoin?
 ----------------

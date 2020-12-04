@@ -3,7 +3,7 @@ Devcoin core (devcoind)
 
 https://www.devcoin.org/
 
-Devcoin Developers © since 2011
+Copyright (c) 2009-2020 The Bitcoin and Devcoin developers
 
 What is Devcoin?
 ----------------
