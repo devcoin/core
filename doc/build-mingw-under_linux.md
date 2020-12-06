@@ -159,6 +159,7 @@ $ make -j2
 Download devcoin source code:
 
 ```
+$ cd "${BUILD_DIR}"
 $ git clone --depth=1 https://github.com/devcoin/core/
 ```
 
@@ -250,6 +251,15 @@ $ cp /usr/${TARGET_ARCH}-w64-mingw32/bin/Qt5Gui.dll "${BUNDLE_DIR}"
 $ cp /usr/${TARGET_ARCH}-w64-mingw32/bin/Qt5Network.dll "${BUNDLE_DIR}"
 $ cp /usr/${TARGET_ARCH}-w64-mingw32/bin/Qt5Widgets.dll "${BUNDLE_DIR}"
 $ cp /usr/${TARGET_ARCH}-w64-mingw32/bin/zlib1.dll "${BUNDLE_DIR}"
+```
+
+We also need to bypass UAC prompt when running devcoin-qt.exe, create the file
+
+```
+$ echo 'Set ApplicationPath="C:\\Program Files\SomeApp\testapp.exe"\n\
+cmd \/min /C "set __COMPAT_LAYER=RUNASINVOKER && start "" %ApplicationPath%"\n\
+'\
+> "${BUNDLE_DIR}"/Devcoin.bat
 ```
 
 Wrap everything into a single package:
