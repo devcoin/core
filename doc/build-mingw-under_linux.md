@@ -207,7 +207,7 @@ Let's package Devcoind.exe along its runtime dependencies into a zip file.
 First we need a folder for the package:
 ```
 $ cd "${BUILD_DIR}"
-$ export BUNDLE_DIR="Devcoin-${TARGET_ARCH}"
+$ export BUNDLE_DIR="${BUILD_DIR}/Devcoin-${TARGET_ARCH}"
 $ mkdir -p "${BUNDLE_DIR}"
 ```
 
@@ -255,6 +255,6 @@ $ cp /usr/${TARGET_ARCH}-w64-mingw32/bin/zlib1.dll "${BUNDLE_DIR}"
 Wrap everything into a single package:
 
 ```
-$ zip -r "${BUILD_DIR}/${BUNDLE_DIR}".zip "${BUNDLE_DIR}"/*
+$ cd "${BUNDLE_DIR}"; zip -r "${BUILD_DIR}/Devcoin-${TARGET_ARCH}".zip *; cd "${BUILD_DIR}"
 ```
 
