@@ -92,7 +92,7 @@ For Windows 32bit:
 
 ```
 $ cd "${BUILD_DIR}"
-$ wget https://curl.haxx.se/windows/dl-7.68.0/openssl-1.1.1d-win32-mingw.tar.xz
+$ wget "https://bintray.com/vszakats/generic/download_file?file_path=openssl-1.1.1d-win32-mingw.tar.xz" -O openssl-1.1.1d-win32-mingw.tar.xz
 $ tar xf openssl-1.1.1d-win32-mingw.tar.xz
 ```
 
@@ -100,7 +100,7 @@ For Windows 64bit:
 
 ```
 $ cd "${BUILD_DIR}"
-$ wget https://curl.haxx.se/windows/dl-7.68.0/openssl-1.1.1d-win64-mingw.tar.xz
+$ wget "https://bintray.com/vszakats/generic/download_file?file_path=openssl-1.1.1d-win64-mingw.tar.xz" -O openssl-1.1.1d-win64-mingw.tar.xz
 $ tar xf openssl-1.1.1d-win64-mingw.tar.xz
 ```
 
@@ -128,7 +128,7 @@ For Windows 32bit:
 
 ```
 $ cd "${BUILD_DIR}"
-$ wget https://curl.haxx.se/windows/dl-7.68.0/curl-7.68.0-win32-mingw.tar.xz
+$ wget "https://bintray.com/vszakats/generic/download_file?file_path=curl-7.68.0-win32-mingw.tar.xz" -O curl-7.68.0-win32-mingw.tar.xz
 $ tar xf curl-7.68.0-win32-mingw.tar.xz
 ```
 
@@ -136,7 +136,7 @@ For Windows 64bit:
 
 ```
 $ cd "${BUILD_DIR}"
-$ wget https://curl.haxx.se/windows/dl-7.68.0/curl-7.68.0-win64-mingw.tar.xz
+$ wget "https://bintray.com/vszakats/generic/download_file?file_path=curl-7.68.0-win64-mingw.tar.xz" -O curl-7.68.0-win64-mingw.tar.xz
 $ tar xf curl-7.68.0-win64-mingw.tar.xz
 ```
 
