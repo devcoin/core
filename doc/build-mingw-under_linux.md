@@ -40,7 +40,7 @@ $ docker run -tid \
              burningdaylight/docker-mingw-qt5 /bin/bash
 ```
 
-Nex we update and install dependencies:
+Next we update and install dependencies:
 
 NOTE: You need to enter a differ
 
