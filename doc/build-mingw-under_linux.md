@@ -12,14 +12,6 @@ $ mkdir -p "${BUILD_DIR}"
 ```
 We also have to choose the target architecture.
 
-For 32-bit:
-
-```
-$ export TARGET_ARCH=i686
-```
-
-For 64-bit:
-
 ```
 $ export TARGET_ARCH=x86_64
 ```
@@ -55,22 +47,6 @@ $ docker exec -ti builder bash
 
 ## Boost
 
-For Windows 32bit:
-
-```
-$ cd "${BUILD_DIR}"
-$ wget http://dl.bintray.com/boostorg/release/1.65.0/source/boost_1_65_0.tar.bz2
-$ tar xjfp boost_1_65_0.tar.bz2
-$ cd boost_1_65_0
-$ wget https://gist.githubusercontent.com/develCuy/311475bf4d34013f1b4ba4970a272d47/raw/0b308c2e7311c9ab887268b8b6aada3dba8dc0d2/devcoin_boost_1.65.0.patch
-$ patch -p1 < devcoin_boost_1.65.0.patch
-$ ./bootstrap.sh --without-icu
-$ echo "using gcc : 7.3 : ${TARGET_ARCH}-w64-mingw32-g++ : <rc>${TARGET_ARCH}-w64-mingw32-windres <archiver>${TARGET_ARCH}-w64-mingw32-ar ;" > user-config.jam
-$ ./bjam toolset=gcc target-os=windows variant=release threading=multi threadapi=win32 --user-config=user-config.jam -j 2 --without-mpi --without-python -sNO_BZIP2=1 -sNO_ZLIB=1 --layout=tagged stage
-```
-
-For Windows 64bit:
-
 ```
 $ cd "${BUILD_DIR}"
 $ wget http://dl.bintray.com/boostorg/release/1.65.0/source/boost_1_65_0.tar.bz2
@@ -87,16 +63,6 @@ $ ./bjam toolset=gcc target-os=windows address-model=64 architecture=x86 variant
 ## SSL 
 
 There are working binaries provided by the official CURL repository.
-
-For Windows 32bit:
-
-```
-$ cd "${BUILD_DIR}"
-$ wget "https://bintray.com/vszakats/generic/download_file?file_path=openssl-1.1.1d-win32-mingw.tar.xz" -O openssl-1.1.1d-win32-mingw.tar.xz
-$ tar xf openssl-1.1.1d-win32-mingw.tar.xz
-```
-
-For Windows 64bit:
 
 ```
 $ cd "${BUILD_DIR}"
@@ -123,16 +89,6 @@ $ make -j2
 ## Curl
 
 There are working binaries provided by the official CURL repository.
-
-For Windows 32bit:
-
-```
-$ cd "${BUILD_DIR}"
-$ wget "https://bintray.com/vszakats/generic/download_file?file_path=curl-7.68.0-win32-mingw.tar.xz" -O curl-7.68.0-win32-mingw.tar.xz
-$ tar xf curl-7.68.0-win32-mingw.tar.xz
-```
-
-For Windows 64bit:
 
 ```
 $ cd "${BUILD_DIR}"
@@ -175,15 +131,6 @@ $ ${TARGET_ARCH}-w64-mingw32-ranlib libleveldb.a && ${TARGET_ARCH}-w64-mingw32-r
 
 Now build Devcoind.exe.
 
-For Windows 32bit:
-
-```
-$ cd "${BUILD_DIR}/core/src"
-$ make -f makefile.linux-mingw -j8 CROSS_COMPILE=${TARGET_ARCH}-w64-mingw32- CXXFLAGS="-static-libgcc -static-libstdc++" LMODE=dynamic
-```
-
-For Windows 64bit:
-
 ```
 $ cd "${BUILD_DIR}/core/src"
 $ make -f makefile.linux-mingw64 -j8 CROSS_COMPILE=${TARGET_ARCH}-w64-mingw32- CXXFLAGS="-static-libgcc -static-libstdc++" LMODE=dynamic
@@ -212,25 +159,21 @@ $ export BUNDLE_DIR="${BUILD_DIR}/Devcoin-${TARGET_ARCH}"
 $ mkdir -p "${BUNDLE_DIR}"
 ```
 
-For Windows 32bit:
+Add Devcoind.exe and devcoin-qt.exe
 
 ```
-$ cp "${BUILD_DIR}"/curl-7.68.0-win32-mingw/bin/libcurl.dll "${BUNDLE_DIR}"
-$ cp "${BUILD_DIR}"/openssl-1.1.1d-win32-mingw/*.dll "${BUNDLE_DIR}"
-```
+$ /usr/x86_64-w64-mingw32/bin/strip "${BUILD_DIR}"/core/src/Devcoind.exe
+$ cp "${BUILD_DIR}"/core/src/Devcoind.exe "${BUNDLE_DIR}"
+$ /usr/x86_64-w64-mingw32/bin/strip "${BUILD_DIR}"/core/release/devcoin-qt.exe
+$ cp "${BUILD_DIR}"/core/release/devcoin-qt.exe "${BUNDLE_DIR}"
 
-For Windows 64bit:
-
-```
-$ cp "${BUILD_DIR}"/curl-7.68.0-win64-mingw/bin/libcurl-x64.dll "${BUNDLE_DIR}"
-$ cp "${BUILD_DIR}"/openssl-1.1.1d-win64-mingw/*.dll "${BUNDLE_DIR}"
 ```
 
 Remaining dependencies:
 
 ```
-$ cp "${BUILD_DIR}"/core/src/Devcoind.exe "${BUNDLE_DIR}"
-$ cp "${BUILD_DIR}"/core/release/devcoin-qt.exe "${BUNDLE_DIR}"
+$ cp "${BUILD_DIR}"/curl-7.68.0-win64-mingw/bin/libcurl-x64.dll "${BUNDLE_DIR}"
+$ cp "${BUILD_DIR}"/openssl-1.1.1d-win64-mingw/*.dll "${BUNDLE_DIR}"
 $ cp -r /usr/${TARGET_ARCH}-w64-mingw32/lib/qt/plugins/platforms/ "${BUNDLE_DIR}"
 $ cp /usr/${TARGET_ARCH}-w64-mingw32/bin/libwinpthread-1.dll "${BUNDLE_DIR}"
 $ cp /usr/${TARGET_ARCH}-w64-mingw32/bin/libgcc_s_seh-1.dll "${BUNDLE_DIR}"
@@ -253,18 +196,10 @@ $ cp /usr/${TARGET_ARCH}-w64-mingw32/bin/Qt5Widgets.dll "${BUNDLE_DIR}"
 $ cp /usr/${TARGET_ARCH}-w64-mingw32/bin/zlib1.dll "${BUNDLE_DIR}"
 ```
 
-We also need to bypass UAC prompt when running devcoin-qt.exe, create the file
-
-```
-$ echo 'Set ApplicationPath="C:\\Program Files\SomeApp\testapp.exe"\n\
-cmd \/min /C "set __COMPAT_LAYER=RUNASINVOKER && start "" %ApplicationPath%"\n\
-'\
-> "${BUNDLE_DIR}"/Devcoin.bat
-```
-
 Wrap everything into a single package:
 
 ```
+$ cd "${BUNDLE_DIR}"; zip -r "${BUILD_DIR}/Devcoind-${TARGET_ARCH}".zip Devcoind.exe libcrypto-1_1-x64.dll libcurl-x64.dll libssl-1_1-x64.dll libwinpthread-1.dll;
 $ cd "${BUNDLE_DIR}"; zip -r "${BUILD_DIR}/Devcoin-${TARGET_ARCH}".zip *; cd "${BUILD_DIR}"
 ```
 
