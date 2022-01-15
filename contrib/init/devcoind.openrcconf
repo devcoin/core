@@ -1,0 +1,33 @@
+# /etc/conf.d/devcoind: config file for /etc/init.d/devcoind
+
+# Config file location
+#DEVCOIND_CONFIGFILE="/etc/devcoin/devcoin.conf"
+
+# What directory to write pidfile to?  (created and owned by $DEVCOIND_USER)
+#DEVCOIND_PIDDIR="/var/run/devcoind"
+
+# What filename to give the pidfile
+#DEVCOIND_PIDFILE="${DEVCOIND_PIDDIR}/devcoind.pid"
+
+# Where to write devcoind data (be mindful that the blockchain is large)
+#DEVCOIND_DATADIR="/var/lib/devcoind"
+
+# User and group to own devcoind process
+#DEVCOIND_USER="devcoin"
+#DEVCOIND_GROUP="devcoin"
+
+# Path to devcoind executable
+#DEVCOIND_BIN="/usr/bin/devcoind"
+
+# Nice value to run devcoind under
+#DEVCOIND_NICE=0
+
+# Additional options (avoid -conf and -datadir, use flags above)
+#DEVCOIND_OPTS=""
+
+# The timeout in seconds OpenRC will wait for devcoind to terminate
+# after a SIGTERM has been raised.
+# Note that this will be mapped as argument to start-stop-daemon's
+# '--retry' option, which means you can specify a retry schedule
+# here. For more information see man 8 start-stop-daemon.
+DEVCOIND_SIGTERM_TIMEOUT=600
