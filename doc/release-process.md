@@ -304,7 +304,7 @@ cat "$VERSION"/*/all.SHA256SUMS.asc > SHA256SUMS.asc
 
   - Devcoin Core announcements list https://devcoin.org/en/list/announcements/join/
 
-  - Devcoin Core Twitter https://twitter.com/devcoincoreorg
+  - Devcoin Core Twitter https://twitter.com/_Devcoin
 
   - Celebrate
 
