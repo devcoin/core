@@ -203,7 +203,7 @@ class NetTest(DevcoinTestFramework):
             second_octet = i % 256
             a = f"{first_octet}.{second_octet}.1.1"
             imported_addrs.append(a)
-            self.nodes[0].addpeeraddress(a, 8333)
+            self.nodes[0].addpeeraddress(a, 52333)
 
         # Fetch the addresses via the RPC and test the results.
         assert_equal(len(self.nodes[0].getnodeaddresses()), 1)  # default count is 1
@@ -219,7 +219,7 @@ class NetTest(DevcoinTestFramework):
             assert_greater_than(a["time"], 1527811200)  # 1st June 2018
             assert_equal(a["services"], services)
             assert a["address"] in imported_addrs
-            assert_equal(a["port"], 8333)
+            assert_equal(a["port"], 52333)
             assert_equal(a["network"], "ipv4")
 
         # Test the IPv6 address.
@@ -227,7 +227,7 @@ class NetTest(DevcoinTestFramework):
         assert_equal(len(res), 1)
         assert_equal(res[0]["address"], ipv6_addr)
         assert_equal(res[0]["network"], "ipv6")
-        assert_equal(res[0]["port"], 8333)
+        assert_equal(res[0]["port"], 52333)
         assert_equal(res[0]["services"], services)
 
         # Test for the absence of onion and I2P addresses.
@@ -256,7 +256,7 @@ class NetTest(DevcoinTestFramework):
         addrs = node.getnodeaddresses(count=0)
         assert_equal(len(addrs), 1)
         assert_equal(addrs[0]["address"], "1.2.3.4")
-        assert_equal(addrs[0]["port"], 8333)
+        assert_equal(addrs[0]["port"], 52333)
 
         self.log.debug("Test that adding the same address again when already present fails")
         assert_equal(node.addpeeraddress(address="1.2.3.4", port=8333), {"success": False})

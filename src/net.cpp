@@ -1736,11 +1736,13 @@ void CConnman::ThreadDNSAddressSeed()
                 continue;
             }
             unsigned int nMaxIPs = 256; // Limits number of IPs learned from a DNS seed
+            std::cout << "DEBUG ThreadDNSAddressSeed(): " << host << std::endl;
             if (LookupHost(host, vIPs, nMaxIPs, true)) {
                 for (const CNetAddr& ip : vIPs) {
                     int nOneDay = 24*3600;
                     CAddress addr = CAddress(CService(ip, Params().GetDefaultPort()), requiredServiceBits);
                     addr.nTime = GetTime() - 3*nOneDay - rng.randrange(4*nOneDay); // use a random age between 3 and 7 days old
+                    std::cout << "DEBUG ThreadDNSAddressSeed(): found " << ip.ToString() << std::endl;
                     vAdd.push_back(addr);
                     found++;
                 }
@@ -2198,6 +2200,9 @@ void CConnman::ThreadOpenAddedConnections()
 // if successful, this moves the passed grant to the constructed node
 void CConnman::OpenNetworkConnection(const CAddress& addrConnect, bool fCountFailure, CSemaphoreGrant *grantOutbound, const char *pszDest, ConnectionType conn_type)
 {
+
+    std::cout << "OpenNetworkConnection() " << addrConnect.ToString() << std::endl;
+
     assert(conn_type != ConnectionType::INBOUND);
 
     //

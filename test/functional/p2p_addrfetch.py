@@ -17,7 +17,7 @@ ADDR = CAddress()
 ADDR.time = int(time.time())
 ADDR.nServices = NODE_NETWORK | NODE_WITNESS
 ADDR.ip = "192.0.0.8"
-ADDR.port = 18444
+ADDR.port = 52444
 
 
 class P2PAddrFetch(DevcoinTestFramework):
