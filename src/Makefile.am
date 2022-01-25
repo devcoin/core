@@ -118,6 +118,7 @@ DEVCOIN_CORE_H = \
   addrdb.h \
   addrman.h \
   attributes.h \
+  auxpow.h \
   banman.h \
   base58.h \
   bech32.h \
@@ -510,6 +511,8 @@ libdevcoin_consensus_a_SOURCES = \
   prevector.h \
   primitives/block.cpp \
   primitives/block.h \
+  primitives/pureheader.cpp \
+  primitives/pureheader.h \
   primitives/transaction.cpp \
   primitives/transaction.h \
   pubkey.cpp \
@@ -534,6 +537,7 @@ libdevcoin_consensus_a_SOURCES = \
 libdevcoin_common_a_CPPFLAGS = $(AM_CPPFLAGS) $(DEVCOIN_INCLUDES)
 libdevcoin_common_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 libdevcoin_common_a_SOURCES = \
+  auxpow.cpp \
   base58.cpp \
   bech32.cpp \
   bloom.cpp \

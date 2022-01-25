@@ -7,6 +7,7 @@
 #include <devcoin.h>
 
 #include <arith_uint256.h>
+#include <auxpow.h>
 #include <chain.h>
 #include <chainparams.h>
 #include <checkqueue.h>
@@ -1155,6 +1156,67 @@ PackageMempoolAcceptResult ProcessNewPackage(CChainState& active_chainstate, CTx
         active_chainstate.CoinsTip().Uncache(hashTx);
     }
     return result;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//
+// CBlock and CBlockIndex
+//
+bool CheckProofOfWork(const CBlockHeader& block, const Consensus::Params& params)
+{
+    /* Except for legacy blocks with full version 1, ensure that
+       the chain ID is correct.  Legacy blocks are not allowed since
+       the merge-mining start, which is checked in AcceptBlockHeader
+       where the height is known.  */
+    const int32_t &nChainID = block.GetChainId();
+    if (!block.IsLegacy() && params.fStrictChainId) {
+        if (nChainID > 0) {
+            if (nChainID != params.nAuxpowChainId)
+                return error("%s : block does not have our chain ID"
+                        " (got %d, expected %d, full nVersion %d)",
+                        __func__, nChainID,
+                        params.nAuxpowChainId, block.nVersion);
+        } else if (block.auxpow) {
+            const int32_t &nOldChainID = block.GetOldChainId();
+            if (nOldChainID != params.nAuxpowOldChainId)
+                return error("%s : block does not have our old chain ID"
+                        " (got %d, expected %d, full nVersion %d)",
+                        __func__, nOldChainID,
+                        params.nAuxpowOldChainId, block.nVersion);
+        }
+    }
+
+    if (block.GetHash().ToString() == uint256S("f24f611405e2349a5c95bec245cda453c32406b3623e3943a0dd1952f98adefc").ToString()) {
+        return error("DEBUG: %s !block.auxpow=%s block.IsAuxpow()=%d !CheckProofOfWork(block.GetHash(), block.nBits, params)=%s", __func__,
+          !block.auxpow?"true":"false",
+          block.IsAuxpow(),
+          !CheckProofOfWork(block.GetHash(), block.nBits, params)?"true":"false"
+        );
+    }
+
+    /* If there is no auxpow, just check the block hash.  */
+    if (!block.auxpow)
+    {
+        if (block.IsAuxpow())
+            return error("%s : no auxpow on block with auxpow version",
+                         __func__);
+
+        if (!CheckProofOfWork(block.GetHash(), block.nBits, params))
+            return error("%s : non-AUX proof of work failed", __func__);
+
+        return true;
+    }
+
+    /* We have auxpow.  Check it.  */
+    if (!block.IsAuxpow())
+        return error("%s : auxpow on block with non-auxpow version", __func__);
+
+    if (!CheckProofOfWork(block.auxpow->getParentBlockHash(), block.nBits, params))
+        return error("%s : AUX proof of work failed", __func__);
+    if (!block.auxpow->check(block.GetHash(), block.GetChainId(), params))
+        return error("%s : AUX POW is not valid", __func__);
+
+    return true;
 }
 
 CTransactionRef GetTransaction(const CBlockIndex* const block_index, const CTxMemPool* const mempool, const uint256& hash, const Consensus::Params& consensusParams, uint256& hashBlock)
@@ -3002,7 +3064,7 @@ void CChainState::ReceivedBlockTransactions(const CBlock& block, CBlockIndex* pi
 static bool CheckBlockHeader(const CBlockHeader& block, BlockValidationState& state, const Consensus::Params& consensusParams, bool fCheckPOW = true)
 {
     // Check proof of work matches claimed amount
-    if (fCheckPOW && !CheckProofOfWork(block.GetHash(), block.nBits, consensusParams))
+    if (fCheckPOW && !CheckProofOfWork(block, consensusParams))
         return state.Invalid(BlockValidationResult::BLOCK_INVALID_HEADER, "high-hash", "proof of work failed");
 
     return true;

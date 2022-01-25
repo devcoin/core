@@ -107,6 +107,12 @@ struct Params {
     uint256 nMinimumChainWork;
     /** By default assume that the signatures in ancestors of this block are valid */
     uint256 defaultAssumeValid;
+    /** Auxpow parameters */
+    int32_t nAuxpowChainId;
+    int32_t nAuxpowOldChainId;
+    int nAuxpowStartHeight;
+    bool fStrictChainId;
+    int nLegacyBlocksBefore; // -1 for "always allow"
 
     /**
      * If true, witness commitments contain a payload equal to a Devcoin Script solution

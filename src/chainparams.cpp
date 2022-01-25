@@ -94,6 +94,11 @@ public:
         consensus.nMinimumChainWork = uint256S("0x00000000000000000000000000000000000000000479f5f70d88c3979e3fcd70"); // 1213640
         consensus.defaultAssumeValid = uint256S("0xbd9ff6428a7cc472d3813bbee6fb3ae1a9992b8b034deca1249487a4a1b8e51a"); // 1213640
 
+        // AuxPow
+        consensus.fStrictChainId = true;
+        consensus.nAuxpowChainId = 4;
+        consensus.nAuxpowOldChainId = 4096;
+
         /**
          * The message start string is designed to be unlikely to occur in normal data.
          * The characters are rarely used upper ASCII, not valid as UTF-8, and produce
@@ -202,6 +207,11 @@ public:
         consensus.nMinimumChainWork = uint256S("0x0000000000000000000000000000000000000000000000000000141f25d13472"); // 838467
         consensus.defaultAssumeValid = uint256S("0x0000003243223caf052c7e5e6710fae794dbdc10949a594550f073dbf5755bd4"); // 838467
 
+        // AuxPow
+        consensus.fStrictChainId = false;
+        consensus.nAuxpowChainId = 16;
+        consensus.nAuxpowOldChainId = 4096;
+
         pchMessageStart[0] = 0x64; // d
         pchMessageStart[1] = 0x65; // e
         pchMessageStart[2] = 0x76; // v
@@ -306,6 +316,12 @@ public:
 
         strNetworkID = CBaseChainParams::SIGNET;
         consensus.signet_blocks = true;
+
+        // AuxPow
+        consensus.fStrictChainId = false;
+        consensus.nAuxpowChainId = 8;
+        consensus.nAuxpowOldChainId = 4096;
+
         consensus.signet_challenge.assign(bin.begin(), bin.end());
         consensus.nSubsidyHalvingInterval = 210000;
         consensus.BIP16Exception = uint256{};
@@ -404,6 +420,11 @@ public:
 
         consensus.nMinimumChainWork = uint256{};
         consensus.defaultAssumeValid = uint256{};
+
+        // AuxPow
+        consensus.fStrictChainId = false;
+        consensus.nAuxpowChainId = 8;
+        consensus.nAuxpowOldChainId = 4096;
 
         pchMessageStart[0] = 0x64; // d
         pchMessageStart[1] = 0x65; // e
