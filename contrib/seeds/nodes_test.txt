@@ -1,2 +1,2 @@
 # List of fixed seed nodes for testnet
-
+64.71.72.56:42333
