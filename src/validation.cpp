@@ -1186,14 +1186,6 @@ bool CheckProofOfWork(const CBlockHeader& block, const Consensus::Params& params
         }
     }
 
-    if (block.GetHash().ToString() == uint256S("f24f611405e2349a5c95bec245cda453c32406b3623e3943a0dd1952f98adefc").ToString()) {
-        return error("DEBUG: %s !block.auxpow=%s block.IsAuxpow()=%d !CheckProofOfWork(block.GetHash(), block.nBits, params)=%s", __func__,
-          !block.auxpow?"true":"false",
-          block.IsAuxpow(),
-          !CheckProofOfWork(block.GetHash(), block.nBits, params)?"true":"false"
-        );
-    }
-
     /* If there is no auxpow, just check the block hash.  */
     if (!block.auxpow)
     {
@@ -2290,12 +2282,15 @@ void CChainState::UpdateTip(const CBlockIndex* pindexNew)
             }
         }
     }
-    LogPrintf("%s: new best=%s height=%d version=0x%08x log2_work=%f tx=%lu date='%s' progress=%f cache=%.1fMiB(%utxo)%s\n", __func__,
+    /*
+    LogPrintf("%s: new best=%s height=%d version=0x%08x log2_work=%f tx=%lu date='%s' progress=%f cache=%.1fMiB(%utxo) blockhash=%s%s\n", __func__,
       pindexNew->GetBlockHash().ToString(), pindexNew->nHeight, pindexNew->nVersion,
       log(pindexNew->nChainWork.getdouble())/log(2.0), (unsigned long)pindexNew->nChainTx,
       FormatISO8601DateTime(pindexNew->GetBlockTime()),
       GuessVerificationProgress(m_params.TxData(), pindexNew), this->CoinsTip().DynamicMemoryUsage() * (1.0 / (1<<20)), this->CoinsTip().GetCacheSize(),
+      pindexNew->phashBlock,
       !warning_messages.empty() ? strprintf(" warning='%s'", warning_messages.original) : "");
+    */
 }
 
 /** Disconnect m_chain's tip.
