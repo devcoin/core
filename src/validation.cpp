@@ -3271,7 +3271,7 @@ static bool ContextualCheckBlock(const CBlock& block, BlockValidationState& stat
         }
     }
 
-    // DEVCOIN currently doesn't enforce 2 blocks, since merged mining
+    // Devcoin currently doesn't enforce v2 blocks, since merged mining
     // produces v1 blocks and normal mining should produce v2 blocks.
     /*
     // Enforce rule that the coinbase starts with serialized block height
