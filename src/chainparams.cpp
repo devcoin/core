@@ -71,7 +71,7 @@ public:
         consensus.BIP65Height = 33892;
         consensus.BIP66Height = 33892;
         consensus.CSVHeight = 33892;
-        consensus.SegwitHeight = 33892;
+        consensus.SegwitHeight = 512000;
         consensus.MinBIP9WarningHeight = 34036;
         consensus.powLimit = uint256S("00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.nPowTargetTimespan = 24 * 60 * 60; // one day
