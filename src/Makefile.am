@@ -1,4 +1,4 @@
-# Copyright (c) 2013-2016 The Bitcoin Core and Devcoin Core developers
+# Copyright (c) 2013-2022 The Bitcoin Core and Devcoin Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -661,7 +661,7 @@ devcoin_bin_ldadd = \
   $(LIBMEMENV) \
   $(LIBSECP256K1)
 
-devcoin_bin_ldadd += $(BOOST_LIBS) $(BDB_LIBS) $(MINIUPNPC_LIBS) $(NATPMP_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS) $(ZMQ_LIBS) $(SQLITE_LIBS)
+devcoin_bin_ldadd += $(BOOST_LIBS) $(BDB_LIBS) $(MINIUPNPC_LIBS) $(NATPMP_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS) $(ZMQ_LIBS) $(SQLITE_LIBS) $(LIBCURL)
 
 devcoind_SOURCES = $(devcoin_daemon_sources) init/devcoind.cpp
 devcoind_CPPFLAGS = $(devcoin_bin_cppflags)
