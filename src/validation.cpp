@@ -5,6 +5,7 @@
 
 #include <validation.h>
 #include <devcoin.h>
+#include <receiver.h>
 
 #include <arith_uint256.h>
 #include <auxpow.h>
@@ -22,6 +23,7 @@
 #include <hash.h>
 #include <index/blockfilterindex.h>
 #include <index/txindex.h>
+#include <key_io.h>
 #include <logging.h>
 #include <logging/timer.h>
 #include <node/blockstorage.h>
@@ -2046,6 +2048,36 @@ bool CChainState::ConnectBlock(const CBlock& block, BlockValidationState& state,
 
     int64_t nTime6 = GetTimeMicros(); nTimeCallbacks += nTime6 - nTime5;
     LogPrint(BCLog::BENCH, "    - Callbacks: %.2fms [%.2fs (%.2fms/blk)]\n", MILLI * (nTime6 - nTime5), nTimeCallbacks * MICRO, nTimeCallbacks * MILLI / nBlocksTotal);
+
+    // DEVCOIN
+    // Check that the required Devcoin share was sent to each beneficiary
+    if (block.vtx[0]->GetValueOut() > (GetBlockSubsidy(pindex->nHeight, m_params.GetConsensus()) - fallbackReduction))
+    {
+        std::vector<std::string> addressStrings;
+        std::vector<int64_t> amounts;
+
+        for (unsigned int i = 1; i < block.vtx[0]->vout.size(); i++)
+        {
+            CTxDestination address;
+            if (ExtractDestination(block.vtx[0]->vout[i].scriptPubKey, address))
+            {
+                if (IsValidDestination(address)) {
+                    addressStrings.push_back(EncodeDestination(address));
+                    amounts.push_back(block.vtx[0]->vout[i].nValue);
+                }
+            }
+        }
+
+        std::wstring dataDirectory = gArgs.GetDataDirBase().wstring();
+        std::string dataDirectoryString(dataDirectory.begin(), dataDirectory.end());
+
+        if (!getIsSufficientAmount(addressStrings, amounts, dataDirectoryString, receiverCSV, (int)pindex->nHeight, devcoinShare, devcoinStep) && !ShutdownRequested()) {
+            // This error prevents the node from accepting further blocks.
+            // If the node is shutdown manually, next time the node will
+            // shutdown itself if the error persists.
+            return error("%s: Share to beneficiary is insufficient");
+        }
+    }
 
     return true;
 }

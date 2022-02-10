@@ -205,6 +205,7 @@ DEVCOIN_CORE_H = \
   psbt.h \
   random.h \
   randomenv.h \
+  receiver.h \
   reverse_iterator.h \
   rpc/blockchain.h \
   rpc/client.h \
@@ -358,6 +359,7 @@ libdevcoin_server_a_SOURCES = \
   policy/rbf.cpp \
   policy/settings.cpp \
   pow.cpp \
+  receiver.cpp \
   rest.cpp \
   rpc/blockchain.cpp \
   rpc/mining.cpp \

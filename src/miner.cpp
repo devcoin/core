@@ -14,6 +14,8 @@
 #include <consensus/tx_verify.h>
 #include <consensus/validation.h>
 #include <deploymentstatus.h>
+#include <key_io.h>
+#include <receiver.h>
 #include <policy/feerate.h>
 #include <policy/policy.h>
 #include <pow.h>
@@ -121,7 +123,11 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
     assert(pindexPrev != nullptr);
     nHeight = pindexPrev->nHeight + 1;
 
-    pblock->nVersion = g_versionbitscache.ComputeBlockVersion(pindexPrev, chainparams.GetConsensus());
+    // DEVCOIN
+    const int32_t nChainId = chainparams.GetConsensus ().nAuxpowChainId;
+    const int32_t nVersion = g_versionbitscache.ComputeBlockVersion(pindexPrev, chainparams.GetConsensus());
+    pblock->SetBaseVersion(nVersion, nChainId);
+
     // -regtest only: allow overriding block.nVersion with
     // -blockversion=N to test forking scenarios
     if (chainparams.MineBlocksOnDemand())
@@ -158,9 +164,51 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
     CMutableTransaction coinbaseTx;
     coinbaseTx.vin.resize(1);
     coinbaseTx.vin[0].prevout.SetNull();
-    coinbaseTx.vout.resize(1);
+
+    // DEVCOIN
+    std::wstring dataDirectory = gArgs.GetDataDirBase().wstring();
+    std::string dataDirectoryString(dataDirectory.begin(), dataDirectory.end());
+    vector<string> coinAddressStrings = getCoinAddressStrings(dataDirectoryString, receiverCSV, (int)pindexPrev->nHeight+1, devcoinStep);
+    coinbaseTx.vout.resize(coinAddressStrings.size() + 1);
     coinbaseTx.vout[0].scriptPubKey = scriptPubKeyIn;
-    coinbaseTx.vout[0].nValue = nFees + GetBlockSubsidy(nHeight, chainparams.GetConsensus());
+
+    // Prepare to pay beneficiaries
+    int64_t nFees = 0;
+    int64_t minerValue = GetBlockSubsidy(nHeight, chainparams.GetConsensus());
+    int64_t sharePerAddress = 0;
+    if (coinAddressStrings.size() == 0)
+        minerValue -= fallbackReduction;
+    else
+        sharePerAddress = roundint64(devcoinShare / (int64_t)coinAddressStrings.size());
+
+    LogPrintf("%s: coinAddressStrings: %d\n", __func__, coinAddressStrings.size());
+    for (unsigned int i=0; i < coinAddressStrings.size(); i++)
+    {
+        // create transaction
+        const std::string coinAddressString = coinAddressStrings[i];
+        string error_str;
+
+        CTxDestination beneficiaryAddr = DecodeDestination(coinAddressString, error_str);
+        if (!IsValidDestination(beneficiaryAddr))
+        {
+            LogPrintf("%s: Address not valid! %s %s\n", __func__, coinAddressString.c_str(), error_str);
+            return NULL;
+        }
+
+        CScript scriptPubKey = GetScriptForDestination(beneficiaryAddr);
+        coinbaseTx.vout[i + 1] = CTxOut(sharePerAddress, scriptPubKey);
+
+        if (coinbaseTx.vout[i + 1].nValue < 0)
+        {
+            LogPrintf("%s: negative vout value: %d\n", __func__, coinbaseTx.vout[i + 1].nValue);
+            coinbaseTx.vout[i + 1].nValue = 0;
+        }
+
+        minerValue -= sharePerAddress;
+        LogPrintf("%s: Address %s valid, value %d, minerValue %d\n", __func__, coinAddressString.c_str(), coinbaseTx.vout[i + 1].nValue, minerValue);
+    }
+
+    coinbaseTx.vout[0].nValue = minerValue + nFees;
     coinbaseTx.vin[0].scriptSig = CScript() << nHeight << OP_0;
     pblock->vtx[0] = MakeTransactionRef(std::move(coinbaseTx));
     pblocktemplate->vchCoinbaseCommitment = GenerateCoinbaseCommitment(*pblock, pindexPrev, chainparams.GetConsensus());
