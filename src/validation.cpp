@@ -2075,7 +2075,7 @@ bool CChainState::ConnectBlock(const CBlock& block, BlockValidationState& state,
             // This error prevents the node from accepting further blocks.
             // If the node is shutdown manually, next time the node will
             // shutdown itself if the error persists.
-            return error("%s: Share to beneficiary is insufficient");
+            return error("%s: Share to beneficiary is insufficient", __func__);
         }
     }
 
