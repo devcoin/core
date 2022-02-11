@@ -331,7 +331,12 @@ bool getIsSufficientAmount(vector<string> addressStrings, vector<int64_t> amount
 
     for (unsigned int i = 0; i < coinAddressStrings.size(); i++)
     {
-        if (receiverMap[coinAddressStrings[i]] < sharePerAddress)
+        if (0 == receiverMap[coinAddressStrings[i]])
+        {
+            LogPrintf("WARNING! The reveiverMap sums zero. Custodians weren't in consensus at height %d.\n", height);
+            return true;
+        }
+        else if (receiverMap[coinAddressStrings[i]] < sharePerAddress)
         {
             LogPrintf("%s: In receiver.h, getIsSufficientAmount rejected the addresses or amounts.\n", __func__);
             LogPrintf("For the given:\n");
