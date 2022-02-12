@@ -308,10 +308,28 @@ int getInt(const string& integerString)
 bool getIsSufficientAmount(vector<string> addressStrings, vector<int64_t> amounts, const string& dataDirectory, const string& fileName, int height, int64_t share, int step)
 {
     vector<string> coinAddressStrings = getCoinAddressStrings(dataDirectory, fileName, height, step);
+
+    if (coinAddressStrings.size() != addressStrings.size()) {
+        LogPrintf("WARNING! %s() beneficiaries from %s: %d\n", __func__, fileName, coinAddressStrings.size());
+        LogPrintf("WARNING! %s() beneficiaries at height=%d: %d\n", __func__, height, addressStrings.size());
+    }
+
+    return true;
+
+// getIsSufficientAmount() is now invoked from CChainState::ConnectBlock().
+// Returning other than true will trigger an error that will force nodes to
+// shutdown.
+// Old code below validates very poorly and lacks exceptions that aren't
+// document anywhere.
+// A better implementation of receivers or even migration into a DAO model is
+// being discussed: https://github.com/devcoin/core/issues/98
+
+/*
     map<string, int64_t> receiverMap;
 
     if (coinAddressStrings.size() == 0)
     {
+        // Warn when given fileName hasn't any beneficiaries at given height.
         LogPrintf("%s: No coin addresses were found, there may be something wrong with the receiver_x.csv files.\n", __func__);
         return false;
     }
@@ -362,6 +380,7 @@ bool getIsSufficientAmount(vector<string> addressStrings, vector<int64_t> amount
     }
 
     return true;
+*/
 }
 
 string getJoinedPath(const string& directoryPath, const string& fileName)
