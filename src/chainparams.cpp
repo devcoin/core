@@ -66,11 +66,11 @@ public:
         consensus.signet_challenge.clear();
         consensus.nSubsidyHalvingInterval = 210000;
         consensus.BIP16Exception = uint256{};
-        consensus.BIP34Height = 33892;
-        consensus.BIP34Hash = uint256S("0xfc6331163991ebcf76dd205fffad94c2231390215c5b867001c0e61fbefe263d");
-        consensus.BIP65Height = 33892;
-        consensus.BIP66Height = 33892;
-        consensus.CSVHeight = 33892;
+        consensus.BIP34Height = 23523;
+        consensus.BIP34Hash = uint256S("0x0000000002fde67fbf51d8b3c1fe80b162b0ba5ac58b0afe87c4c94cbe958c58");
+        consensus.BIP65Height = 23523; // 0000000002fde67fbf51d8b3c1fe80b162b0ba5ac58b0afe87c4c94cbe958c58
+        consensus.BIP66Height = 23523; // 0000000002fde67fbf51d8b3c1fe80b162b0ba5ac58b0afe87c4c94cbe958c58
+        consensus.CSVHeight = 1;
         consensus.SegwitHeight = 516000;
         consensus.MinBIP9WarningHeight = 34036;
         consensus.powLimit = uint256S("00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
