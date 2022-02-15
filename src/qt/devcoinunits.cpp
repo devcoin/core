@@ -22,7 +22,9 @@ QList<DevcoinUnits::Unit> DevcoinUnits::availableUnits()
     unitlist.append(DVC);
     unitlist.append(mDVC);
     unitlist.append(uDVC);
-    unitlist.append(SAT);
+    // DEVCOIN
+    // The minimum unit doesn't seem to have a name yet. See: https://github.com/devcoin/core/issues/99
+    //~ unitlist.append(SAT);
     return unitlist;
 }
 
