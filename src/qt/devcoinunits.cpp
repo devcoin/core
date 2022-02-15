@@ -48,7 +48,7 @@ QString DevcoinUnits::longName(int unit)
     {
     case DVC: return QString("DVC");
     case mDVC: return QString("mDVC");
-    case uDVC: return QString::fromUtf8("µDVC (bits)");
+    case uDVC: return QString::fromUtf8("µDVC");
     case SAT: return QString("Satoshi (sat)");
     default: return QString("???");
     }
@@ -58,7 +58,7 @@ QString DevcoinUnits::shortName(int unit)
 {
     switch(unit)
     {
-    case uDVC: return QString::fromUtf8("bits");
+    case uDVC: return QString::fromUtf8("µDVC");
     case SAT: return QString("sat");
     default: return longName(unit);
     }
@@ -70,7 +70,7 @@ QString DevcoinUnits::description(int unit)
     {
     case DVC: return QString("Devcoins");
     case mDVC: return QString("Milli-Devcoins (1 / 1" THIN_SP_UTF8 "000)");
-    case uDVC: return QString("Micro-Devcoins (bits) (1 / 1" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
+    case uDVC: return QString("Micro-Devcoins (µDVC) (1 / 1" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
     case SAT: return QString("Satoshi (sat) (1 / 100" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
     default: return QString("???");
     }
