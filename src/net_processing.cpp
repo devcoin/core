@@ -3133,28 +3133,49 @@ void PeerManagerImpl::ProcessMessage(CNode& pfrom, const std::string& msg_type, 
 
         // we must use CBlocks, as CBlockHeaders won't include the 0x00 nTx count at the end
         std::vector<CBlock> vHeaders;
-        int nLimit = MAX_HEADERS_RESULTS;
+        unsigned nCount = 0;
+        unsigned nSize = 0;
         LogPrint(BCLog::NET, "getheaders %d to %s from peer=%d\n", (pindex ? pindex->nHeight : -1), hashStop.IsNull() ? "end" : hashStop.ToString(), pfrom.GetId());
         for (; pindex; pindex = m_chainman.ActiveChain().Next(pindex))
         {
-            vHeaders.push_back(pindex->GetBlockHeader());
-            if (--nLimit <= 0 || pindex->GetBlockHash() == hashStop)
+            const CBlockHeader header = pindex->GetBlockHeader(m_chainparams.GetConsensus());
+            ++nCount;
+            nSize += GetSerializeSize(header, PROTOCOL_VERSION);
+            vHeaders.push_back(header);
+            if (nCount >= MAX_HEADERS_RESULTS
+                    || pindex->GetBlockHash() == hashStop)
+                break;
+            if (pfrom.nVersion >= SIZE_HEADERS_LIMIT_VERSION
+                    && nSize >= THRESHOLD_HEADERS_SIZE)
                 break;
         }
-        // pindex can be nullptr either if we sent m_chainman.ActiveChain().Tip() OR
-        // if our peer has m_chainman.ActiveChain().Tip() (and thus we are sending an empty
-        // headers message). In both cases it's safe to update
-        // pindexBestHeaderSent to be our tip.
-        //
-        // It is important that we simply reset the BestHeaderSent value here,
-        // and not max(BestHeaderSent, newHeaderSent). We might have announced
-        // the currently-being-connected tip using a compact block, which
-        // resulted in the peer sending a headers request, which we respond to
-        // without the new block. By resetting the BestHeaderSent, we ensure we
-        // will re-announce the new block via headers (or compact blocks again)
-        // in the SendMessages logic.
-        nodestate->pindexBestHeaderSent = pindex ? pindex : m_chainman.ActiveChain().Tip();
-        m_connman.PushMessage(&pfrom, msgMaker.Make(NetMsgType::HEADERS, vHeaders));
+        /* Check maximum headers size before pushing the message
+           if the peer enforces it.  This should not fail since we
+           break above in the loop at the threshold and the threshold
+           should be small enough in comparison to the hard max size.
+           Do it nevertheless to be sure.  */
+        if (pfrom.nVersion >= SIZE_HEADERS_LIMIT_VERSION
+              && nSize > MAX_HEADERS_SIZE)
+            LogPrintf("ERROR: not pushing 'headers', too large\n");
+        else
+        {
+            LogPrint(BCLog::NET, "pushing %u headers, %u bytes\n", nCount, nSize);
+            // pindex can be nullptr either if we sent m_chainman.ActiveChain().Tip() OR
+            // if our peer has m_chainman.ActiveChain().Tip() (and thus we are sending an empty
+            // headers message). In both cases it's safe to update
+            // pindexBestHeaderSent to be our tip.
+            //
+            // It is important that we simply reset the BestHeaderSent value here,
+            // and not max(BestHeaderSent, newHeaderSent). We might have announced
+            // the currently-being-connected tip using a compact block, which
+            // resulted in the peer sending a headers request, which we respond to
+            // without the new block. By resetting the BestHeaderSent, we ensure we
+            // will re-announce the new block via headers (or compact blocks again)
+            // in the SendMessages logic.
+            nodestate->pindexBestHeaderSent = pindex ? pindex : m_chainman.ActiveChain().Tip();
+            m_connman.PushMessage(&pfrom, msgMaker.Make(NetMsgType::HEADERS, vHeaders));
+        }
+
         return;
     }
 
