@@ -162,7 +162,13 @@ static constexpr double MAX_ADDR_RATE_PER_SECOND{0.1};
  *  based increments won't go above this, but the MAX_ADDR_TO_SEND increment following GETADDR
  *  is exempt from this limit. */
 static constexpr size_t MAX_ADDR_PROCESSING_TOKEN_BUCKET{MAX_ADDR_TO_SEND};
-
+// DEVCOIN
+static const unsigned int MAX_HEADERS_SIZE = (6 << 20); // 6 MiB
+/** Size of a headers message that is the threshold for assuming that the
+ *  peer has more headers (even if we have less than MAX_HEADERS_RESULTS).
+ *  This is used starting with SIZE_HEADERS_LIMIT_VERSION peers.
+ */
+static const unsigned int THRESHOLD_HEADERS_SIZE = (4 << 20); // 4 MiB
 // Internal stuff
 namespace {
 /** Blocks that are in flight, and that are in the queue to be downloaded. */
@@ -4545,14 +4551,14 @@ bool PeerManagerImpl::SendMessages(CNode* pto)
                     pBestIndex = pindex;
                     if (fFoundStartingHeader) {
                         // add this to the headers message
-                        vHeaders.push_back(pindex->GetBlockHeader());
+                        vHeaders.push_back(pindex->GetBlockHeader(consensusParams));
                     } else if (PeerHasHeader(&state, pindex)) {
                         continue; // keep looking for the first new block
                     } else if (pindex->pprev == nullptr || PeerHasHeader(&state, pindex->pprev)) {
                         // Peer doesn't have this header but they do have the prior one.
                         // Start sending headers.
                         fFoundStartingHeader = true;
-                        vHeaders.push_back(pindex->GetBlockHeader());
+                        vHeaders.push_back(pindex->GetBlockHeader(consensusParams));
                     } else {
                         // Peer doesn't have this header or the prior one -- nothing will
                         // connect, so bail out.

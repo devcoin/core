@@ -22,6 +22,8 @@ class CChain;
 class CChainParams;
 class ChainstateManager;
 struct FlatFilePos;
+// DEVCOIN
+class CBlockHeader;
 namespace Consensus {
 struct Params;
 }
@@ -71,7 +73,8 @@ bool ReadBlockFromDisk(CBlock& block, const FlatFilePos& pos, const Consensus::P
 bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex, const Consensus::Params& consensusParams);
 bool ReadRawBlockFromDisk(std::vector<uint8_t>& block, const FlatFilePos& pos, const CMessageHeader::MessageStartChars& message_start);
 bool ReadRawBlockFromDisk(std::vector<uint8_t>& block, const CBlockIndex* pindex, const CMessageHeader::MessageStartChars& message_start);
-
+// DEVCOIN
+bool ReadBlockHeaderFromDisk(CBlockHeader& block, const CBlockIndex* pindex, const Consensus::Params& consensusParams);
 bool UndoReadFromDisk(CBlockUndo& blockundo, const CBlockIndex* pindex);
 bool WriteUndoDataForBlock(const CBlockUndo& blockundo, BlockValidationState& state, CBlockIndex* pindex, const CChainParams& chainparams);
 

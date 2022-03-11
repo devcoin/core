@@ -362,7 +362,12 @@ bool WriteUndoDataForBlock(const CBlockUndo& blockundo, BlockValidationState& st
     return true;
 }
 
-bool ReadBlockFromDisk(CBlock& block, const FlatFilePos& pos, const Consensus::Params& consensusParams)
+//DEVCOIN
+/* Generic implementation of block reading that can handle
+   both a block and its header.  */
+
+template<typename T>
+static bool ReadBlockOrHeader(T& block, const FlatFilePos& pos, const Consensus::Params& consensusParams)
 {
     block.SetNull();
 
@@ -391,8 +396,8 @@ bool ReadBlockFromDisk(CBlock& block, const FlatFilePos& pos, const Consensus::P
 
     return true;
 }
-
-bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex, const Consensus::Params& consensusParams)
+template<typename T>
+static bool ReadBlockOrHeader(T& block, const CBlockIndex* pindex, const Consensus::Params& consensusParams)
 {
     FlatFilePos blockPos;
     {
@@ -400,7 +405,7 @@ bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex, const Consensus
         blockPos = pindex->GetBlockPos();
     }
 
-    if (!ReadBlockFromDisk(block, blockPos, consensusParams)) {
+    if (!ReadBlockOrHeader(block, blockPos, consensusParams)) {
         return false;
     }
     if (block.GetHash() != pindex->GetBlockHash()) {
@@ -408,6 +413,20 @@ bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex, const Consensus
                      pindex->ToString(), pindex->GetBlockPos().ToString());
     }
     return true;
+}
+bool ReadBlockFromDisk(CBlock& block, const FlatFilePos& pos, const Consensus::Params& consensusParams)
+{
+    return ReadBlockOrHeader(block, pos, consensusParams);
+}
+
+bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex, const Consensus::Params& consensusParams)
+{
+    return ReadBlockOrHeader(block, pindex, consensusParams);
+}
+
+bool ReadBlockHeaderFromDisk(CBlockHeader& block, const CBlockIndex* pindex, const Consensus::Params& consensusParams)
+{
+    return ReadBlockOrHeader(block, pindex, consensusParams);
 }
 
 bool ReadRawBlockFromDisk(std::vector<uint8_t>& block, const FlatFilePos& pos, const CMessageHeader::MessageStartChars& message_start)
