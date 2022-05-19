@@ -185,7 +185,7 @@ BOOST_AUTO_TEST_CASE(addrman_ports)
     BOOST_CHECK(addrman.Add(CAddress(addr1, NODE_NONE), source));
     BOOST_CHECK_EQUAL(addrman.size(), 1U);
 
-    CService addr1_port = ResolveService("250.1.1.1", 8334);
+    CService addr1_port = ResolveService("250.1.1.1", 52334);
     BOOST_CHECK(!addrman.Add(CAddress(addr1_port, NODE_NONE), source));
     BOOST_CHECK_EQUAL(addrman.size(), 1U);
     CAddrInfo addr_ret2 = addrman.Select();

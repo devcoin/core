@@ -77,7 +77,7 @@ Bug fixes
 
 * Clicking on a devcoin: URI on Windows should now launch Devcoin-Qt properly.
 
-* When running -testnet, use RPC port 18332 by default.
+* When running -testnet, use RPC port 62332 by default.
 
 * Better detection and handling of corrupt wallet.dat and blkindex.dat files.
   Previous versions would crash with a DB_RUNRECOVERY exception, this

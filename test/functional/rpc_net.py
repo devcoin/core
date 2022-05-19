@@ -193,7 +193,7 @@ class NetTest(DevcoinTestFramework):
 
         # Add an IPv6 address to the address manager.
         ipv6_addr = "1233:3432:2434:2343:3234:2345:6546:4534"
-        self.nodes[0].addpeeraddress(address=ipv6_addr, port=8333)
+        self.nodes[0].addpeeraddress(address=ipv6_addr, port=52333)
 
         # Add 10,000 IPv4 addresses to the address manager. Due to the way bucket
         # and bucket positions are calculated, some of these addresses will collide.
@@ -248,18 +248,18 @@ class NetTest(DevcoinTestFramework):
         assert "addpeerinfo" in node.help("addpeerinfo")
 
         self.log.debug("Test that adding an empty address fails")
-        assert_equal(node.addpeeraddress(address="", port=8333), {"success": False})
+        assert_equal(node.addpeeraddress(address="", port=52333), {"success": False})
         assert_equal(node.getnodeaddresses(count=0), [])
 
         self.log.debug("Test that adding a valid address succeeds")
-        assert_equal(node.addpeeraddress(address="1.2.3.4", port=8333), {"success": True})
+        assert_equal(node.addpeeraddress(address="1.2.3.4", port=52333), {"success": True})
         addrs = node.getnodeaddresses(count=0)
         assert_equal(len(addrs), 1)
         assert_equal(addrs[0]["address"], "1.2.3.4")
         assert_equal(addrs[0]["port"], 52333)
 
         self.log.debug("Test that adding the same address again when already present fails")
-        assert_equal(node.addpeeraddress(address="1.2.3.4", port=8333), {"success": False})
+        assert_equal(node.addpeeraddress(address="1.2.3.4", port=52333), {"success": False})
         assert_equal(len(node.getnodeaddresses(count=0)), 1)
 
 
