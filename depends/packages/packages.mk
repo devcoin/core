@@ -1,4 +1,5 @@
 packages:=boost libevent
+native_packages := native_ccache
 
 qrencode_packages = qrencode
 
