@@ -150,7 +150,7 @@ jobs:
           mkdir -p ./depends/SDKs
           curl --location --fail $SDK_URL/${{ matrix.sdk }}/MacOSX${{ matrix.sdk }}.sdk.tar.xz -o depends/sdk-sources/MacOSX${{ matrix.sdk }}.sdk.tar.xz
           tar -C depends/SDKs -xf depends/sdk-sources/MacOSX${{ matrix.sdk }}.sdk.tar.xz
-          ln -s MacOSX${{ matrix.sdk }}/ depends/SDKs/Xcode-12.1-12A7403-extracted-SDK-with-libcxx-headers
+          ln -s MacOSX${{ matrix.sdk }}.sdk/ depends/SDKs/Xcode-12.1-12A7403-extracted-SDK-with-libcxx-headers
       - name: Dependency cache
         uses: actions/cache@v2
         env:
