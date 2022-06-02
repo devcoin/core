@@ -83,6 +83,9 @@ jobs:
           - name: i686-win
             host: i686-w64-mingw32
             arch: "i386"
+            curl:
+              version: "7.83.1_3"
+              api: win32
             os: ubuntu-20.04
             packages: python3 nsis g++-mingw-w64-i686 wine bc wine-binfmt
             postinstall: |
@@ -96,7 +99,9 @@ jobs:
           - name: x86_64-win
             host: x86_64-w64-mingw32
             arch: "i386"
-            curl: "7.83.1_3"
+            curl:
+              version: "7.83.1_3"
+              api: win64
             os: ubuntu-20.04
             packages: python3 nsis g++-mingw-w64-x86-64 wine64 bc wine-binfmt
             postinstall: |
@@ -159,10 +164,12 @@ jobs:
         run: |
           mkdir -p ./depends/sdk-sources
           mkdir -p ./depends/SDKs
-          curl --location --fail $CURL_URL/dl-${{ matrix.curl }}/curl-${{ matrix.curl }}-win64-mingw.tar.xz -o depends/sdk-sources/curl-${{ matrix.curl }}-win64-mingw.tar.xz
-          tar -C /tmp -xf depends/sdk-sources/curl-${{ matrix.curl }}-win64-mingw.tar.xz
-          cp -a /tmp/curl-${{ matrix.curl }}-win64-mingw/lib/* depends/x86_64-w64-mingw32/lib/
-          cp -a /tmp/curl-${{ matrix.curl }}-win64-mingw/include/* depends/x86_64-w64-mingw32/include/
+          mkdir -p ./depends/${{ matrix.host }}/lib
+          mkdir -p ./depends/${{ matrix.host }}/include
+          curl --location --fail $CURL_URL/dl-${{ matrix.curl.version }}/curl-${{ matrix.curl.version }}-${{ matrix.curl.api }}-mingw.tar.xz -o depends/sdk-sources/curl-${{ matrix.curl.version }}-${{ matrix.curl.api }}-mingw.tar.xz
+          tar -C /tmp -xf depends/sdk-sources/curl-${{ matrix.curl.version }}-${{ matrix.curl.api }}-mingw.tar.xz
+          cp -a /tmp/curl-${{ matrix.curl.version }}-${{ matrix.curl.api }}-mingw/lib/* depends/${{ matrix.host }}/lib/
+          cp -a /tmp/curl-${{ matrix.curl.version }}-${{ matrix.curl.api }}-mingw/include/* depends/${{ matrix.host }}/include/
 
       - name: Dependency cache
         uses: actions/cache@v2
