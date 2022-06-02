@@ -96,8 +96,7 @@ jobs:
           - name: x86_64-win
             host: x86_64-w64-mingw32
             arch: "i386"
-            openssl: 3.0.3
-            curl: 7.83.1
+            curl: "7.83.1_3"
             os: ubuntu-20.04
             packages: python3 nsis g++-mingw-w64-x86-64 wine64 bc wine-binfmt
             postinstall: |
@@ -154,16 +153,6 @@ jobs:
           curl --location --fail $SDK_URL/${{ matrix.sdk }}/MacOSX${{ matrix.sdk }}.sdk.tar.xz -o depends/sdk-sources/MacOSX${{ matrix.sdk }}.sdk.tar.xz
           tar -C depends/SDKs -xf depends/sdk-sources/MacOSX${{ matrix.sdk }}.sdk.tar.xz
           ln -s MacOSX${{ matrix.sdk }}.sdk/ depends/SDKs/Xcode-12.1-12A7403-extracted-SDK-with-libcxx-headers
-
-      - name: Install OpenSSL
-        if: ${{ matrix.openssl }}
-        run: |
-          mkdir -p ./depends/sdk-sources
-          mkdir -p ./depends/SDKs
-          curl --location --fail $CURL_URL/dl-${{ matrix.curl }}/openssl-${{ matrix.openssl }}-win64-mingw.tar.xz -o depends/sdk-sources/openssl-${{ matrix.openssl }}-win64-mingw.tar.xz
-          tar -C /tmp -xf depends/sdk-sources/openssl-${{ matrix.openssl }}-win64-mingw.tar.xz
-          cp -a /tmp/openssl-${{ matrix.openssl }}-win64-mingw/lib64/* depends/x86_64-w64-mingw32/lib/
-          cp -a /tmp/openssl-${{ matrix.openssl }}-win64-mingw/include/* depends/x86_64-w64-mingw32/include/
 
       - name: Install CURL
         if: ${{ matrix.curl }}
