@@ -167,18 +167,6 @@ jobs:
           tar -C depends/SDKs -xf depends/sdk-sources/MacOSX${{ matrix.sdk }}.sdk.tar.xz
           ln -s MacOSX${{ matrix.sdk }}.sdk/ depends/SDKs/Xcode-12.1-12A7403-extracted-SDK-with-libcxx-headers
 
-      - name: Install CURL
-        if: ${{ matrix.curl }}
-        run: |
-          mkdir -p ./depends/sdk-sources
-          mkdir -p ./depends/SDKs
-          mkdir -p ./depends/${{ matrix.host }}/lib
-          mkdir -p ./depends/${{ matrix.host }}/include
-          curl --location --fail $CURL_URL/dl-${{ matrix.curl.version }}/curl-${{ matrix.curl.version }}-${{ matrix.curl.api }}-mingw.tar.xz -o depends/sdk-sources/curl-${{ matrix.curl.version }}-${{ matrix.curl.api }}-mingw.tar.xz
-          tar -C /tmp -xf depends/sdk-sources/curl-${{ matrix.curl.version }}-${{ matrix.curl.api }}-mingw.tar.xz
-          cp -a /tmp/curl-${{ matrix.curl.version }}-${{ matrix.curl.api }}-mingw/lib/* depends/${{ matrix.host }}/lib/
-          cp -a /tmp/curl-${{ matrix.curl.version }}-${{ matrix.curl.api }}-mingw/include/* depends/${{ matrix.host }}/include/
-
       - name: Dependency cache
         uses: actions/cache@v2
         env:
@@ -190,6 +178,17 @@ jobs:
       - name: Build depends
         run: |
           make $MAKEJOBS -C depends HOST=${{ matrix.host }} ${{ matrix.dep-opts }}
+
+      - name: Install CURL
+        if: ${{ matrix.curl }}
+        run: |
+          mkdir -p ./depends/sdk-sources
+          mkdir -p ./depends/SDKs
+          curl --location --fail $CURL_URL/dl-${{ matrix.curl.version }}/curl-${{ matrix.curl.version }}-${{ matrix.curl.api }}-mingw.tar.xz -o depends/sdk-sources/curl-${{ matrix.curl.version }}-${{ matrix.curl.api }}-mingw.tar.xz
+          tar -C /tmp -xf depends/sdk-sources/curl-${{ matrix.curl.version }}-${{ matrix.curl.api }}-mingw.tar.xz
+          cp -a /tmp/curl-${{ matrix.curl.version }}-${{ matrix.curl.api }}-mingw/lib/* depends/${{ matrix.host }}/lib/
+          cp -a /tmp/curl-${{ matrix.curl.version }}-${{ matrix.curl.api }}-mingw/include/* depends/${{ matrix.host }}/include/
+
       - name: CCache
         uses: actions/cache@v2
         env:
