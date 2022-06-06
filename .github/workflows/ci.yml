@@ -85,7 +85,7 @@ jobs:
             arch: "i386"
             curl:
               version: "7.83.1_3"
-              win: true
+              api: win64
             os: ubuntu-20.04
             packages: python3 nsis g++-mingw-w64-x86-64 wine64 bc wine-binfmt
             postinstall: |
@@ -191,7 +191,7 @@ jobs:
           sudo cp -a /tmp/libcurl/usr/include/${{ matrix.arch }}/* /usr/include/${{ matrix.arch }}/
 
       - name: Install CURL for Windows
-        if: ${{ matrix.curl.win }}
+        if: ${{ matrix.curl.api }}
         run: |
           mkdir -p ./depends/sdk-sources
           mkdir -p ./depends/SDKs
