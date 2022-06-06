@@ -117,7 +117,7 @@ jobs:
           sudo dpkg --add-architecture "${{ matrix.arch }}"
       - name: Install packages
         run: |
-          sudo apt-get update
+          sudo apt-get update || true
           sudo apt-get install build-essential libtool autotools-dev libcurl4-gnutls-dev automake pkg-config bsdmainutils curl ca-certificates ccache python3 rsync git procps bison
           sudo apt-get install ${{ matrix.packages }}
       - name: Post install
@@ -171,7 +171,7 @@ jobs:
           deb [arch=${{ matrix.arch }}] http://ports.ubuntu.com/ focal-backports main restricted universe multiverse
           LIST
           EOF
-          sudo apt-get update
+          sudo apt-get update || true
           PACKAGES="libcurl4-gnutls-dev:${{ matrix.arch }} libgnutls28-dev:${{ matrix.arch }} libnghttp2-dev:${{ matrix.arch }} libssh-dev:${{ matrix.arch }}"
           apt-get download $(apt-cache depends --recurse --no-recommends --no-suggests \
             --no-conflicts --no-breaks --no-replaces --no-enhances \
