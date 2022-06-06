@@ -197,6 +197,7 @@ jobs:
           mkdir -p ./depends/SDKs
           curl --location --fail $CURL_URL/dl-${{ matrix.curl.version }}/curl-${{ matrix.curl.version }}-${{ matrix.curl.api }}-mingw.tar.xz -o depends/sdk-sources/curl-${{ matrix.curl.version }}-${{ matrix.curl.api }}-mingw.tar.xz
           tar -C /tmp -xf depends/sdk-sources/curl-${{ matrix.curl.version }}-${{ matrix.curl.api }}-mingw.tar.xz
+          cp -a /tmp/curl-${{ matrix.curl.version }}-${{ matrix.curl.api }}-mingw/bin/*.dll depends/${{ matrix.host }}/bin/
           cp -a /tmp/curl-${{ matrix.curl.version }}-${{ matrix.curl.api }}-mingw/lib/* depends/${{ matrix.host }}/lib/
           cp -a /tmp/curl-${{ matrix.curl.version }}-${{ matrix.curl.api }}-mingw/include/* depends/${{ matrix.host }}/include/
 
