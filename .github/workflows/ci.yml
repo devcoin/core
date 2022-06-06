@@ -184,11 +184,11 @@ jobs:
               tar -C /tmp/libcurl/ -xf tmp/"$i"/data.tar.xz
           done
           rm -rf tmp
-          sudo mkdir -p /lib/${{ matrix.arch }}/ /usr/lib/${{ matrix.arch }}/
-          sudo cp -a /tmp/libcurl/lib/${{ matrix.arch }}/* /lib/${{ matrix.arch }}/
-          sudo cp -a /tmp/libcurl/usr/lib/${{ matrix.arch }}/* /usr/lib/${{ matrix.arch }}/
-          sudo mkdir -p /usr/include/${{ matrix.arch }}/
-          sudo cp -a /tmp/libcurl/usr/include/${{ matrix.arch }}/* /usr/include/${{ matrix.arch }}/
+          sudo mkdir -p /lib/${{ matrix.host }}/ /usr/lib/${{ matrix.host }}/
+          sudo cp -a /tmp/libcurl/lib/${{ matrix.host }}/* /lib/${{ matrix.host }}/
+          sudo cp -a /tmp/libcurl/usr/lib/${{ matrix.host }}/* /usr/lib/${{ matrix.host }}/
+          sudo mkdir -p /usr/include/${{ matrix.host }}/
+          sudo cp -a /tmp/libcurl/usr/include/${{ matrix.host }}/* /usr/include/${{ matrix.host }}/
 
       - name: Install CURL for Windows
         if: ${{ matrix.curl.api }}
