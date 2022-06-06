@@ -38,6 +38,9 @@ jobs:
         include:
           - name: aarch64-linux
             host: aarch64-linux-gnu
+            arch: "arm64"
+            curl:
+              arm: true
             os: ubuntu-18.04
             packages: g++-aarch64-linux-gnu
             run-tests: false
@@ -49,6 +52,9 @@ jobs:
             goal: install
           - name: armhf-linux
             host: arm-linux-gnueabihf
+            arch: "armhf"
+            curl:
+              arm: true
             os: ubuntu-20.04
             packages: g++-arm-linux-gnueabihf
             run-tests: false
@@ -79,7 +85,7 @@ jobs:
             arch: "i386"
             curl:
               version: "7.83.1_3"
-              api: win64
+              win: true
             os: ubuntu-20.04
             packages: python3 nsis g++-mingw-w64-x86-64 wine64 bc wine-binfmt
             postinstall: |
@@ -151,8 +157,41 @@ jobs:
         run: |
           make $MAKEJOBS -C depends HOST=${{ matrix.host }} ${{ matrix.dep-opts }}
 
-      - name: Install CURL
-        if: ${{ matrix.curl }}
+      - name: Install CURL for ARM
+        if: ${{ matrix.curl.arm }}
+        run: |
+          sudo bash <<EOF
+          cat > /etc/apt/sources.list.d/${{ matrix.arch }}.list <<LIST
+          deb [arch=${{ matrix.arch }}] http://ports.ubuntu.com/ focal main restricted security
+          deb [arch=${{ matrix.arch }}] http://ports.ubuntu.com/ focal-updates main restricted
+          deb [arch=${{ matrix.arch }}] http://ports.ubuntu.com/ focal universe
+          deb [arch=${{ matrix.arch }}] http://ports.ubuntu.com/ focal-updates universe
+          deb [arch=${{ matrix.arch }}] http://ports.ubuntu.com/ focal multiverse
+          deb [arch=${{ matrix.arch }}] http://ports.ubuntu.com/ focal-updates multiverse
+          deb [arch=${{ matrix.arch }}] http://ports.ubuntu.com/ focal-backports main restricted universe multiverse
+          LIST
+          EOF
+          sudo apt-get update
+          PACKAGES="libcurl4-gnutls-dev:${{ matrix.arch }} libgnutls28-dev:${{ matrix.arch }} libnghttp2-dev:${{ matrix.arch }} libssh-dev:${{ matrix.arch }}"
+          apt-get download $(apt-cache depends --recurse --no-recommends --no-suggests \
+            --no-conflicts --no-breaks --no-replaces --no-enhances \
+            --no-pre-depends ${PACKAGES} | grep "^\w")
+          rm -f *amd64*.deb *i386*.deb
+          mkdir -p /tmp/libcurl
+          for i in *.deb; do
+              mkdir -p tmp/"$i"
+              cd tmp/"$i"/; ar -x ../../"$i"; cd ../../
+              tar -C /tmp/libcurl/ -xf tmp/"$i"/data.tar.xz
+          done
+          rm -rf tmp
+          sudo mkdir -p /lib/${{ matrix.arch }}/ /usr/lib/${{ matrix.arch }}/
+          sudo cp -a /tmp/libcurl/lib/${{ matrix.arch }}/* /lib/${{ matrix.arch }}/
+          sudo cp -a /tmp/libcurl/usr/lib/${{ matrix.arch }}/* /usr/lib/${{ matrix.arch }}/
+          sudo mkdir -p /usr/include/${{ matrix.arch }}/
+          sudo cp -a /tmp/libcurl/usr/include/${{ matrix.arch }}/* /usr/include/${{ matrix.arch }}/
+
+      - name: Install CURL for Windows
+        if: ${{ matrix.curl.win }}
         run: |
           mkdir -p ./depends/sdk-sources
           mkdir -p ./depends/SDKs
