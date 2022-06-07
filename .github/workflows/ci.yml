@@ -4,6 +4,11 @@ on:
   workflow_dispatch:
     paths-ignore:
       - '**/*.md'
+    inputs:
+      debug_enabled:
+        description: 'Run the build with tmate debugging enabled (https://github.com/marketplace/actions/debugging-with-tmate)'
+        required: false
+        default: false
   pull_request:
     paths-ignore:
       - 'doc/**'
@@ -115,6 +120,7 @@ jobs:
         if: ${{ matrix.arch }}
         run: |
           sudo dpkg --add-architecture "${{ matrix.arch }}"
+
       - name: Install packages
         run: |
           sudo apt-get update || true
@@ -215,6 +221,7 @@ jobs:
           ./autogen.sh
           ./configure --prefix=`pwd`/depends/${{ matrix.host }} ${{ matrix.config-opts }} || ( cat config.log && false)
           make $MAKEJOBS ${{ matrix.goal }} ${{ matrix.make-params }} || ( echo "Build failure. Verbose build follows." && make ${{ matrix.goal }} ${{ matrix.make-params }} V=1 ; false )
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
@@ -222,4 +229,8 @@ jobs:
           path: |
             depends/${{ matrix.host }}/bin/*
             dist/Devcoin-Core-Qt.app
+
+      - name: Setup tmate session
+        if: ${{ failure() && github.event_name == 'workflow_dispatch' && github.event.inputs.debug_enabled }}
+        uses: develCuy/action-tmate@master
 
