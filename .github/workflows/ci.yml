@@ -41,7 +41,7 @@ jobs:
             arch: "arm64"
             curl:
               arm: true
-            os: ubuntu-18.04
+            os: ubuntu-20.04
             packages: g++-aarch64-linux-gnu
             run-tests: false
             check-security: true
@@ -160,12 +160,6 @@ jobs:
       - name: Install CURL for ARM
         if: ${{ matrix.curl.arm }}
         run: |
-          sudo rm -f /etc/apt/sources.list.d/*
-          sudo bash <<EOF
-          cat > /etc/apt/sources.list <<LIST
-          deb http://archive.ubuntu.com/ubuntu focal main universe
-          LIST
-          EOF
           sudo bash <<EOF
           cat > /etc/apt/sources.list.d/${{ matrix.arch }}.list <<LIST
           deb [arch=${{ matrix.arch }}] http://ports.ubuntu.com/ focal main restricted security
