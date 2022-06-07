@@ -65,7 +65,7 @@ jobs:
           - name: x86_64-linux-nowallet
             host: x86_64-unknown-linux-gnu
             os: ubuntu-20.04
-            packages: python3
+            packages: python3 libcurl4-gnutls-dev
             run-tests: true
             dep-opts: "NO_WALLET=1"
             config-opts: "--enable-gui=qt5 --enable-glibc-back-compat --enable-reduce-exports --disable-wallet"
@@ -74,7 +74,7 @@ jobs:
           - name: x86_64-linux-dbg
             host: x86_64-unknown-linux-gnu
             os: ubuntu-20.04
-            packages: bc python3-zmq
+            packages: bc python3-zmq libcurl4-gnutls-dev
             run-tests: true
             dep-opts: "DEBUG=1"
             config-opts: "--enable-gui=qt5 --enable-zmq --enable-glibc-back-compat --enable-reduce-exports CPPFLAGS=-DDEBUG_LOCKORDER"
@@ -118,7 +118,7 @@ jobs:
       - name: Install packages
         run: |
           sudo apt-get update || true
-          sudo apt-get install build-essential libtool autotools-dev libcurl4-gnutls-dev automake pkg-config bsdmainutils curl ca-certificates ccache python3 rsync git procps bison
+          sudo apt-get install build-essential libtool autotools-dev automake pkg-config bsdmainutils curl ca-certificates ccache python3 rsync git procps bison
           sudo apt-get install ${{ matrix.packages }}
       - name: Post install
         if: ${{ matrix.postinstall }}
