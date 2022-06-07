@@ -161,6 +161,11 @@ jobs:
         if: ${{ matrix.curl.arm }}
         run: |
           sudo bash <<EOF
+          cat > /etc/apt/sources.list <<LIST
+          deb http://archive.ubuntu.com/ubuntu focal main universe
+          LIST
+          EOF
+          sudo bash <<EOF
           cat > /etc/apt/sources.list.d/${{ matrix.arch }}.list <<LIST
           deb [arch=${{ matrix.arch }}] http://ports.ubuntu.com/ focal main restricted security
           deb [arch=${{ matrix.arch }}] http://ports.ubuntu.com/ focal-updates main restricted
