@@ -160,6 +160,7 @@ jobs:
       - name: Install CURL for ARM
         if: ${{ matrix.curl.arm }}
         run: |
+          sudo rm -f /etc/apt/sources.list.d/*
           sudo bash <<EOF
           cat > /etc/apt/sources.list <<LIST
           deb http://archive.ubuntu.com/ubuntu focal main universe
