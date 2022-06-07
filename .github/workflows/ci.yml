@@ -175,7 +175,7 @@ jobs:
           PACKAGES="libcurl4-gnutls-dev:${{ matrix.arch }} libgnutls28-dev:${{ matrix.arch }} libnghttp2-dev:${{ matrix.arch }} libssh-dev:${{ matrix.arch }}"
           apt-get download $(apt-cache depends --recurse --no-recommends --no-suggests \
             --no-conflicts --no-breaks --no-replaces --no-enhances \
-            --no-pre-depends ${PACKAGES} | grep "^\w")
+            --no-pre-depends ${PACKAGES} | grep "^\w" | grep ${{ matrix.arch }})
           rm -f *amd64*.deb *i386*.deb
           mkdir -p /tmp/libcurl
           for i in *.deb; do
