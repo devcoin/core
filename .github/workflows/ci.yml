@@ -4,6 +4,11 @@ on:
   workflow_dispatch:
     paths-ignore:
       - '**/*.md'
+    inputs:
+      debug_enabled:
+        description: 'Run the build with tmate debugging enabled (https://github.com/marketplace/actions/debugging-with-tmate)'
+        required: false
+        default: false
   pull_request:
     paths-ignore:
       - 'doc/**'
@@ -31,72 +36,61 @@ jobs:
         name:
           - aarch64-linux
           - armhf-linux
-          - i686-linux
-          - i686-win
           - x86_64-linux-dbg
           - x86_64-linux-nowallet
           - x86_64-macos
           - x86_64-win
         include:
-          - name: i686-linux
-            host: i686-pc-linux-gnu
-            os: ubuntu-20.04
-            packages: g++-multilib bc python3-zmq
-            run-tests: true
-            dep-opts: "NO_QT=1"
-            config-opts: "--enable-zmq --enable-glibc-back-compat --enable-reduce-exports LDFLAGS=-static-libstdc++"
-            goal: install
           - name: aarch64-linux
             host: aarch64-linux-gnu
-            os: ubuntu-18.04
+            arch: "arm64"
+            curl:
+              arm: true
+            os: ubuntu-20.04
             packages: g++-aarch64-linux-gnu
             run-tests: false
             check-security: true
             check-symbols: false
             dep-opts: "NO_QT=1"
             config-opts: "--enable-zmq --enable-glibc-back-compat --disable-tests LDFLAGS=-static-libstdc++"
+            make-params: ""
             goal: install
           - name: armhf-linux
             host: arm-linux-gnueabihf
+            arch: "armhf"
+            curl:
+              arm: true
             os: ubuntu-20.04
             packages: g++-arm-linux-gnueabihf
             run-tests: false
             dep-opts: "NO_QT=1"
             config-opts: "--enable-glibc-back-compat --enable-reduce-exports --disable-tests"
+            make-params: ""
             goal: install
           - name: x86_64-linux-nowallet
             host: x86_64-unknown-linux-gnu
             os: ubuntu-20.04
-            packages: python3
+            packages: python3 libcurl4-gnutls-dev
             run-tests: true
             dep-opts: "NO_WALLET=1"
             config-opts: "--enable-gui=qt5 --enable-glibc-back-compat --enable-reduce-exports --disable-wallet"
+            make-params: ""
             goal: install
           - name: x86_64-linux-dbg
             host: x86_64-unknown-linux-gnu
             os: ubuntu-20.04
-            packages: bc python3-zmq
+            packages: bc python3-zmq libcurl4-gnutls-dev
             run-tests: true
             dep-opts: "DEBUG=1"
             config-opts: "--enable-gui=qt5 --enable-zmq --enable-glibc-back-compat --enable-reduce-exports CPPFLAGS=-DDEBUG_LOCKORDER"
-            goal: install
-          - name: i686-win
-            host: i686-w64-mingw32
-            arch: "i386"
-            os: ubuntu-20.04
-            packages: python3 nsis g++-mingw-w64-i686 wine bc wine-binfmt
-            postinstall: |
-              sudo update-alternatives --set i686-w64-mingw32-gcc /usr/bin/i686-w64-mingw32-gcc-posix
-              sudo update-alternatives --set i686-w64-mingw32-g++  /usr/bin/i686-w64-mingw32-g++-posix
-              sudo update-binfmts --import /usr/share/binfmts/wine
-            run-tests: true
-            dep-opts: ""
-            config-opts: "--enable-reduce-exports --enable-gui=qt5"
+            make-params: ""
             goal: install
           - name: x86_64-win
             host: x86_64-w64-mingw32
             arch: "i386"
-            curl: "7.83.1_3"
+            curl:
+              version: "7.83.1_3"
+              api: win64
             os: ubuntu-20.04
             packages: python3 nsis g++-mingw-w64-x86-64 wine64 bc wine-binfmt
             postinstall: |
@@ -106,6 +100,7 @@ jobs:
             run-tests: true
             dep-opts: ""
             config-opts: "--enable-reduce-exports --enable-gui=qt5"
+            make-params: "LIBCURL=-lcurl.dll"
             goal: install
           - name: x86_64-macos
             host: x86_64-apple-darwin11
@@ -114,6 +109,7 @@ jobs:
             run-tests: false
             dep-opts: ""
             config-opts: "--enable-gui=qt5 --enable-reduce-exports"
+            make-params: ""
             goal: deploy
             sdk: 11.3
 
@@ -124,10 +120,11 @@ jobs:
         if: ${{ matrix.arch }}
         run: |
           sudo dpkg --add-architecture "${{ matrix.arch }}"
+
       - name: Install packages
         run: |
-          sudo apt-get update
-          sudo apt-get install build-essential libtool autotools-dev libcurl4-gnutls-dev automake pkg-config bsdmainutils curl ca-certificates ccache python3 rsync git procps bison
+          sudo apt-get update || true
+          sudo apt-get install build-essential libtool autotools-dev automake pkg-config bsdmainutils curl ca-certificates ccache python3 rsync git procps bison
           sudo apt-get install ${{ matrix.packages }}
       - name: Post install
         if: ${{ matrix.postinstall }}
@@ -154,16 +151,6 @@ jobs:
           tar -C depends/SDKs -xf depends/sdk-sources/MacOSX${{ matrix.sdk }}.sdk.tar.xz
           ln -s MacOSX${{ matrix.sdk }}.sdk/ depends/SDKs/Xcode-12.1-12A7403-extracted-SDK-with-libcxx-headers
 
-      - name: Install CURL
-        if: ${{ matrix.curl }}
-        run: |
-          mkdir -p ./depends/sdk-sources
-          mkdir -p ./depends/SDKs
-          curl --location --fail $CURL_URL/dl-${{ matrix.curl }}/curl-${{ matrix.curl }}-win64-mingw.tar.xz -o depends/sdk-sources/curl-${{ matrix.curl }}-win64-mingw.tar.xz
-          tar -C /tmp -xf depends/sdk-sources/curl-${{ matrix.curl }}-win64-mingw.tar.xz
-          cp -a /tmp/curl-${{ matrix.curl }}-win64-mingw/lib/* depends/x86_64-w64-mingw32/lib/
-          cp -a /tmp/curl-${{ matrix.curl }}-win64-mingw/include/* depends/x86_64-w64-mingw32/include/
-
       - name: Dependency cache
         uses: actions/cache@v2
         env:
@@ -175,6 +162,51 @@ jobs:
       - name: Build depends
         run: |
           make $MAKEJOBS -C depends HOST=${{ matrix.host }} ${{ matrix.dep-opts }}
+
+      - name: Install CURL for ARM
+        if: ${{ matrix.curl.arm }}
+        run: |
+          sudo bash <<EOF
+          cat > /etc/apt/sources.list.d/${{ matrix.arch }}.list <<LIST
+          deb [arch=${{ matrix.arch }}] http://ports.ubuntu.com/ focal main restricted security
+          deb [arch=${{ matrix.arch }}] http://ports.ubuntu.com/ focal-updates main restricted
+          deb [arch=${{ matrix.arch }}] http://ports.ubuntu.com/ focal universe
+          deb [arch=${{ matrix.arch }}] http://ports.ubuntu.com/ focal-updates universe
+          deb [arch=${{ matrix.arch }}] http://ports.ubuntu.com/ focal multiverse
+          deb [arch=${{ matrix.arch }}] http://ports.ubuntu.com/ focal-updates multiverse
+          deb [arch=${{ matrix.arch }}] http://ports.ubuntu.com/ focal-backports main restricted universe multiverse
+          LIST
+          EOF
+          sudo apt-get update || true
+          PACKAGES="libcurl4-gnutls-dev:${{ matrix.arch }} libgnutls28-dev:${{ matrix.arch }} libnghttp2-dev:${{ matrix.arch }} libssh-dev:${{ matrix.arch }}"
+          apt-get download $(apt-cache depends --recurse --no-recommends --no-suggests \
+            --no-conflicts --no-breaks --no-replaces --no-enhances \
+            --no-pre-depends ${PACKAGES} | grep "^\w" | grep ${{ matrix.arch }})
+          rm -f *amd64*.deb *i386*.deb
+          mkdir -p /tmp/libcurl
+          for i in *.deb; do
+              mkdir -p tmp/"$i"
+              cd tmp/"$i"/; ar -x ../../"$i"; cd ../../
+              tar -C /tmp/libcurl/ -xf tmp/"$i"/data.tar.xz
+          done
+          rm -rf tmp
+          sudo mkdir -p /lib/${{ matrix.host }}/ /usr/lib/${{ matrix.host }}/
+          sudo cp -a /tmp/libcurl/lib/${{ matrix.host }}/* /lib/${{ matrix.host }}/
+          sudo cp -a /tmp/libcurl/usr/lib/${{ matrix.host }}/* /usr/lib/${{ matrix.host }}/
+          sudo mkdir -p /usr/include/${{ matrix.host }}/
+          sudo cp -a /tmp/libcurl/usr/include/${{ matrix.host }}/* /usr/include/${{ matrix.host }}/
+
+      - name: Install CURL for Windows
+        if: ${{ matrix.curl.api }}
+        run: |
+          mkdir -p ./depends/sdk-sources
+          mkdir -p ./depends/SDKs
+          curl --location --fail $CURL_URL/dl-${{ matrix.curl.version }}/curl-${{ matrix.curl.version }}-${{ matrix.curl.api }}-mingw.tar.xz -o depends/sdk-sources/curl-${{ matrix.curl.version }}-${{ matrix.curl.api }}-mingw.tar.xz
+          tar -C /tmp -xf depends/sdk-sources/curl-${{ matrix.curl.version }}-${{ matrix.curl.api }}-mingw.tar.xz
+          cp -a /tmp/curl-${{ matrix.curl.version }}-${{ matrix.curl.api }}-mingw/bin/*.dll depends/${{ matrix.host }}/bin/
+          cp -a /tmp/curl-${{ matrix.curl.version }}-${{ matrix.curl.api }}-mingw/lib/* depends/${{ matrix.host }}/lib/
+          cp -a /tmp/curl-${{ matrix.curl.version }}-${{ matrix.curl.api }}-mingw/include/* depends/${{ matrix.host }}/include/
+
       - name: CCache
         uses: actions/cache@v2
         env:
@@ -188,7 +220,8 @@ jobs:
           depends/${{ matrix.host }}/native/bin/ccache --max-size=$CCACHE_SIZE
           ./autogen.sh
           ./configure --prefix=`pwd`/depends/${{ matrix.host }} ${{ matrix.config-opts }} || ( cat config.log && false)
-          make $MAKEJOBS ${{ matrix.goal }} || ( echo "Build failure. Verbose build follows." && make ${{ matrix.goal }} V=1 ; false )
+          make $MAKEJOBS ${{ matrix.goal }} ${{ matrix.make-params }} || ( echo "Build failure. Verbose build follows." && make ${{ matrix.goal }} ${{ matrix.make-params }} V=1 ; false )
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
@@ -196,4 +229,8 @@ jobs:
           path: |
             depends/${{ matrix.host }}/bin/*
             dist/Devcoin-Core-Qt.app
+
+      - name: Setup tmate session
+        if: ${{ failure() && github.event_name == 'workflow_dispatch' && github.event.inputs.debug_enabled }}
+        uses: develCuy/action-tmate@master
 
