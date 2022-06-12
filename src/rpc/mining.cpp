@@ -18,6 +18,7 @@
 #include <node/context.h>
 #include <policy/fees.h>
 #include <pow.h>
+#include <rpc/auxpow_miner.h>
 #include <rpc/blockchain.h>
 #include <rpc/mining.h>
 #include <rpc/net.h>
@@ -1245,6 +1246,77 @@ static RPCHelpMan estimaterawfee()
 },
     };
 }
+/* ************************************************************************** */
+/* Merge mining.  */
+
+static RPCHelpMan createauxblock()
+{
+    return RPCHelpMan{"createauxblock",
+        "\nCreates a new block and returns information required to"
+        " merge-mine it.\n",
+        {
+            {"address", RPCArg::Type::STR, RPCArg::Optional::NO, "Payout address for the coinbase transaction"},
+        },
+        RPCResult{
+            RPCResult::Type::OBJ, "", "",
+            {
+                {RPCResult::Type::STR_HEX, "hash", "hash of the created block"},
+                {RPCResult::Type::NUM, "chainid", "chain ID for this block"},
+                {RPCResult::Type::STR_HEX, "previousblockhash", "hash of the previous block"},
+                {RPCResult::Type::NUM, "coinbasevalue", "value of the block's coinbase"},
+                {RPCResult::Type::STR_HEX, "bits", "compressed target of the block"},
+                {RPCResult::Type::NUM, "height", "height of the block"},
+                {RPCResult::Type::STR_HEX, "_target", "target in reversed byte order, deprecated"},
+            },
+        },
+        RPCExamples{
+          HelpExampleCli("createauxblock", "\"address\"")
+          + HelpExampleRpc("createauxblock", "\"address\"")
+        },
+        [&](const RPCHelpMan& self, const JSONRPCRequest& request) -> UniValue
+{
+
+    // Check coinbase payout address
+    const CTxDestination coinbaseScript
+      = DecodeDestination(request.params[0].get_str());
+    if (!IsValidDestination(coinbaseScript)) {
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY,
+                           "Error: Invalid coinbase payout address");
+    }
+    const CScript scriptPubKey = GetScriptForDestination(coinbaseScript);
+
+    return AuxpowMiner::get ().createAuxBlock(request, scriptPubKey);
+},
+    };
+}
+
+static RPCHelpMan submitauxblock()
+{
+    return RPCHelpMan{"submitauxblock",
+        "\nSubmits a solved auxpow for a block that was previously"
+        " created by 'createauxblock'.\n",
+        {
+            {"hash", RPCArg::Type::STR_HEX, RPCArg::Optional::NO, "Hash of the block to submit"},
+            {"auxpow", RPCArg::Type::STR_HEX, RPCArg::Optional::NO, "Serialised auxpow found"},
+        },
+        RPCResult{
+            RPCResult::Type::BOOL, "", "whether the submitted block was correct"
+        },
+        RPCExamples{
+            HelpExampleCli("submitauxblock", "\"hash\" \"serialised auxpow\"")
+            + HelpExampleRpc("submitauxblock", "\"hash\" \"serialised auxpow\"")
+        },
+        [&](const RPCHelpMan& self, const JSONRPCRequest& request) -> UniValue
+{
+    return AuxpowMiner::get ().submitAuxBlock(request,
+                                              request.params[0].get_str(),
+                                              request.params[1].get_str());
+},
+    };
+}
+
+
+ /* ************************************************************************** */
 
 void RegisterMiningRPCCommands(CRPCTable &t)
 {
@@ -1258,7 +1330,9 @@ static const CRPCCommand commands[] =
     { "mining",              &getblocktemplate,        },
     { "mining",              &submitblock,             },
     { "mining",              &submitheader,            },
-
+    // DEVCOIN
+    { "mining",              &createauxblock,          },
+    { "mining",              &submitauxblock,          },
 
     { "generating",          &generatetoaddress,       },
     { "generating",          &generatetodescriptor,    },

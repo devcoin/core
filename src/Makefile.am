@@ -208,6 +208,7 @@ DEVCOIN_CORE_H = \
   receiver.h \
   reverse_iterator.h \
   rpc/blockchain.h \
+  rpc/auxpow_miner.h \
   rpc/client.h \
   rpc/mining.h \
   rpc/net.h \
@@ -361,6 +362,7 @@ libdevcoin_server_a_SOURCES = \
   pow.cpp \
   receiver.cpp \
   rest.cpp \
+  rpc/auxpow_miner.cpp \
   rpc/blockchain.cpp \
   rpc/mining.cpp \
   rpc/misc.cpp \
@@ -425,6 +427,7 @@ libdevcoin_wallet_a_SOURCES = \
   wallet/walletdb.cpp \
   wallet/walletutil.cpp \
   wallet/coinselection.cpp \
+  rpc/auxpow_miner.cpp \
   $(DEVCOIN_CORE_H)
 
 if USE_SQLITE
