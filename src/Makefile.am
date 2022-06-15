@@ -213,6 +213,7 @@ DEVCOIN_CORE_H = \
   rpc/mining.h \
   rpc/net.h \
   rpc/protocol.h \
+  rpc/rawtransaction.h \
   rpc/rawtransaction_util.h \
   rpc/register.h \
   rpc/request.h \

@@ -303,6 +303,7 @@ bool CBlockTreeDB::LoadBlockIndexGuts(const Consensus::Params& consensusParams, 
                    the CDiskBlockIndex does not contain the auxpow.
                    This check isn't important, since the data on disk should
                    already be valid and can be trusted.  */
+
                 pcursor->Next();
             } else {
                 return error("%s: failed to read value", __func__);

@@ -65,7 +65,7 @@ public:
         consensus.signet_blocks = false;
         consensus.signet_challenge.clear();
         consensus.nSubsidyHalvingInterval = 210000;
-        consensus.BIP16Exception = uint256{};
+        consensus.BIP16Height = 1;
         consensus.BIP34Height = 23523;
         consensus.BIP34Hash = uint256S("0x0000000002fde67fbf51d8b3c1fe80b162b0ba5ac58b0afe87c4c94cbe958c58");
         consensus.BIP65Height = 23523; // 0000000002fde67fbf51d8b3c1fe80b162b0ba5ac58b0afe87c4c94cbe958c58
@@ -94,10 +94,11 @@ public:
         consensus.nMinimumChainWork = uint256S("0x0000000000000000000000000000000000000000025018c6a1a353ba518e9753");
         consensus.defaultAssumeValid = uint256S("0xe5f6dbecef5f5b8c49b8a6b7cefc80183dace19c474264b87f07edf55d347860"); // 496000
 
-        // AuxPow
-        consensus.fStrictChainId = true;
         consensus.nAuxpowChainId = 4;
         consensus.nAuxpowOldChainId = 4096;
+        consensus.nAuxpowStartHeight = 0;
+        consensus.fStrictChainId = true;
+        consensus.nLegacyBlocksBefore = 19200;
 
         /**
          * The message start string is designed to be unlikely to occur in normal data.
@@ -178,7 +179,7 @@ public:
         consensus.signet_blocks = false;
         consensus.signet_challenge.clear();
         consensus.nSubsidyHalvingInterval = 210000;
-        consensus.BIP16Exception = uint256{};
+        consensus.BIP16Height = 1;
         consensus.BIP34Height = 1;
         consensus.BIP34Hash = uint256{};
         consensus.BIP65Height = 1;
@@ -189,6 +190,7 @@ public:
         consensus.nPowTargetTimespan = 24 * 60 * 60; // one day
         consensus.nPowTargetSpacing = 10 * 60;
         consensus.fPowAllowMinDifficultyBlocks = true;
+        consensus.nMinDifficultySince = 0;
         consensus.fPowNoRetargeting = false;
         consensus.nRuleChangeActivationThreshold = 108; // 75% for testchains
         consensus.nMinerConfirmationWindow = 144; // nPowTargetTimespan / nPowTargetSpacing
@@ -207,10 +209,11 @@ public:
         consensus.nMinimumChainWork = uint256S("0x0000000000000000000000000000000000000000000000000000141f25d13472"); // 838467
         consensus.defaultAssumeValid = uint256S("0x0000003243223caf052c7e5e6710fae794dbdc10949a594550f073dbf5755bd4"); // 838467
 
-        // AuxPow
-        consensus.fStrictChainId = false;
+        consensus.nAuxpowStartHeight = 0;
         consensus.nAuxpowChainId = 16;
         consensus.nAuxpowOldChainId = 4096;
+        consensus.fStrictChainId = false;
+        consensus.nLegacyBlocksBefore = -1;
 
         pchMessageStart[0] = 0x64; // d
         pchMessageStart[1] = 0x65; // e
@@ -316,15 +319,9 @@ public:
 
         strNetworkID = CBaseChainParams::SIGNET;
         consensus.signet_blocks = true;
-
-        // AuxPow
-        consensus.fStrictChainId = false;
-        consensus.nAuxpowChainId = 8;
-        consensus.nAuxpowOldChainId = 4096;
-
         consensus.signet_challenge.assign(bin.begin(), bin.end());
         consensus.nSubsidyHalvingInterval = 210000;
-        consensus.BIP16Exception = uint256{};
+        consensus.BIP16Height = 1;
         consensus.BIP34Height = 1;
         consensus.BIP34Hash = uint256{};
         consensus.BIP65Height = 1;
@@ -349,6 +346,12 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_TAPROOT].nStartTime = Consensus::BIP9Deployment::ALWAYS_ACTIVE;
         consensus.vDeployments[Consensus::DEPLOYMENT_TAPROOT].nTimeout = Consensus::BIP9Deployment::NO_TIMEOUT;
         consensus.vDeployments[Consensus::DEPLOYMENT_TAPROOT].min_activation_height = 0; // No activation delay
+
+        consensus.nAuxpowStartHeight = 0;
+        consensus.nAuxpowChainId = 8;
+        consensus.nAuxpowOldChainId = 4096;
+        consensus.fStrictChainId = true;
+        consensus.nLegacyBlocksBefore = 0;
 
         // message start is defined as the first 4 bytes of the sha256d of the block script
         CHashWriter h(SER_DISK, 0);
@@ -392,21 +395,21 @@ public:
         consensus.signet_blocks = false;
         consensus.signet_challenge.clear();
         consensus.nSubsidyHalvingInterval = 150;
-        consensus.BIP16Exception = uint256();
+        consensus.BIP16Height = 1;
         consensus.BIP34Height = 500; // BIP34 activated on regtest (Used in functional tests)
-        consensus.BIP34Hash = uint256();
         consensus.BIP65Height = 1351; // BIP65 activated on regtest (Used in functional tests)
         consensus.BIP66Height = 1251; // BIP66 activated on regtest (Used in functional tests)
         consensus.CSVHeight = 432; // CSV activated on regtest (Used in rpc activation tests)
         consensus.SegwitHeight = 0; // SEGWIT is always activated on regtest unless overridden
+        consensus.MinBIP9WarningHeight = 0;
         consensus.powLimit = uint256S("7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.nPowTargetTimespan = 24 * 60 * 60; // one day
         consensus.nPowTargetSpacing = 10 * 60;
         consensus.fPowAllowMinDifficultyBlocks = true;
+        consensus.nMinDifficultySince = 0;
         consensus.fPowNoRetargeting = true;
         consensus.nRuleChangeActivationThreshold = 108; // 75% for testchains
         consensus.nMinerConfirmationWindow = 144; // Faster than normal for regtest (144 instead of 2016)
-        consensus.MinBIP9WarningHeight = 0;
 
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nStartTime = 0;
@@ -421,10 +424,11 @@ public:
         consensus.nMinimumChainWork = uint256{};
         consensus.defaultAssumeValid = uint256{};
 
-        // AuxPow
-        consensus.fStrictChainId = false;
+        consensus.nAuxpowStartHeight = 0;
         consensus.nAuxpowChainId = 8;
         consensus.nAuxpowOldChainId = 4096;
+        consensus.fStrictChainId = true;
+        consensus.nLegacyBlocksBefore = 0;
 
         pchMessageStart[0] = 0x64; // d
         pchMessageStart[1] = 0x65; // e
@@ -496,6 +500,16 @@ public:
 
 void CRegTestParams::UpdateActivationParametersFromArgs(const ArgsManager& args)
 {
+    if (args.IsArgSet("-bip16height")) {
+        int64_t height = args.GetArg("-bip16height", consensus.BIP16Height);
+        if (height < -1 || height >= std::numeric_limits<int>::max()) {
+            throw std::runtime_error(strprintf("Activation height %ld for BIP16 is out of valid range. Use -1 to disable BIP16.", height));
+        } else if (height == -1) {
+            LogPrintf("BIP16 disabled for testing\n");
+            height = std::numeric_limits<int>::max();
+        }
+        consensus.BIP16Height = static_cast<int>(height);
+    }
     if (args.IsArgSet("-segwitheight")) {
         int64_t height = args.GetArg("-segwitheight", consensus.SegwitHeight);
         if (height < -1 || height >= std::numeric_limits<int>::max()) {

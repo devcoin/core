@@ -20,8 +20,10 @@
 class CBlock;
 class CBlockHeader;
 class CBlockIndex;
+class CChainState;
+class CValidationState;
 class UniValue;
-class ChainstateManager;
+
 namespace auxpow_tests
 {
 class CAuxPowForTest;
@@ -29,8 +31,6 @@ class CAuxPowForTest;
 
 /** Header for merge-mining data in the coinbase.  */
 static const unsigned char pchMergedMiningHeader[] = { 0xfa, 0xbe, 'm', 'm' };
-
-typedef std::vector<unsigned char> valtype;
 
 /**
  * Data for the merge-mining auxpow.  This uses a merkle tx (the parent block's
@@ -65,7 +65,8 @@ private:
                                     const std::vector<uint256>& vMerkleBranch,
                                     int nIndex);
 
-  friend UniValue AuxpowToJSON(const CAuxPow& auxpow, ChainstateManager& chainstate);
+  friend UniValue AuxpowToJSON(const CAuxPow& auxpow, bool verbose,
+                               CChainState& active_chainstate);
   friend class auxpow_tests::CAuxPowForTest;
 
 public:
@@ -83,8 +84,7 @@ public:
   CAuxPow (const CAuxPow&) = delete;
   void operator= (const CAuxPow&) = delete;
 
-
-  SERIALIZE_METHODS(CAuxPow, obj)
+  SERIALIZE_METHODS (CAuxPow, obj)
   {
     /* The coinbase Merkle tx' hashBlock field is never actually verified
        or used in the code for an auxpow (and never was).  The parent block
@@ -96,8 +96,11 @@ public:
     /* The index of the parent coinbase tx is always zero.  */
     int nIndex = 0;
 
-    /* Data from the coinbase transaction READWRITE(obj.key);READWRITE(obj.key);as Merkle tx.  */
-    READWRITE (obj.coinbaseTx, hashBlock, obj.vMerkleBranch, nIndex, obj.vChainMerkleBranch, obj.nChainIndex, obj.parentBlock);
+    /* Data from the coinbase transaction as Merkle tx.  */
+    READWRITE (obj.coinbaseTx, hashBlock, obj.vMerkleBranch, nIndex);
+
+    /* Additional data for the auxpow itself.  */
+    READWRITE (obj.vChainMerkleBranch, obj.nChainIndex, obj.parentBlock);
   }
 
   /**
@@ -122,6 +125,18 @@ public:
   }
 
   /**
+   * Return parent block.  This is only used for the temporary parentblock
+   * auxpow version check.
+   * @return The parent block.
+   */
+  /* FIXME: Remove after the hardfork.  */
+  inline const CPureBlockHeader&
+  getParentBlock () const
+  {
+    return parentBlock;
+  }
+
+  /**
    * Calculate the expected index in the merkle tree.  This is also used
    * for the test-suite.
    * @param nNonce The coinbase's nonce value.
@@ -129,7 +144,7 @@ public:
    * @param h The merkle block height.
    * @return The expected index for the aux hash.
    */
-  static int getExpectedIndex (const uint32_t &nNonce, const int &nChainId, const unsigned &h);
+  static int getExpectedIndex (uint32_t nNonce, int nChainId, unsigned h);
 
   /**
    * Constructs a minimal CAuxPow object for the given block header and

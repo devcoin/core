@@ -98,8 +98,25 @@ static const int MAX_BLOCKS_IN_TRANSIT_PER_PEER = 16;
 /** Time during which a peer must stall block download progress before being disconnected. */
 static constexpr auto BLOCK_STALLING_TIMEOUT = 2s;
 /** Number of headers sent in one getheaders result. We rely on the assumption that if a peer sends
- *  less than this number, we reached its tip. Changing this value is a protocol upgrade. */
+ *  less than this number, we reached its tip. Changing this value is a protocol upgrade.
+ *
+ *  With a protocol upgrade, we now enforce an additional restriction on the
+ *  total size of a "headers" message (see below).  The absolute limit
+ *  on the number of headers still applies as well, so that we do not get
+ *  overloaded both with small and large headers.
+ */
 static const unsigned int MAX_HEADERS_RESULTS = 2000;
+// DEVCOIN
+/** Maximum size of a "headers" message.  This is enforced starting with
+ *  SIZE_HEADERS_LIMIT_VERSION peers and prevents overloading if we have
+ *  very large headers (due to auxpow).
+ */
+static const unsigned int MAX_HEADERS_SIZE = (6 << 20); // 6 MiB
+/** Size of a headers message that is the threshold for assuming that the
+ *  peer has more headers (even if we have less than MAX_HEADERS_RESULTS).
+ *  This is used starting with SIZE_HEADERS_LIMIT_VERSION peers.
+ */
+static const unsigned int THRESHOLD_HEADERS_SIZE = (4 << 20); // 4 MiB
 /** Maximum depth of blocks we're willing to serve as compact blocks to peers
  *  when requested. For older blocks, a regular BLOCK response will be sent. */
 static const int MAX_CMPCTBLOCK_DEPTH = 5;
@@ -162,13 +179,7 @@ static constexpr double MAX_ADDR_RATE_PER_SECOND{0.1};
  *  based increments won't go above this, but the MAX_ADDR_TO_SEND increment following GETADDR
  *  is exempt from this limit. */
 static constexpr size_t MAX_ADDR_PROCESSING_TOKEN_BUCKET{MAX_ADDR_TO_SEND};
-// DEVCOIN
-static const unsigned int MAX_HEADERS_SIZE = (6 << 20); // 6 MiB
-/** Size of a headers message that is the threshold for assuming that the
- *  peer has more headers (even if we have less than MAX_HEADERS_RESULTS).
- *  This is used starting with SIZE_HEADERS_LIMIT_VERSION peers.
- */
-static const unsigned int THRESHOLD_HEADERS_SIZE = (4 << 20); // 4 MiB
+
 // Internal stuff
 namespace {
 /** Blocks that are in flight, and that are in the queue to be downloaded. */
@@ -2013,6 +2024,17 @@ void PeerManagerImpl::ProcessHeadersMessage(CNode& pfrom, const Peer& peer,
         return;
     }
 
+    size_t nSize = 0;
+    for (const auto& header : headers) {
+        nSize += GetSerializeSize(header, PROTOCOL_VERSION);
+        if (pfrom.nVersion >= SIZE_HEADERS_LIMIT_VERSION
+              && nSize > MAX_HEADERS_SIZE) {
+            LOCK(cs_main);
+            Misbehaving(pfrom.GetId(), 20, strprintf("headers message size = %u", nSize));
+            return;
+        }
+    }
+
     bool received_new_header = false;
     const CBlockIndex *pindexLast = nullptr;
     {
@@ -2089,7 +2111,14 @@ void PeerManagerImpl::ProcessHeadersMessage(CNode& pfrom, const Peer& peer,
             nodestate->m_last_block_announcement = GetTime();
         }
 
-        if (nCount == MAX_HEADERS_RESULTS) {
+        bool maxSize = (nCount == MAX_HEADERS_RESULTS);
+        if (pfrom.nVersion >= SIZE_HEADERS_LIMIT_VERSION
+              && nSize >= THRESHOLD_HEADERS_SIZE)
+            maxSize = true;
+        // FIXME: This change (with hasNewHeaders) is rolled back in Bitcoin,
+        // but I think it should stay here for merge-mined coins.  Try to get
+        // it fixed again upstream and then update the fix.
+        if (maxSize && received_new_header) {
             // Headers message had its maximum size; the peer may have more headers.
             // TODO: optimize: if pindexLast is an ancestor of m_chainman.ActiveChain().Tip or pindexBestHeader, continue
             // from there instead.
@@ -3143,12 +3172,13 @@ void PeerManagerImpl::ProcessMessage(CNode& pfrom, const std::string& msg_type, 
             nSize += GetSerializeSize(header, PROTOCOL_VERSION);
             vHeaders.push_back(header);
             if (nCount >= MAX_HEADERS_RESULTS
-                    || pindex->GetBlockHash() == hashStop)
+                  || pindex->GetBlockHash() == hashStop)
                 break;
             if (pfrom.nVersion >= SIZE_HEADERS_LIMIT_VERSION
-                    && nSize >= THRESHOLD_HEADERS_SIZE)
+                  && nSize >= THRESHOLD_HEADERS_SIZE)
                 break;
         }
+
         /* Check maximum headers size before pushing the message
            if the peer enforces it.  This should not fail since we
            break above in the loop at the threshold and the threshold
@@ -3160,8 +3190,8 @@ void PeerManagerImpl::ProcessMessage(CNode& pfrom, const std::string& msg_type, 
         else
         {
             LogPrint(BCLog::NET, "pushing %u headers, %u bytes\n", nCount, nSize);
-            // pindex can be nullptr either if we sent m_chainman.ActiveChain().Tip() OR
-            // if our peer has m_chainman.ActiveChain().Tip() (and thus we are sending an empty
+            // pindex can be nullptr either if we sent ::ChainActive().Tip() OR
+            // if our peer has ::ChainActive().Tip() (and thus we are sending an empty
             // headers message). In both cases it's safe to update
             // pindexBestHeaderSent to be our tip.
             //

@@ -10,7 +10,7 @@
 #include <primitives/block.h>
 #include <uint256.h>
 
-unsigned int GetNextWorkRequired_Original(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params& params)
+unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params& params)
 {
     assert(pindexLast != nullptr);
     unsigned int nProofOfWorkLimit = UintToArith256(params.powLimit).GetCompact();
@@ -18,8 +18,16 @@ unsigned int GetNextWorkRequired_Original(const CBlockIndex* pindexLast, const C
     // Only change once per difficulty adjustment interval
     if ((pindexLast->nHeight+1) % params.DifficultyAdjustmentInterval() != 0)
     {
-        if (params.fPowAllowMinDifficultyBlocks)
+        if (params.AllowMinDifficultyBlocks(pblock->GetBlockTime()))
         {
+            /* khal's port of this code from Bitcoin to the old namecoind
+               has a bug:  Comparison of block times is done by an unsigned
+               difference.  Consequently, the minimum difficulty is also
+               applied if the block's timestamp is earlier than the preceding
+               block's.  Reproduce this.  */
+            if (pblock->GetBlockTime() < pindexLast->GetBlockTime())
+                return nProofOfWorkLimit;
+
             // Special difficulty rule for testnet:
             // If the new block's timestamp is more than 2* 10 minutes
             // then allow mining of a min-difficulty block.
@@ -37,8 +45,15 @@ unsigned int GetNextWorkRequired_Original(const CBlockIndex* pindexLast, const C
         return pindexLast->nBits;
     }
 
+    /* Adapt the retargeting interval after merge-mining start
+       according to the changed Devcoin rules.  */
+    int nBlocksBack = params.DifficultyAdjustmentInterval() - 1;
+    if (pindexLast->nHeight >= params.nAuxpowStartHeight
+        && (pindexLast->nHeight + 1 > params.DifficultyAdjustmentInterval()))
+        nBlocksBack = params.DifficultyAdjustmentInterval();
+
     // Go back by what we want to be 14 days worth of blocks
-    int nHeightFirst = pindexLast->nHeight - (params.DifficultyAdjustmentInterval()-1);
+    int nHeightFirst = pindexLast->nHeight - nBlocksBack;
     assert(nHeightFirst >= 0);
     const CBlockIndex* pindexFirst = pindexLast->GetAncestor(nHeightFirst);
     assert(pindexFirst);
@@ -48,17 +63,15 @@ unsigned int GetNextWorkRequired_Original(const CBlockIndex* pindexLast, const C
 
 unsigned int CalculateNextWorkRequired(const CBlockIndex* pindexLast, int64_t nFirstBlockTime, const Consensus::Params& params)
 {
-    int64_t nPowTargetTimespan = 14 * 24 * 60 * 60; // two weeks
-
     if (params.fPowNoRetargeting)
         return pindexLast->nBits;
 
     // Limit adjustment step
     int64_t nActualTimespan = pindexLast->GetBlockTime() - nFirstBlockTime;
-    if (nActualTimespan < nPowTargetTimespan/4)
-        nActualTimespan = nPowTargetTimespan/4;
-    if (nActualTimespan > nPowTargetTimespan*4)
-        nActualTimespan = nPowTargetTimespan*4;
+    if (nActualTimespan < params.nPowTargetTimespan/4)
+        nActualTimespan = params.nPowTargetTimespan/4;
+    if (nActualTimespan > params.nPowTargetTimespan*4)
+        nActualTimespan = params.nPowTargetTimespan*4;
 
     // Retarget
     const arith_uint256 bnPowLimit = UintToArith256(params.powLimit);
@@ -183,7 +196,7 @@ unsigned int GetNextWorkRequired_Old(const CBlockIndex* pindexLast, const CBlock
     return bnNew.GetCompact();
 }
 
-unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params& params)
+unsigned int GetNextWorkRequired_New(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params& params)
 {
     return GetNextWorkRequired_Old(pindexLast, pblock, params);
 }

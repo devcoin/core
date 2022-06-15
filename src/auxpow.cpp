@@ -1,7 +1,7 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2011 Vince Durham
 // Copyright (c) 2009-2014 The Bitcoin developers
-// Copyright (c) 2014-2019 Daniel Kraft
+// Copyright (c) 2014-2021 Daniel Kraft
 // Distributed under the MIT/X11 software license, see the accompanying
 // file license.txt or http://www.opensource.org/licenses/mit-license.php.
 
@@ -42,22 +42,17 @@ CAuxPow::check (const uint256& hashAuxBlock, int nChainId,
                 const Consensus::Params& params) const
 {
     if (params.fStrictChainId) {
-        const int32_t &nChainIDParent = parentBlock.GetChainId();
-        if(nChainIDParent > 0) {
-            if(nChainIDParent == params.nAuxpowChainId)
-                return error("Aux POW parent has our chain ID");
-        } else {
-            const int32_t &nOldChainIDParent = parentBlock.GetOldChainId();
-            if(nOldChainIDParent == params.nAuxpowOldChainId)
-                return error("Aux POW parent has our old chain ID");
-        }
+        if (parentBlock.GetChainId () == nChainId)
+            return error("Aux POW parent has our chain ID");
+        else if(parentBlock.GetOldChainId() == params.nAuxpowOldChainId)
+            return error("Aux POW parent has our old chain ID");
     }
 
     if (vChainMerkleBranch.size() > 30)
         return error("Aux POW chain merkle branch too long");
 
     // Check that the chain merkle root is in the coinbase
-    const uint256 &nRootHash
+    const uint256 nRootHash
       = CheckMerkleBranch (hashAuxBlock, vChainMerkleBranch, nChainIndex);
     valtype vchRootHash(nRootHash.begin (), nRootHash.end ());
     std::reverse (vchRootHash.begin (), vchRootHash.end ()); // correct endian
@@ -71,7 +66,7 @@ CAuxPow::check (const uint256& hashAuxBlock, int nChainId,
     if (coinbaseTx->vin.empty())
         return error("Aux POW coinbase has no inputs");
 
-    const CScript &script = coinbaseTx->vin[0].scriptSig;
+    const CScript script = coinbaseTx->vin[0].scriptSig;
 
     // Check that the same work is not submitted twice to our chain.
     //
@@ -114,12 +109,12 @@ CAuxPow::check (const uint256& hashAuxBlock, int nChainId,
     if (script.end() - pc < 8)
         return error("Aux POW missing chain merkle tree size and nonce in parent coinbase");
 
-    const uint32_t &nSize = DecodeLE32 (&pc[0]);
-    const unsigned &merkleHeight = vChainMerkleBranch.size ();
+    const uint32_t nSize = DecodeLE32 (&pc[0]);
+    const unsigned merkleHeight = vChainMerkleBranch.size ();
     if (nSize != (1u << merkleHeight))
         return error("Aux POW merkle branch size does not match parent coinbase");
 
-    const uint32_t &nNonce = DecodeLE32 (&pc[4]);
+    const uint32_t nNonce = DecodeLE32 (&pc[4]);
     if (nChainIndex != getExpectedIndex (nNonce, nChainId, merkleHeight))
         return error("Aux POW wrong index");
 
@@ -127,8 +122,8 @@ CAuxPow::check (const uint256& hashAuxBlock, int nChainId,
 }
 
 int
-CAuxPow::getExpectedIndex (const uint32_t &nNonce, const int &nChainId,
-                           const unsigned &h)
+CAuxPow::getExpectedIndex (const uint32_t nNonce, const int nChainId,
+                           const unsigned h)
 {
   // Choose a pseudo-random slot in the chain merkle tree
   // but have it be fixed for a size/nonce/chain combination.

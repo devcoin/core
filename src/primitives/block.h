@@ -23,6 +23,7 @@
 class CBlockHeader : public CPureBlockHeader
 {
 public:
+
     // auxpow (if this is a merge-minded block)
     std::shared_ptr<CAuxPow> auxpow;
 
@@ -31,27 +32,18 @@ public:
         SetNull();
     }
 
-    template<typename Stream>
-    void Serialize(Stream& s) const
+    SERIALIZE_METHODS(CBlockHeader, obj)
     {
-        s << *(CPureBlockHeader*)this;
-        if (this->IsAuxpow())
+        READWRITEAS(CPureBlockHeader, obj);
+
+        if (obj.IsAuxpow())
         {
-            assert(auxpow != nullptr);
-            s << *auxpow;
-        }
-    }
-    template<typename Stream>
-    void Unserialize(Stream& s)
-    {
-        s >> *(CPureBlockHeader*)this;
-        if (this->IsAuxpow())
+            SER_READ(obj, obj.auxpow = std::make_shared<CAuxPow>());
+            assert(obj.auxpow != nullptr);
+            READWRITE(*obj.auxpow);
+        } else
         {
-            auxpow = std::make_shared<CAuxPow>();
-            assert(auxpow != nullptr);
-            s >> *auxpow;
-        } else {
-            auxpow.reset();
+            SER_READ(obj, obj.auxpow.reset());
         }
     }
 
