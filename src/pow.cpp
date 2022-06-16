@@ -10,7 +10,7 @@
 #include <primitives/block.h>
 #include <uint256.h>
 
-unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params& params)
+unsigned int GetNextWorkRequired_Orig(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params& params)
 {
     assert(pindexLast != nullptr);
     unsigned int nProofOfWorkLimit = UintToArith256(params.powLimit).GetCompact();
@@ -196,7 +196,7 @@ unsigned int GetNextWorkRequired_Old(const CBlockIndex* pindexLast, const CBlock
     return bnNew.GetCompact();
 }
 
-unsigned int GetNextWorkRequired_New(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params& params)
+unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params& params)
 {
     return GetNextWorkRequired_Old(pindexLast, pblock, params);
 }
