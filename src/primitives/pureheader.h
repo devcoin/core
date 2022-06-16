@@ -22,11 +22,8 @@ private:
 
     /* Modifiers to the version.  */
     static const int32_t VERSION_AUXPOW = (1 << 8);
-    static const uint8_t VERSION_START_BIT = 16;
 
     /** Bits above are reserved for the auxpow chain ID.  */
-    // mask to get old Chain ID from version field, legacy one is 4096 (2^12) in SYS so 0x1fff mask is needed
-    static const int32_t MASK_OLD_AUXPOW_CHAINID_SHIFTED = (0x1fff << VERSION_START_BIT);
     static const int32_t VERSION_CHAIN_START = (1 << 16);
 
 public:
@@ -103,16 +100,6 @@ public:
     {
         return nVersion / VERSION_CHAIN_START;
     }
-
-    /**
-     * Extract the legacy chain ID.
-     * @return The chain ID encoded in the version before versionbits were fixed to work with auxpow
-     */
-    inline int32_t GetOldChainId() const 
-    {
-        return GetOldChainId(nVersion);
-    }
-    static int32_t GetOldChainId(const int& ver);
 
     /**
      * Set the chain ID.  This is used for the test suite.

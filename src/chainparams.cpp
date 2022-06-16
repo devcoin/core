@@ -66,10 +66,10 @@ public:
         consensus.signet_challenge.clear();
         consensus.nSubsidyHalvingInterval = 210000;
         consensus.BIP16Height = 1;
-        consensus.BIP34Height = 23523;
-        consensus.BIP34Hash = uint256S("0x0000000002fde67fbf51d8b3c1fe80b162b0ba5ac58b0afe87c4c94cbe958c58");
-        consensus.BIP65Height = 23523; // 0000000002fde67fbf51d8b3c1fe80b162b0ba5ac58b0afe87c4c94cbe958c58
-        consensus.BIP66Height = 23523; // 0000000002fde67fbf51d8b3c1fe80b162b0ba5ac58b0afe87c4c94cbe958c58
+        consensus.BIP34Height = 544000;
+        consensus.BIP34Hash = uint256{};
+        consensus.BIP65Height = 544000;
+        consensus.BIP66Height = 544000;
         consensus.CSVHeight = 544000;
         consensus.SegwitHeight = 544000;
         consensus.powLimit = uint256S("00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
@@ -91,11 +91,15 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_TAPROOT].nTimeout = 1628640000; // August 11th, 2021
         consensus.vDeployments[Consensus::DEPLOYMENT_TAPROOT].min_activation_height = 709632; // Approximately November 12th, 2021
 
+
+        // The best chain should have at least this much work.
+        // The value is the chain work of the Devcoin mainnet chain at height
+        // 565'000, with best block hash:
+        // [TODO BLOCKHASH]
         consensus.nMinimumChainWork = uint256S("0x0000000000000000000000000000000000000000025018c6a1a353ba518e9753");
         consensus.defaultAssumeValid = uint256S("0xe5f6dbecef5f5b8c49b8a6b7cefc80183dace19c474264b87f07edf55d347860"); // 496000
 
         consensus.nAuxpowChainId = 4;
-        consensus.nAuxpowOldChainId = 4096;
         consensus.nAuxpowStartHeight = 0;
         consensus.fStrictChainId = true;
         consensus.nLegacyBlocksBefore = 19200;
@@ -211,7 +215,6 @@ public:
 
         consensus.nAuxpowStartHeight = 0;
         consensus.nAuxpowChainId = 16;
-        consensus.nAuxpowOldChainId = 4096;
         consensus.fStrictChainId = false;
         consensus.nLegacyBlocksBefore = -1;
 
@@ -349,7 +352,6 @@ public:
 
         consensus.nAuxpowStartHeight = 0;
         consensus.nAuxpowChainId = 8;
-        consensus.nAuxpowOldChainId = 4096;
         consensus.fStrictChainId = true;
         consensus.nLegacyBlocksBefore = 0;
 
@@ -426,7 +428,6 @@ public:
 
         consensus.nAuxpowStartHeight = 0;
         consensus.nAuxpowChainId = 8;
-        consensus.nAuxpowOldChainId = 4096;
         consensus.fStrictChainId = true;
         consensus.nLegacyBlocksBefore = 0;
 

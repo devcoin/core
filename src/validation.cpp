@@ -1198,23 +1198,12 @@ bool CheckProofOfWork(const CBlockHeader& block, const Consensus::Params& params
        the chain ID is correct.  Legacy blocks are not allowed since
        the merge-mining start, which is checked in AcceptBlockHeader
        where the height is known.  */
-    const int32_t &nChainID = block.GetChainId();
-    if (!block.IsLegacy() && params.fStrictChainId) {
-        if (nChainID > 0) {
-            if (nChainID != params.nAuxpowChainId)
-                return error("%s : block does not have our chain ID"
-                        " (got %d, expected %d, full nVersion %d)",
-                        __func__, nChainID,
-                        params.nAuxpowChainId, block.nVersion);
-        } else if (block.auxpow) {
-            const int32_t &nOldChainID = block.GetOldChainId();
-            if (nOldChainID != params.nAuxpowOldChainId)
-                return error("%s : block does not have our old chain ID"
-                        " (got %d, expected %d, full nVersion %d)",
-                        __func__, nOldChainID,
-                        params.nAuxpowOldChainId, block.nVersion);
-        }
-    }
+    if (!block.IsLegacy() && params.fStrictChainId
+        && block.GetChainId() != params.nAuxpowChainId)
+        return error("%s : block does not have our chain ID"
+                     " (got %d, expected %d, full nVersion %d)",
+                     __func__, block.GetChainId(),
+                     params.nAuxpowChainId, block.nVersion);
 
     /* If there is no auxpow, just check the block hash.  */
     if (!block.auxpow)

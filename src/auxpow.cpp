@@ -41,12 +41,8 @@ bool
 CAuxPow::check (const uint256& hashAuxBlock, int nChainId,
                 const Consensus::Params& params) const
 {
-    if (params.fStrictChainId) {
-        if (parentBlock.GetChainId () == nChainId)
-            return error("Aux POW parent has our chain ID");
-        else if(parentBlock.GetOldChainId() == params.nAuxpowOldChainId)
-            return error("Aux POW parent has our old chain ID");
-    }
+    if (params.fStrictChainId && parentBlock.GetChainId () == nChainId)
+        return error("Aux POW parent has our chain ID");
 
     if (vChainMerkleBranch.size() > 30)
         return error("Aux POW chain merkle branch too long");

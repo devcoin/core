@@ -207,8 +207,8 @@ DEVCOIN_CORE_H = \
   randomenv.h \
   receiver.h \
   reverse_iterator.h \
-  rpc/blockchain.h \
   rpc/auxpow_miner.h \
+  rpc/blockchain.h \
   rpc/client.h \
   rpc/mining.h \
   rpc/net.h \
@@ -428,7 +428,6 @@ libdevcoin_wallet_a_SOURCES = \
   wallet/walletdb.cpp \
   wallet/walletutil.cpp \
   wallet/coinselection.cpp \
-  rpc/auxpow_miner.cpp \
   $(DEVCOIN_CORE_H)
 
 if USE_SQLITE
@@ -655,7 +654,9 @@ devcoin_daemon_sources += devcoind-res.rc
 endif
 
 devcoin_bin_ldadd = \
+  $(LIBDEVCOIN_SERVER) \
   $(LIBDEVCOIN_WALLET) \
+  $(LIBDEVCOIN_SERVER) \
   $(LIBDEVCOIN_COMMON) \
   $(LIBDEVCOIN_UTIL) \
   $(LIBUNIVALUE) \
