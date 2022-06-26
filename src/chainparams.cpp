@@ -101,8 +101,8 @@ public:
 
         consensus.nAuxpowChainId = 4;
         consensus.nAuxpowStartHeight = 0;
-        consensus.fStrictChainId = true;
-        consensus.nLegacyBlocksBefore = 19200;
+        consensus.fStrictChainId = false;
+        consensus.nLegacyBlocksBefore = 25000;
 
         /**
          * The message start string is designed to be unlikely to occur in normal data.
