@@ -70,8 +70,8 @@ public:
         consensus.BIP34Hash = uint256S("0x0000000002fde67fbf51d8b3c1fe80b162b0ba5ac58b0afe87c4c94cbe958c58");
         consensus.BIP65Height = 23523; // 0000000002fde67fbf51d8b3c1fe80b162b0ba5ac58b0afe87c4c94cbe958c58
         consensus.BIP66Height = 23523; // 0000000002fde67fbf51d8b3c1fe80b162b0ba5ac58b0afe87c4c94cbe958c58
-        consensus.CSVHeight = 557000;
-        consensus.SegwitHeight = 557000;
+        consensus.CSVHeight = 608000;
+        consensus.SegwitHeight = 608000;
         consensus.powLimit = uint256S("00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.nPowTargetTimespan = 24 * 60 * 60; // one day
         consensus.nPowTargetSpacing = 10 * 60;
