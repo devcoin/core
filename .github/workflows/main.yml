@@ -16,7 +16,11 @@ on:
       debug_enabled:
         description: 'Run the build with tmate debugging enabled (https://github.com/marketplace/actions/debugging-with-tmate)'
         required: false
-        default: false
+        default: 'no'
+        type: choice
+        options:
+          - 'yes'
+          - 'no'
   pull_request:
     paths-ignore:
       - 'doc/**'
@@ -249,6 +253,6 @@ jobs:
             dist/Devcoin-Core-Qt.app
 
       - name: Setup tmate session
-        if: ${{ failure() && github.event_name == 'workflow_dispatch' && github.event.inputs.debug_enabled }}
+        if: ${{ failure() && 'workflow_dispatch' == github.event_name && 'yes' == github.event.inputs.debug_enabled }}
         uses: develCuy/action-tmate@master
 
