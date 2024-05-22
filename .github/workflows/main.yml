@@ -1,10 +1,18 @@
-name: Continuous Integration
+name: Build devcoin for linux, macos and windows
 
 on:
   workflow_dispatch:
     paths-ignore:
       - '**/*.md'
     inputs:
+      platform:
+        description: 'Target platform to build on'
+        required: true
+        type: choice
+        options:
+          - linux
+          - macos
+          - windows
       debug_enabled:
         description: 'Run the build with tmate debugging enabled (https://github.com/marketplace/actions/debugging-with-tmate)'
         required: false
@@ -55,6 +63,7 @@ jobs:
             config-opts: "--enable-zmq --enable-glibc-back-compat --disable-tests LDFLAGS=-static-libstdc++"
             make-params: ""
             goal: install
+            platform: linux
           - name: armhf-linux
             host: arm-linux-gnueabihf
             arch: "armhf"
@@ -67,6 +76,7 @@ jobs:
             config-opts: "--enable-glibc-back-compat --enable-reduce-exports --disable-tests"
             make-params: ""
             goal: install
+            platform: linux
           - name: x86_64-linux-nowallet
             host: x86_64-unknown-linux-gnu
             os: ubuntu-20.04
@@ -76,6 +86,7 @@ jobs:
             config-opts: "--enable-gui=qt5 --enable-glibc-back-compat --enable-reduce-exports --disable-wallet"
             make-params: ""
             goal: install
+            platform: linux
           - name: x86_64-linux-dbg
             host: x86_64-unknown-linux-gnu
             os: ubuntu-20.04
@@ -85,6 +96,7 @@ jobs:
             config-opts: "--enable-gui=qt5 --enable-zmq --enable-glibc-back-compat --enable-reduce-exports CPPFLAGS=-DDEBUG_LOCKORDER"
             make-params: ""
             goal: install
+            platform: linux
           - name: x86_64-win
             host: x86_64-w64-mingw32
             arch: "i386"
@@ -102,6 +114,7 @@ jobs:
             config-opts: "--enable-reduce-exports --enable-gui=qt5"
             make-params: "LIBCURL=-lcurl.dll"
             goal: install
+            platform: windows
           - name: x86_64-macos
             host: x86_64-apple-darwin11
             os: ubuntu-18.04
@@ -111,11 +124,16 @@ jobs:
             config-opts: "--enable-gui=qt5 --enable-reduce-exports"
             make-params: ""
             goal: deploy
+            platform: macos
             sdk: 11.3
 
     runs-on: ${{ matrix.os }}
 
     steps:
+      - name: Skip platform not selected
+        if: matrix.platform != github.event.inputs.platform
+        run: exit 1
+
       - name: Add architecture
         if: ${{ matrix.arch }}
         run: |
