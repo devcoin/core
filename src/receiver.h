@@ -5,6 +5,8 @@
 #ifndef DEVCOIN_RECEIVER_H
 #define DEVCOIN_RECEIVER_H
 
+#include <map>
+
 #include <boost/asio.hpp>
 #include <devcoin.h>
 
