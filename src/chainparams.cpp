@@ -98,6 +98,8 @@ public:
         consensus.fStrictChainId = true;
         consensus.nAuxpowChainId = 4;
         consensus.nAuxpowOldChainId = 4096;
+        consensus.nAuxpowStartHeight = 0;
+        consensus.nLegacyBlocksBefore = -1;
 
         /**
          * The message start string is designed to be unlikely to occur in normal data.
@@ -211,6 +213,8 @@ public:
         consensus.fStrictChainId = false;
         consensus.nAuxpowChainId = 16;
         consensus.nAuxpowOldChainId = 4096;
+        consensus.nAuxpowStartHeight = 0;
+        consensus.nLegacyBlocksBefore = -1;
 
         pchMessageStart[0] = 0x64; // d
         pchMessageStart[1] = 0x65; // e
@@ -321,6 +325,8 @@ public:
         consensus.fStrictChainId = false;
         consensus.nAuxpowChainId = 8;
         consensus.nAuxpowOldChainId = 4096;
+        consensus.nAuxpowStartHeight = 0;
+        consensus.nLegacyBlocksBefore = -1;
 
         consensus.signet_challenge.assign(bin.begin(), bin.end());
         consensus.nSubsidyHalvingInterval = 210000;
@@ -425,6 +431,8 @@ public:
         consensus.fStrictChainId = false;
         consensus.nAuxpowChainId = 8;
         consensus.nAuxpowOldChainId = 4096;
+        consensus.nAuxpowStartHeight = 0;
+        consensus.nLegacyBlocksBefore = -1;
 
         pchMessageStart[0] = 0x64; // d
         pchMessageStart[1] = 0x65; // e

@@ -146,6 +146,10 @@ void sanity_check_chainparams(const ArgsManager& args, std::string chainName)
     // target timespan is an even multiple of spacing
     BOOST_CHECK_EQUAL(consensus.nPowTargetTimespan % consensus.nPowTargetSpacing, 0);
 
+    // AuxPoW RPCs are available without introducing a legacy-block cutoff.
+    BOOST_CHECK_EQUAL(consensus.nAuxpowStartHeight, 0);
+    BOOST_CHECK_EQUAL(consensus.nLegacyBlocksBefore, -1);
+
     // genesis nBits is positive, doesn't overflow and is lower than powLimit
     arith_uint256 pow_compact;
     bool neg, over;
