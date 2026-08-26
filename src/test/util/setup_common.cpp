@@ -39,6 +39,7 @@
 #include <walletinitinterface.h>
 
 #include <functional>
+#include <fstream>
 
 const std::function<std::string(const char*)> G_TRANSLATION_FUN = nullptr;
 UrlDecodeFn* const URL_DECODE = nullptr;
@@ -215,6 +216,14 @@ TestChain100Setup::TestChain100Setup()
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}};
     coinbaseKey.Set(vchKey.begin(), vchKey.end(), true);
 
+    // Keep regtest deterministic and offline. Without this local file the
+    // receiver code downloads current mainnet addresses, which are invalid on
+    // regtest and make CreateNewBlock return a null block template.
+    fs::create_directories(m_path_root / "receiver");
+    std::ofstream receiver_file{(m_path_root / "receiver" / "receiver_0.csv").string()};
+    receiver_file << "Format,pluribusunum\n";
+    receiver_file.close();
+
     // Generate a 100-block chain:
     this->mineBlocks(COINBASE_MATURITY);
 
@@ -222,7 +231,7 @@ TestChain100Setup::TestChain100Setup()
         LOCK(::cs_main);
         assert(
             m_node.chainman->ActiveChain().Tip()->GetBlockHash().ToString() ==
-            "571d80a9967ae599cec0448b0b0ba1cfb606f584d8069bd7166b86854ba7a191");
+            "403208c76fd3e9b0f90e6e27f5d2f2b9c08d9a8a9314794bf9716ff9b8958e78");
     }
 }
 
