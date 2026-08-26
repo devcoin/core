@@ -16,6 +16,7 @@
 #include <util/system.h>
 
 #include <algorithm>
+#include <string>
 
 namespace
 {
@@ -35,11 +36,109 @@ DecodeLE32 (const unsigned char* bytes)
   return res;
 }
 
+struct CommitmentResult
+{
+  bool present;
+  bool valid;
+  std::string error;
+};
+
+template <typename Iterator>
+CommitmentResult
+CheckCommitmentTail (Iterator pc, Iterator end,
+                     const unsigned merkleHeight, const int chainIndex,
+                     const int chainId)
+{
+  if (end - pc < 8)
+    return {true, false,
+            "Aux POW missing chain merkle tree size and nonce in parent coinbase"};
+
+  const uint32_t nSize = DecodeLE32 (&pc[0]);
+  if (nSize != (1u << merkleHeight))
+    return {true, false,
+            "Aux POW merkle branch size does not match parent coinbase"};
+
+  const uint32_t nNonce = DecodeLE32 (&pc[4]);
+  if (chainIndex != CAuxPow::getExpectedIndex (nNonce, chainId, merkleHeight))
+    return {true, false, "Aux POW wrong index"};
+
+  return {true, true, {}};
+}
+
+CommitmentResult
+CheckInputCommitment (const CScript& script, const valtype& root,
+                      const unsigned merkleHeight, const int chainIndex,
+                      const int chainId)
+{
+  const auto mmHeaderBegin = std::begin (pchMergedMiningHeader);
+  const auto mmHeaderEnd = std::end (pchMergedMiningHeader);
+  auto pcHead = std::search (script.begin (), script.end (),
+                             mmHeaderBegin, mmHeaderEnd);
+  auto pc = std::search (script.begin (), script.end (), root.begin (), root.end ());
+
+  if (pc == script.end ())
+    return {pcHead != script.end (), false,
+            "Aux POW missing chain merkle root in parent coinbase"};
+
+  if (pcHead != script.end ())
+    {
+      if (script.end () != std::search (pcHead + 1, script.end (),
+                                        mmHeaderBegin, mmHeaderEnd))
+        return {true, false, "Multiple merged mining headers in coinbase"};
+      if (pcHead + sizeof (pchMergedMiningHeader) != pc)
+        return {true, false,
+                "Merged mining header is not just before chain merkle root"};
+    }
+  else if (pc - script.begin () > 20)
+    return {true, false,
+            "Aux POW chain merkle root must start in the first 20 bytes of the parent coinbase"};
+
+  pc += root.size ();
+  return CheckCommitmentTail (pc, script.end (), merkleHeight,
+                              chainIndex, chainId);
+}
+
+CommitmentResult
+CheckOutputCommitments (const CTransaction& coinbase, const valtype& root,
+                        const unsigned merkleHeight, const int chainIndex,
+                        const int chainId)
+{
+  CommitmentResult result{false, false, {}};
+  for (size_t i = 0; i < coinbase.vout.size (); ++i)
+    {
+      const CTxOut& output = coinbase.vout[i];
+      const CScript& script = output.scriptPubKey;
+      if (script.size () != 46 || script[0] != OP_RETURN || script[1] != 44
+          || !std::equal (std::begin (pchMergedMiningHeader),
+                          std::end (pchMergedMiningHeader), script.begin () + 2))
+        continue;
+
+      if (result.present)
+        return {true, false, "Multiple merged mining outputs in coinbase"};
+      result.present = true;
+
+      if (i + 1 != coinbase.vout.size ())
+        result.error = "Merged mining output is not the final coinbase output";
+      else if (output.nValue != 0)
+        result.error = "Merged mining output value is not zero";
+      else if (!std::equal (root.begin (), root.end (), script.begin () + 6))
+        result.error = "Aux POW output has the wrong chain merkle root";
+      else
+        {
+          valtype payload (script.begin () + 2, script.end ());
+          result = CheckCommitmentTail (payload.begin () + 36, payload.end (),
+                                        merkleHeight, chainIndex, chainId);
+        }
+    }
+  return result;
+}
+
 } // anonymous namespace
 
 bool
 CAuxPow::check (const uint256& hashAuxBlock, int nChainId,
-                const Consensus::Params& params) const
+                 const Consensus::Params& params,
+                 bool allowOutputCommitment) const
 {
     if (params.fStrictChainId) {
         const int32_t &nChainIDParent = parentBlock.GetChainId();
@@ -71,59 +170,29 @@ CAuxPow::check (const uint256& hashAuxBlock, int nChainId,
     if (coinbaseTx->vin.empty())
         return error("Aux POW coinbase has no inputs");
 
-    const CScript &script = coinbaseTx->vin[0].scriptSig;
-
-    // Check that the same work is not submitted twice to our chain.
-    //
-
-    const unsigned char* const mmHeaderBegin = pchMergedMiningHeader;
-    const unsigned char* const mmHeaderEnd
-        = mmHeaderBegin + sizeof (pchMergedMiningHeader);
-    CScript::const_iterator pcHead =
-        std::search(script.begin(), script.end(), mmHeaderBegin, mmHeaderEnd);
-
-    CScript::const_iterator pc =
-        std::search(script.begin(), script.end(), vchRootHash.begin(), vchRootHash.end());
-
-    if (pc == script.end())
-        return error("Aux POW missing chain merkle root in parent coinbase");
-
-    if (pcHead != script.end())
-    {
-        // Enforce only one chain merkle root by checking that a single instance of the merged
-        // mining header exists just before.
-        if (script.end() != std::search(pcHead + 1, script.end(),
-                                        mmHeaderBegin, mmHeaderEnd))
-            return error("Multiple merged mining headers in coinbase");
-        if (pcHead + sizeof(pchMergedMiningHeader) != pc)
-            return error("Merged mining header is not just before chain merkle root");
-    }
-    else
-    {
-        // For backward compatibility.
-        // Enforce only one chain merkle root by checking that it starts early in the coinbase.
-        // 8-12 bytes are enough to encode extraNonce and nBits.
-        if (pc - script.begin() > 20)
-            return error("Aux POW chain merkle root must start in the first 20 bytes of the parent coinbase");
-    }
-
-
-    // Ensure we are at a deterministic point in the merkle leaves by hashing
-    // a nonce and our chain ID and comparing to the index.
-    pc += vchRootHash.size();
-    if (script.end() - pc < 8)
-        return error("Aux POW missing chain merkle tree size and nonce in parent coinbase");
-
-    const uint32_t &nSize = DecodeLE32 (&pc[0]);
     const unsigned &merkleHeight = vChainMerkleBranch.size ();
-    if (nSize != (1u << merkleHeight))
-        return error("Aux POW merkle branch size does not match parent coinbase");
+    const CommitmentResult input = CheckInputCommitment (
+        coinbaseTx->vin[0].scriptSig, vchRootHash, merkleHeight,
+        nChainIndex, nChainId);
+    const CommitmentResult output = CheckOutputCommitments (
+        *coinbaseTx, vchRootHash, merkleHeight, nChainIndex, nChainId);
 
-    const uint32_t &nNonce = DecodeLE32 (&pc[4]);
-    if (nChainIndex != getExpectedIndex (nNonce, nChainId, merkleHeight))
-        return error("Aux POW wrong index");
+    if (input.present && output.present)
+        return error("Multiple merged mining commitment locations in coinbase");
+    if (input.valid)
+        return true;
+    if (output.valid)
+      {
+        if (!allowOutputCommitment)
+            return error("Aux POW coinbase output commitment is not active");
+        return true;
+      }
+    if (input.present)
+        return error("%s", input.error.c_str ());
+    if (output.present)
+        return error("%s", output.error.c_str ());
 
-    return true;
+    return error("Aux POW missing chain merkle root in parent coinbase");
 }
 
 int

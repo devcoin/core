@@ -99,6 +99,7 @@ public:
         consensus.nAuxpowChainId = 4;
         consensus.nAuxpowOldChainId = 4096;
         consensus.nAuxpowStartHeight = 0;
+        consensus.nAuxpowOutputCommitmentHeight = std::numeric_limits<int>::max();
         consensus.nLegacyBlocksBefore = -1;
 
         /**
@@ -214,6 +215,7 @@ public:
         consensus.nAuxpowChainId = 16;
         consensus.nAuxpowOldChainId = 4096;
         consensus.nAuxpowStartHeight = 0;
+        consensus.nAuxpowOutputCommitmentHeight = 0;
         consensus.nLegacyBlocksBefore = -1;
 
         pchMessageStart[0] = 0x64; // d
@@ -326,6 +328,7 @@ public:
         consensus.nAuxpowChainId = 8;
         consensus.nAuxpowOldChainId = 4096;
         consensus.nAuxpowStartHeight = 0;
+        consensus.nAuxpowOutputCommitmentHeight = 0;
         consensus.nLegacyBlocksBefore = -1;
 
         consensus.signet_challenge.assign(bin.begin(), bin.end());
@@ -432,6 +435,7 @@ public:
         consensus.nAuxpowChainId = 8;
         consensus.nAuxpowOldChainId = 4096;
         consensus.nAuxpowStartHeight = 0;
+        consensus.nAuxpowOutputCommitmentHeight = 0;
         consensus.nLegacyBlocksBefore = -1;
 
         pchMessageStart[0] = 0x64; // d

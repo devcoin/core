@@ -21,7 +21,7 @@ from test_framework.messages import (
     ser_uint256_vector,
     uint256_from_compact,
 )
-from test_framework.script import CScript, OP_TRUE
+from test_framework.script import CScript, OP_RETURN, OP_TRUE
 from test_framework.test_framework import DevcoinTestFramework
 from test_framework.util import (
     assert_equal,
@@ -34,7 +34,7 @@ MERGED_MINING_HEADER = bytes.fromhex("fabe6d6d")
 PARENT_VERSION = 0x20000000
 
 
-def build_auxpow(candidate, hash_block=0):
+def build_auxpow(candidate, hash_block=0, output_commitment=False):
     """Build one canonical single-chain CAuxPow without a tx-length prefix."""
     commitment = (
         MERGED_MINING_HEADER
@@ -46,11 +46,17 @@ def build_auxpow(candidate, hash_block=0):
     coinbase.vin = [
         CTxIn(
             COutPoint(0, 0xffffffff),
-            scriptSig=commitment,
+            scriptSig=CScript([OP_TRUE, OP_TRUE]) if output_commitment else commitment,
             nSequence=0xffffffff,
         )
     ]
     coinbase.vout = [CTxOut(0, CScript([OP_TRUE]))]
+    if output_commitment:
+        coinbase.vout.append(CTxOut(0, CScript([OP_RETURN, commitment])))
+        assert_equal(
+            coinbase.vout[-1].serialize().hex(),
+            "00" * 8 + "2e6a2c" + commitment.hex(),
+        )
     coinbase.calc_sha256()
 
     parent = CBlockHeader()
@@ -209,7 +215,7 @@ class AuxpowRPCTest(DevcoinTestFramework):
         fresh = node.createauxblock(payout)
         self.assert_candidate(fresh)
         # hashBlock is a legacy field that consensus intentionally ignores.
-        fresh_proof = build_auxpow(fresh, hash_block=1)
+        fresh_proof = build_auxpow(fresh, hash_block=1, output_commitment=True)
         assert node.submitauxblock(fresh["hash"], fresh_proof)
         assert_equal(node.getbestblockhash(), fresh["hash"])
         assert_equal(node.getblockcount(), fresh["height"])

@@ -65,6 +65,7 @@ endif
 # test_devcoin binary #
 DEVCOIN_TESTS =\
   test/arith_uint256_tests.cpp \
+  test/auxpow_tests.cpp \
   test/scriptnum10.h \
   test/addrman_tests.cpp \
   test/amount_tests.cpp \

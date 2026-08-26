@@ -1213,6 +1213,12 @@ bool CheckProofOfWork(const CBlockHeader& block, const Consensus::Params& params
     return true;
 }
 
+bool CheckAuxPowCommitment(const CBlockHeader& block, int height, const Consensus::Params& params)
+{
+    return !block.auxpow || height >= params.nAuxpowOutputCommitmentHeight
+        || block.auxpow->check(block.GetHash(), block.GetChainId(), params, false);
+}
+
 CTransactionRef GetTransaction(const CBlockIndex* const block_index, const CTxMemPool* const mempool, const uint256& hash, const Consensus::Params& consensusParams, uint256& hashBlock)
 {
     LOCK(cs_main);
@@ -1777,6 +1783,13 @@ bool CChainState::ConnectBlock(const CBlock& block, BlockValidationState& state,
             return AbortNode(state, "Corrupt block found indicating potential hardware failure; shutting down");
         }
         return error("%s: Consensus::CheckBlock: %s", __func__, state.ToString());
+    }
+
+    const Consensus::Params& consensus = m_params.GetConsensus();
+    if (!CheckAuxPowCommitment(block, pindex->nHeight, consensus)) {
+        return state.Invalid(BlockValidationResult::BLOCK_CONSENSUS,
+                             "bad-auxpow-output-premature",
+                             "coinbase output AuxPoW commitment is not active");
     }
 
     // verify that the view's current state corresponds to the previous block
@@ -3285,6 +3298,12 @@ static bool ContextualCheckBlockHeader(const CBlockHeader& block, BlockValidatio
 static bool ContextualCheckBlock(const CBlock& block, BlockValidationState& state, const Consensus::Params& consensusParams, const CBlockIndex* pindexPrev)
 {
     const int nHeight = pindexPrev == nullptr ? 0 : pindexPrev->nHeight + 1;
+
+    if (!CheckAuxPowCommitment(block, nHeight, consensusParams)) {
+        return state.Invalid(BlockValidationResult::BLOCK_CONSENSUS,
+                             "bad-auxpow-output-premature",
+                             "coinbase output AuxPoW commitment is not active");
+    }
 
     // Enforce BIP113 (Median Time Past).
     int nLockTimeFlags = 0;

@@ -107,10 +107,13 @@ public:
    * @param hashAuxBlock Hash of the merge-mined block.
    * @param nChainId The auxpow chain ID of the block to check.
    * @param params Consensus parameters.
+   * @param allowOutputCommitment Whether the canonical coinbase-output form is
+   * allowed at the block's height.
    * @return True if the auxpow is valid.
    */
   bool check (const uint256& hashAuxBlock, int nChainId,
-              const Consensus::Params& params) const;
+               const Consensus::Params& params,
+               bool allowOutputCommitment = true) const;
 
   /**
    * Returns the parent block hash.  This is used to validate the PoW.

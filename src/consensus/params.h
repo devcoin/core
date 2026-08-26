@@ -111,6 +111,8 @@ struct Params {
     int32_t nAuxpowChainId;
     int32_t nAuxpowOldChainId;
     int nAuxpowStartHeight;
+    /** Height at which a canonical final coinbase output may carry AuxPoW. */
+    int nAuxpowOutputCommitmentHeight;
     bool fStrictChainId;
     int nLegacyBlocksBefore; // -1 for "always allow"
 
