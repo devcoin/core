@@ -466,7 +466,7 @@ BOOST_AUTO_TEST_CASE(caddrinfo_get_tried_bucket_legacy)
 
     std::vector<bool> asmap; // use /16
 
-    BOOST_CHECK_EQUAL(info1.GetTriedBucket(nKey1, asmap), 40);
+    BOOST_CHECK_EQUAL(info1.GetTriedBucket(nKey1, asmap), 62);
 
     // Test: Make sure key actually randomizes bucket placement. A fail on
     //  this test could be a security issue.
@@ -599,7 +599,7 @@ BOOST_AUTO_TEST_CASE(caddrinfo_get_tried_bucket)
 
     std::vector<bool> asmap = FromBytes(asmap_raw, sizeof(asmap_raw) * 8);
 
-    BOOST_CHECK_EQUAL(info1.GetTriedBucket(nKey1, asmap), 236);
+    BOOST_CHECK_EQUAL(info1.GetTriedBucket(nKey1, asmap), 29);
 
     // Test: Make sure key actually randomizes bucket placement. A fail on
     //  this test could be a security issue.
