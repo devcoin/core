@@ -2052,7 +2052,7 @@ bool CChainState::ConnectBlock(const CBlock& block, BlockValidationState& state,
 
     // DEVCOIN
     // Check that the required Devcoin share was sent to each beneficiary
-    if (block.vtx[0]->GetValueOut() > (GetBlockSubsidy(pindex->nHeight, m_params.GetConsensus()) - fallbackReduction))
+    if (block.vtx[0]->GetValueOut() > (blockReward - fallbackReduction))
     {
         std::vector<std::string> addressStrings;
         std::vector<int64_t> amounts;

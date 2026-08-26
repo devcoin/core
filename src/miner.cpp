@@ -173,7 +173,6 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
     coinbaseTx.vout[0].scriptPubKey = scriptPubKeyIn;
 
     // Prepare to pay beneficiaries
-    int64_t nFees = 0;
     int64_t minerValue = GetBlockSubsidy(nHeight, chainparams.GetConsensus());
     int64_t sharePerAddress = 0;
     if (coinAddressStrings.size() == 0)

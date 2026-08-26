@@ -7,6 +7,10 @@
 #include <consensus/consensus.h>
 #include <consensus/merkle.h>
 #include <consensus/tx_verify.h>
+#include <devcoin.h>
+#include <fs.h>
+#include <key.h>
+#include <key_io.h>
 #include <miner.h>
 #include <policy/policy.h>
 #include <script/standard.h>
@@ -26,6 +30,7 @@
 namespace miner_tests {
 struct MinerTestingSetup : public TestingSetup {
     void TestPackageSelection(const CChainParams& chainparams, const CScript& scriptPubKey, const std::vector<CTransactionRef>& txFirst) EXCLUSIVE_LOCKS_REQUIRED(::cs_main, m_node.mempool->cs);
+    void AddTestTransaction(CAmount fee) EXCLUSIVE_LOCKS_REQUIRED(::cs_main, m_node.mempool->cs);
     bool TestSequenceLocks(const CTransaction& tx, int flags) EXCLUSIVE_LOCKS_REQUIRED(::cs_main, m_node.mempool->cs)
     {
         CCoinsViewMemPool view_mempool(&m_node.chainman->ActiveChainstate().CoinsTip(), *m_node.mempool);
@@ -46,6 +51,34 @@ BlockAssembler MinerTestingSetup::AssemblerForTest(const CChainParams& params)
     options.nBlockMaxWeight = MAX_BLOCK_WEIGHT;
     options.blockMinFeeRate = blockMinFeeRate;
     return BlockAssembler(m_node.chainman->ActiveChainstate(), *m_node.mempool, params, options);
+}
+
+void MinerTestingSetup::AddTestTransaction(const CAmount fee)
+{
+    const CAmount input_value = 10 * COIN;
+    assert(fee > 0 && fee < input_value);
+
+    const COutPoint prevout{InsecureRand256(), 0};
+    const int height = m_node.chainman->ActiveChain().Height();
+    m_node.chainman->ActiveChainstate().CoinsTip().AddCoin(
+        prevout, Coin(CTxOut(input_value, CScript{} << OP_TRUE), height, false), false);
+
+    CMutableTransaction tx;
+    tx.vin.emplace_back(prevout);
+    tx.vout.emplace_back(input_value - fee, CScript{} << OP_TRUE);
+
+    TestMemPoolEntryHelper entry;
+    m_node.mempool->addUnchecked(entry.Fee(fee).Time(GetTime()).Height(height).FromTx(tx));
+}
+
+static void WriteReceiverFile(const fs::path& data_dir, const std::string& contents)
+{
+    const fs::path receiver_dir = data_dir / "receiver";
+    fs::create_directories(receiver_dir);
+    fsbridge::ofstream file{receiver_dir / "receiver_0.csv"};
+    BOOST_REQUIRE(file.is_open());
+    file << contents;
+    BOOST_REQUIRE(file.good());
 }
 
 constexpr static struct {
@@ -196,6 +229,83 @@ void MinerTestingSetup::TestPackageSelection(const CChainParams& chainparams, co
     pblocktemplate = AssemblerForTest(chainparams).CreateNewBlock(scriptPubKey);
     BOOST_REQUIRE_EQUAL(pblocktemplate->block.vtx.size(), 9U);
     BOOST_CHECK(pblocktemplate->block.vtx[8]->GetHash() == hashLowFeeTx2);
+}
+
+BOOST_AUTO_TEST_CASE(CreateNewBlock_fee_accounting)
+{
+    WriteReceiverFile(m_args.GetDataDirBase(), "Format,pluribusunum\n");
+
+    const auto chain_params = CreateChainParams(*m_node.args, CBaseChainParams::MAIN);
+    const CChainParams& chainparams = *chain_params;
+    const CScript script_pub_key{CScript{} << OP_TRUE};
+
+    LOCK2(cs_main, m_node.mempool->cs);
+
+    const auto no_fee_template = AssemblerForTest(chainparams).CreateNewBlock(script_pub_key);
+    BOOST_REQUIRE(no_fee_template);
+    BOOST_REQUIRE_EQUAL(no_fee_template->block.vtx[0]->vout.size(),
+                        no_fee_template->vchCoinbaseCommitment.empty() ? 1U : 2U);
+    const CAmount no_fee_miner_value = no_fee_template->block.vtx[0]->vout[0].nValue;
+
+    const CAmount fee_one = 1 * COIN;
+    const CAmount fee_two = 2 * COIN;
+    const CAmount total_fees = fee_one + fee_two;
+    AddTestTransaction(fee_one);
+    AddTestTransaction(fee_two);
+
+    const auto block_template = AssemblerForTest(chainparams).CreateNewBlock(script_pub_key);
+    BOOST_REQUIRE(block_template);
+    BOOST_REQUIRE_EQUAL(block_template->block.vtx.size(), 3U);
+    BOOST_REQUIRE_EQUAL(block_template->vTxFees.size(), 3U);
+    BOOST_CHECK_EQUAL(block_template->block.vtx[0]->vout[0].nValue, no_fee_miner_value + total_fees);
+    BOOST_CHECK_EQUAL(block_template->vTxFees[0], -total_fees);
+    BOOST_CHECK_EQUAL(block_template->vTxFees[1] + block_template->vTxFees[2], total_fees);
+    BOOST_CHECK_EQUAL(block_template->block.vtx[0]->vout.size(), no_fee_template->block.vtx[0]->vout.size());
+
+    BlockValidationState state;
+    BOOST_CHECK_MESSAGE(
+        TestBlockValidity(state, chainparams, m_node.chainman->ActiveChainstate(), block_template->block,
+                          m_node.chainman->ActiveChain().Tip(), false, false),
+        state.ToString());
+}
+
+BOOST_AUTO_TEST_CASE(CreateNewBlock_beneficiary_fee_accounting)
+{
+    CKey beneficiary_key;
+    beneficiary_key.MakeNewKey(true);
+    const PKHash beneficiary{beneficiary_key.GetPubKey()};
+    WriteReceiverFile(m_args.GetDataDirBase(), strprintf("Coin,%s\n", EncodeDestination(beneficiary)));
+
+    const auto chain_params = CreateChainParams(*m_node.args, CBaseChainParams::MAIN);
+    const CChainParams& chainparams = *chain_params;
+    const CScript script_pub_key{CScript{} << OP_TRUE};
+
+    LOCK2(cs_main, m_node.mempool->cs);
+
+    const auto no_fee_template = AssemblerForTest(chainparams).CreateNewBlock(script_pub_key);
+    BOOST_REQUIRE(no_fee_template);
+    BOOST_REQUIRE_EQUAL(no_fee_template->block.vtx[0]->vout.size(),
+                        no_fee_template->vchCoinbaseCommitment.empty() ? 2U : 3U);
+    BOOST_CHECK(no_fee_template->block.vtx[0]->vout[1].scriptPubKey == GetScriptForDestination(beneficiary));
+    BOOST_CHECK_EQUAL(no_fee_template->block.vtx[0]->vout[1].nValue, devcoinShare);
+
+    const CAmount fee = 2 * COIN;
+    AddTestTransaction(fee);
+    const auto block_template = AssemblerForTest(chainparams).CreateNewBlock(script_pub_key);
+    BOOST_REQUIRE(block_template);
+    BOOST_REQUIRE_EQUAL(block_template->block.vtx.size(), 2U);
+    BOOST_REQUIRE_EQUAL(block_template->block.vtx[0]->vout.size(), no_fee_template->block.vtx[0]->vout.size());
+    BOOST_CHECK_EQUAL(block_template->block.vtx[0]->vout[0].nValue,
+                      no_fee_template->block.vtx[0]->vout[0].nValue + fee);
+    BOOST_CHECK(block_template->block.vtx[0]->vout[1].scriptPubKey == no_fee_template->block.vtx[0]->vout[1].scriptPubKey);
+    BOOST_CHECK_EQUAL(block_template->block.vtx[0]->vout[1].nValue, no_fee_template->block.vtx[0]->vout[1].nValue);
+    BOOST_CHECK_EQUAL(block_template->vTxFees[0], -fee);
+
+    BlockValidationState state;
+    BOOST_CHECK_MESSAGE(
+        TestBlockValidity(state, chainparams, m_node.chainman->ActiveChainstate(), block_template->block,
+                          m_node.chainman->ActiveChain().Tip(), false, false),
+        state.ToString());
 }
 
 // NOTE: These tests rely on CreateNewBlock doing its own self-validation!
