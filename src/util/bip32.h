@@ -6,6 +6,8 @@
 #define DEVCOIN_UTIL_BIP32_H
 
 #include <attributes.h>
+
+#include <cstdint>
 #include <string>
 #include <vector>
 
