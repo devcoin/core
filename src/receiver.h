@@ -5,15 +5,16 @@
 #ifndef DEVCOIN_RECEIVER_H
 #define DEVCOIN_RECEIVER_H
 
-#include <map>
-
 #include <boost/asio.hpp>
 #include <devcoin.h>
+
+#include <map>
+#include <string>
 
 using namespace boost;
 using namespace std;
 
-static map<string, string> globalCacheMap;
+static std::map<std::string, std::string> globalCacheMap;
 static const double globalMinimumIdenticalProportion = 0.500001;
 static int globalTimeOut = 10;
 static int globalTimeOutDouble = globalTimeOut + globalTimeOut;

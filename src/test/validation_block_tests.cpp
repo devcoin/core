@@ -245,7 +245,7 @@ BOOST_AUTO_TEST_CASE(mempool_locks_reorg)
             mtx.vin.push_back(CTxIn{COutPoint{last_mined->vtx[0]->GetHash(), 1}, CScript{}});
             mtx.vin[0].scriptWitness.stack.push_back(WITNESS_STACK_ELEM_OP_TRUE);
             mtx.vout.push_back(last_mined->vtx[0]->vout[1]);
-            mtx.vout[0].nValue -= 1000;
+            mtx.vout[0].nValue -= minRelayTxFee.GetFee(GetVirtualTransactionSize(CTransaction(mtx)));
             txs.push_back(MakeTransactionRef(mtx));
 
             last_mined = GoodBlock(last_mined->GetHash());
@@ -274,7 +274,8 @@ BOOST_AUTO_TEST_CASE(mempool_locks_reorg)
             LOCK(cs_main);
             for (const auto& tx : txs) {
                 const MempoolAcceptResult result = AcceptToMemoryPool(m_node.chainman->ActiveChainstate(), *m_node.mempool, tx, false /* bypass_limits */);
-                BOOST_REQUIRE(result.m_result_type == MempoolAcceptResult::ResultType::VALID);
+                BOOST_REQUIRE_MESSAGE(result.m_result_type == MempoolAcceptResult::ResultType::VALID,
+                                      result.m_state.ToString());
             }
         }
 

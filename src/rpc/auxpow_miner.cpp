@@ -18,6 +18,7 @@
 #include <validation.h>
 
 #include <cassert>
+#include <ios>
 
 namespace
 {
@@ -96,7 +97,7 @@ AuxpowMiner::getCurrentBlock (const ChainstateManager& chainman,
 
         /* Save in our map of constructed blocks.  */
         pblockCur = &newBlock->block;
-        curBlocks.emplace(scriptID, pblockCur);
+        curBlocks[scriptID] = pblockCur;
         blocks[pblockCur->GetHash ()] = pblockCur;
         templates.push_back (std::move (newBlock));
       }
@@ -120,12 +121,9 @@ AuxpowMiner::getCurrentBlock (const ChainstateManager& chainman,
 }
 
 const CBlock*
-AuxpowMiner::lookupSavedBlock (const std::string& hashHex) const
+AuxpowMiner::lookupSavedBlock (const uint256& hash) const
 {
   AssertLockHeld (cs);
-
-  uint256 hash;
-  hash.SetHex (hashHex);
 
   const auto iter = blocks.find (hash);
   if (iter == blocks.end ())
@@ -163,26 +161,37 @@ AuxpowMiner::createAuxBlock (const JSONRPCRequest& request,
 
 bool
 AuxpowMiner::submitAuxBlock (const JSONRPCRequest& request,
-                             const std::string& hashHex,
-                             const std::string& auxpowHex) const
+                             const uint256& hash,
+                             const std::vector<unsigned char>& auxpow) const
 {
   auxMiningCheck (request);
   const auto& node = EnsureAnyNodeContext (request.context);
   auto& chainman = EnsureChainman (node);
 
+  std::unique_ptr<CAuxPow> pow = std::make_unique<CAuxPow> ();
+  try
+    {
+      CDataStream ss(auxpow, SER_NETWORK, PROTOCOL_VERSION);
+      ss >> *pow;
+      if (!ss.empty ())
+        throw std::ios_base::failure ("trailing data");
+    }
+  catch (const std::exception&)
+    {
+      throw JSONRPCError (RPC_DESERIALIZATION_ERROR,
+                          "AuxPoW decode failed");
+    }
+
   std::shared_ptr<CBlock> shared_block;
   {
     LOCK (cs);
-    const CBlock* pblock = lookupSavedBlock (hashHex);
+    const CBlock* pblock = lookupSavedBlock (hash);
+    assert (pblock->GetHash () == hash);
     shared_block = std::make_shared<CBlock> (*pblock);
   }
 
-  const std::vector<unsigned char> vchAuxPow = ParseHex (auxpowHex);
-  CDataStream ss(vchAuxPow, SER_GETHASH, PROTOCOL_VERSION);
-  std::unique_ptr<CAuxPow> pow(new CAuxPow ());
-  ss >> *pow;
   shared_block->SetAuxpow (std::move (pow));
-  assert (shared_block->GetHash ().GetHex () == hashHex);
+  assert (shared_block->GetHash () == hash);
 
   return chainman.ProcessNewBlock (Params (), shared_block, true, nullptr);
 }

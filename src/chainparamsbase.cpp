@@ -45,7 +45,7 @@ std::unique_ptr<CBaseChainParams> CreateBaseChainParams(const std::string& chain
     if (chain == CBaseChainParams::MAIN) {
         return std::make_unique<CBaseChainParams>("", 52332, 52334);
     } else if (chain == CBaseChainParams::TESTNET) {
-        return std::make_unique<CBaseChainParams>("testnet3", 62332, 62334);
+        return std::make_unique<CBaseChainParams>("testnet4", 62332, 62334);
     } else if (chain == CBaseChainParams::SIGNET) {
         return std::make_unique<CBaseChainParams>("signet", 42332, 42334);
     } else if (chain == CBaseChainParams::REGTEST) {

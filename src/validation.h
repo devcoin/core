@@ -335,6 +335,9 @@ void InitScriptExecutionCache();
 /** Context-independent validity checks */
 bool CheckBlock(const CBlock& block, BlockValidationState& state, const Consensus::Params& consensusParams, bool fCheckPOW = true, bool fCheckMerkleRoot = true);
 
+/** Check that an AuxPoW commitment form is allowed at the given height. */
+bool CheckAuxPowCommitment(const CBlockHeader& block, int height, const Consensus::Params& params);
+
 /** Check a block is completely valid from start to finish (only works on top of our current best block) */
 bool TestBlockValidity(BlockValidationState& state,
                        const CChainParams& chainparams,

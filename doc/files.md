@@ -37,7 +37,7 @@ Windows  | `%APPDATA%\Devcoin\` <sup>[\[1\]](#note1)</sup>
 Chain option                   | Data directory path
 -------------------------------|------------------------------
 `-chain=main` (default)        | *path_to_datadir*`/`
-`-chain=test` or `-testnet`    | *path_to_datadir*`/testnet3/`
+`-chain=test` or `-testnet`    | *path_to_datadir*`/testnet4/`
 `-chain=signet` or `-signet`   | *path_to_datadir*`/signet/`
 `-chain=regtest` or `-regtest` | *path_to_datadir*`/regtest/`
 

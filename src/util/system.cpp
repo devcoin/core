@@ -11,7 +11,13 @@
 // For details see https://github.com/devcoin/core/pull/22348.
 #define __kernel_entry
 #endif
+#if __has_include(<boost/process/v1.hpp>)
 #include <boost/process/v1.hpp>
+namespace bp = boost::process::v1;
+#else
+#include <boost/process.hpp>
+namespace bp = boost::process;
+#endif
 #endif // ENABLE_EXTERNAL_SIGNER
 
 #include <chainparamsbase.h>
@@ -1251,8 +1257,6 @@ void runCommand(const std::string& strCommand)
 UniValue RunCommandParseJSON(const std::string& str_command, const std::string& str_std_in)
 {
 #ifdef ENABLE_EXTERNAL_SIGNER
-    namespace bp = boost::process::v1;
-
     UniValue result_json;
     bp::opstream stdin_stream;
     bp::ipstream stdout_stream;

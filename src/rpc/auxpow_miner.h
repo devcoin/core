@@ -52,9 +52,9 @@ private:
   unsigned extraNonce = 0;
 
   /* Some data about when the current block (pblock) was constructed.  */
-  unsigned txUpdatedLast;
+  unsigned txUpdatedLast = 0;
   const CBlockIndex* pindexPrev = nullptr;
-  uint64_t startTime;
+  uint64_t startTime = 0;
 
   /**
    * Constructs a new current block if necessary (checking the current state to
@@ -68,10 +68,10 @@ private:
       EXCLUSIVE_LOCKS_REQUIRED (cs);
 
   /**
-   * Looks up a previously constructed block by its (hex-encoded) hash.  If the
-   * block is found, it is returned.  Otherwise, a JSONRPCError is thrown.
+   * Looks up a previously constructed block by its hash.  If the block is
+   * found, it is returned.  Otherwise, a JSONRPCError is thrown.
    */
-  const CBlock* lookupSavedBlock (const std::string& hashHex) const
+  const CBlock* lookupSavedBlock (const uint256& hash) const
       EXCLUSIVE_LOCKS_REQUIRED (cs);
 
   friend class auxpow_tests::AuxpowMinerForTest;
@@ -95,8 +95,8 @@ public:
    * was accepted.
    */
   bool submitAuxBlock (const JSONRPCRequest& request,
-                       const std::string& hashHex,
-                       const std::string& auxpowHex) const;
+                       const uint256& hash,
+                       const std::vector<unsigned char>& auxpow) const;
 
   /**
    * Returns the singleton instance of AuxpowMiner that is used for RPCs.

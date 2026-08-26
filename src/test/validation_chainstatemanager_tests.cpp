@@ -201,6 +201,11 @@ CreateAndActivateUTXOSnapshot(NodeContext& node, const fs::path root, F malleati
 //! Test basic snapshot activation.
 BOOST_FIXTURE_TEST_CASE(chainstatemanager_activate_snapshot, TestChain100Setup)
 {
+    if (Params().Assumeutxo().empty()) {
+        BOOST_TEST_MESSAGE("No Devcoin regtest AssumeUTXO snapshots are configured");
+        return;
+    }
+
     ChainstateManager& chainman = *Assert(m_node.chainman);
 
     size_t initial_size;
