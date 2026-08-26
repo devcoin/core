@@ -1308,9 +1308,9 @@ static RPCHelpMan submitauxblock()
         },
         [&](const RPCHelpMan& self, const JSONRPCRequest& request) -> UniValue
 {
-    return AuxpowMiner::get ().submitAuxBlock(request,
-                                              request.params[0].get_str(),
-                                              request.params[1].get_str());
+    const uint256 hash = ParseHashV(request.params[0], "hash");
+    const std::vector<unsigned char> auxpow = ParseHexV(request.params[1], "auxpow");
+    return AuxpowMiner::get ().submitAuxBlock(request, hash, auxpow);
 },
     };
 }

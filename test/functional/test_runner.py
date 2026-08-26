@@ -119,6 +119,7 @@ BASE_SCRIPTS = [
     'p2p_sendheaders.py',
     'wallet_importmulti.py --legacy-wallet',
     'mempool_limit.py',
+    'rpc_auxpow.py',
     'rpc_txoutproof.py',
     'wallet_listreceivedby.py --legacy-wallet',
     'wallet_listreceivedby.py --descriptors',
