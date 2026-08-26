@@ -16,6 +16,7 @@
 #include <script/script.h>
 #include <script/standard.h>
 #include <streams.h>
+#include <test/data/mainnet_auxpow_block_496000.json.h>
 #include <test/util/setup_common.h>
 #include <util/strencodings.h>
 #include <util/time.h>
@@ -35,6 +36,8 @@
 #include <string>
 #include <utility>
 #include <vector>
+
+UniValue read_json(const std::string& jsondata);
 
 BOOST_AUTO_TEST_SUITE(auxpow_tests)
 
@@ -371,6 +374,49 @@ BOOST_FIXTURE_TEST_CASE(output_commitment_activation_parameters, BasicTestingSet
 
     BOOST_CHECK(!CheckAuxPowCommitment(output_block, 99, synthetic));
     BOOST_CHECK(CheckAuxPowCommitment(output_block, 100, synthetic));
+}
+
+BOOST_FIXTURE_TEST_CASE(historical_mainnet_auxpow, BasicTestingSetup)
+{
+    const UniValue fixtures = read_json(std::string(
+        json_tests::mainnet_auxpow_block_496000,
+        json_tests::mainnet_auxpow_block_496000
+            + sizeof(json_tests::mainnet_auxpow_block_496000)));
+    BOOST_REQUIRE_EQUAL(fixtures.size(), 1U);
+    const UniValue& fixture = fixtures[0];
+    const std::vector<unsigned char> raw = ParseHex(fixture["raw"].get_str());
+    BOOST_REQUIRE_EQUAL(raw.size(), 1431U);
+
+    CDataStream input(raw, SER_NETWORK, PROTOCOL_VERSION);
+    CBlock block;
+    input >> block;
+    BOOST_REQUIRE(input.empty());
+    BOOST_REQUIRE(block.auxpow);
+
+    const auto main = CreateChainParams(*m_node.args, CBaseChainParams::MAIN);
+    const auto& consensus = main->GetConsensus();
+    const int height = fixture["height"].get_int();
+
+    BOOST_CHECK_EQUAL(height, 496000);
+    BOOST_CHECK_EQUAL(block.GetHash().GetHex(), fixture["hash"].get_str());
+    BOOST_CHECK_EQUAL(block.GetChainId(), consensus.nAuxpowChainId);
+    BOOST_CHECK_EQUAL(consensus.nAuxpowOutputCommitmentHeight,
+                      std::numeric_limits<int>::max());
+    BOOST_CHECK_LT(height, consensus.nAuxpowOutputCommitmentHeight);
+    BOOST_CHECK_EQUAL(CAuxPowForTest::ParentBranchSize(*block.auxpow), 9U);
+    BOOST_CHECK_EQUAL(CAuxPowForTest::ChainBranchSize(*block.auxpow), 5U);
+    BOOST_CHECK_EQUAL(CAuxPowForTest::ChainIndex(*block.auxpow), 18);
+    BOOST_CHECK(CheckAuxPowCommitment(block, height, consensus));
+    BOOST_CHECK(block.auxpow->check(block.GetHash(), block.GetChainId(),
+                                    consensus, false));
+    BOOST_CHECK(CheckProofOfWork(block, consensus));
+
+    BlockValidationState state;
+    BOOST_CHECK(CheckBlock(block, state, consensus, true, true));
+
+    CDataStream output(SER_NETWORK, PROTOCOL_VERSION);
+    output << block;
+    BOOST_CHECK_EQUAL_COLLECTIONS(raw.begin(), raw.end(), output.begin(), output.end());
 }
 
 BOOST_FIXTURE_TEST_CASE(auxpow_serialization, BasicTestingSetup)

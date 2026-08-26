@@ -20,6 +20,7 @@ JSON_TEST_FILES = \
   test/data/blockfilters.json \
   test/data/key_io_valid.json \
   test/data/key_io_invalid.json \
+  test/data/mainnet_auxpow_block_496000.json \
   test/data/script_tests.json \
   test/data/sighash.json \
   test/data/tx_invalid.json \
