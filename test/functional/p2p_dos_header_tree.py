@@ -12,7 +12,7 @@ from test_framework.p2p import (
     P2PInterface,
     msg_headers,
 )
-from test_framework.test_framework import DevcoinTestFramework
+from test_framework.test_framework import DevcoinTestFramework, SkipTest
 
 import os
 
@@ -20,8 +20,11 @@ import os
 class RejectLowDifficultyHeadersTest(DevcoinTestFramework):
     def set_test_params(self):
         self.setup_clean_chain = True
-        self.chain = 'testnet3'  # Use testnet chain because it has an early checkpoint
+        self.chain = 'testnet4'
         self.num_nodes = 2
+
+    def skip_test_if_missing_module(self):
+        raise SkipTest("testnet4 has no post-genesis checkpoint or historical header fixture")
 
     def add_options(self, parser):
         parser.add_argument(

@@ -5,11 +5,10 @@
 '''
 Script to generate list of seed nodes for chainparams.cpp.
 
-This script expects two text files in the directory that is passed as an
+This script expects this text file in the directory that is passed as an
 argument:
 
     nodes_main.txt
-    nodes_test.txt
 
 These files must consist of lines in the format
 
@@ -18,9 +17,9 @@ These files must consist of lines in the format
     <onion>.onion:<port>
     <i2p>.b32.i2p:<port>
 
-The output will be two data structures with the peers in binary format:
+The output will be this data structure with the peers in binary format:
 
-   static const uint8_t chainparams_seed_{main,test}[]={
+   static const uint8_t chainparams_seed_main[]={
    ...
    }
 
@@ -162,9 +161,6 @@ def main():
     g.write(' */\n')
     with open(os.path.join(indir,'nodes_main.txt'), 'r', encoding="utf8") as f:
         process_nodes(g, f, 'chainparams_seed_main')
-    g.write('\n')
-    with open(os.path.join(indir,'nodes_test.txt'), 'r', encoding="utf8") as f:
-        process_nodes(g, f, 'chainparams_seed_test')
     g.write('#endif // DEVCOIN_CHAINPARAMSSEEDS_H\n')
 
 if __name__ == '__main__':

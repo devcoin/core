@@ -4,10 +4,13 @@
 
 #include <chain.h>
 #include <chainparams.h>
+#include <chainparamsbase.h>
 #include <pow.h>
 #include <test/util/setup_common.h>
 
 #include <boost/test/unit_test.hpp>
+
+#include <array>
 
 BOOST_FIXTURE_TEST_SUITE(pow_tests, BasicTestingSetup)
 
@@ -179,6 +182,36 @@ BOOST_AUTO_TEST_CASE(ChainParams_REGTEST_sanity)
 BOOST_AUTO_TEST_CASE(ChainParams_TESTNET_sanity)
 {
     sanity_check_chainparams(*m_node.args, CBaseChainParams::TESTNET);
+}
+
+BOOST_AUTO_TEST_CASE(ChainParams_TESTNET4_identity)
+{
+    const auto params = CreateChainParams(*m_node.args, CBaseChainParams::TESTNET);
+    const auto base_params = CreateBaseChainParams(CBaseChainParams::TESTNET);
+    const auto& consensus = params->GetConsensus();
+    const std::array<unsigned char, 4> expected_magic{{0x7c, 0xb7, 0x44, 0x38}};
+
+    BOOST_CHECK_EQUAL(base_params->DataDir(), "testnet4");
+    BOOST_CHECK_EQUAL(params->GenesisBlock().GetHash().GetHex(),
+                      "0000063785eae56e4c5fbad410d5207374a12959881c5b48b27229ccf1f4b4e7");
+    BOOST_CHECK_EQUAL(params->GenesisBlock().hashMerkleRoot.GetHex(),
+                      "db146109b9f286ca7e7fe1f48e949e898e3dec20f7121b6919d2ed8f6eb647c3");
+    for (size_t i = 0; i < expected_magic.size(); ++i) {
+        BOOST_CHECK_EQUAL(params->MessageStart()[i], expected_magic[i]);
+    }
+    BOOST_CHECK(consensus.fStrictChainId);
+    BOOST_CHECK_EQUAL(consensus.nAuxpowChainId, 16);
+    BOOST_CHECK_EQUAL(consensus.nAuxpowOutputCommitmentHeight, 0);
+    BOOST_CHECK(consensus.nMinimumChainWork.IsNull());
+    BOOST_CHECK(consensus.defaultAssumeValid.IsNull());
+    BOOST_CHECK(params->DNSSeeds().empty());
+    BOOST_CHECK(params->FixedSeeds().empty());
+    BOOST_REQUIRE_EQUAL(params->Checkpoints().mapCheckpoints.size(), 1U);
+    BOOST_CHECK(params->Checkpoints().mapCheckpoints.at(0) == consensus.hashGenesisBlock);
+    BOOST_CHECK(params->Assumeutxo().empty());
+    BOOST_CHECK_EQUAL(params->TxData().nTime, 0);
+    BOOST_CHECK_EQUAL(params->TxData().nTxCount, 0);
+    BOOST_CHECK_EQUAL(params->TxData().dTxRate, 0);
 }
 
 BOOST_AUTO_TEST_CASE(ChainParams_SIGNET_sanity)
