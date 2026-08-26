@@ -176,6 +176,13 @@ ChainTestingSetup::~ChainTestingSetup()
 TestingSetup::TestingSetup(const std::string& chainName, const std::vector<const char*>& extra_args)
     : ChainTestingSetup(chainName, extra_args)
 {
+    // Unit tests must not fetch live receiver data. An empty local list makes
+    // block assembly use the deterministic fallback payout.
+    fs::create_directories(m_path_root / "receiver");
+    std::ofstream receiver_file{(m_path_root / "receiver" / "receiver_0.csv").string()};
+    receiver_file << "Format,pluribusunum\n";
+    receiver_file.close();
+
     const CChainParams& chainparams = Params();
     // Ideally we'd move all the RPC tests to the functional testing framework
     // instead of unit tests, but for now we need these here.
@@ -215,14 +222,6 @@ TestChain100Setup::TestChain100Setup()
     constexpr std::array<unsigned char, 32> vchKey = {
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}};
     coinbaseKey.Set(vchKey.begin(), vchKey.end(), true);
-
-    // Keep regtest deterministic and offline. Without this local file the
-    // receiver code downloads current mainnet addresses, which are invalid on
-    // regtest and make CreateNewBlock return a null block template.
-    fs::create_directories(m_path_root / "receiver");
-    std::ofstream receiver_file{(m_path_root / "receiver" / "receiver_0.csv").string()};
-    receiver_file << "Format,pluribusunum\n";
-    receiver_file.close();
 
     // Generate a 100-block chain:
     this->mineBlocks(COINBASE_MATURITY);
