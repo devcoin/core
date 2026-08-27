@@ -205,7 +205,6 @@ DEVCOIN_CORE_H = \
   psbt.h \
   random.h \
   randomenv.h \
-  receiver.h \
   reverse_iterator.h \
   rpc/blockchain.h \
   rpc/auxpow_miner.h \
@@ -360,7 +359,6 @@ libdevcoin_server_a_SOURCES = \
   policy/rbf.cpp \
   policy/settings.cpp \
   pow.cpp \
-  receiver.cpp \
   rest.cpp \
   rpc/auxpow_miner.cpp \
   rpc/blockchain.cpp \
@@ -666,7 +664,7 @@ devcoin_bin_ldadd = \
   $(LIBMEMENV) \
   $(LIBSECP256K1)
 
-devcoin_bin_ldadd += $(BOOST_LIBS) $(BDB_LIBS) $(MINIUPNPC_LIBS) $(NATPMP_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS) $(ZMQ_LIBS) $(SQLITE_LIBS) $(LIBCURL)
+devcoin_bin_ldadd += $(BOOST_LIBS) $(BDB_LIBS) $(MINIUPNPC_LIBS) $(NATPMP_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS) $(ZMQ_LIBS) $(SQLITE_LIBS)
 
 devcoind_SOURCES = $(devcoin_daemon_sources) init/devcoind.cpp
 devcoind_CPPFLAGS = $(devcoin_bin_cppflags)

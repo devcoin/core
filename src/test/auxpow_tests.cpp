@@ -6,15 +6,12 @@
 #include <auxpow.h>
 #include <chainparams.h>
 #include <consensus/merkle.h>
-#include <fs.h>
+#include <devcoin.h>
 #include <hash.h>
-#include <key.h>
-#include <key_io.h>
 #include <pow.h>
 #include <primitives/block.h>
 #include <rpc/auxpow_miner.h>
 #include <script/script.h>
-#include <script/standard.h>
 #include <streams.h>
 #include <test/data/mainnet_auxpow_block_496000.json.h>
 #include <test/util/setup_common.h>
@@ -208,20 +205,6 @@ std::vector<unsigned char> SerializeAuxpow(const CAuxPow& pow)
     return {stream.begin(), stream.end()};
 }
 
-void WriteReceiverFile(const fs::path& data_dir)
-{
-    CKey beneficiary_key;
-    beneficiary_key.MakeNewKey(true);
-    const PKHash beneficiary{beneficiary_key.GetPubKey()};
-
-    const fs::path receiver_dir = data_dir / "receiver";
-    fs::create_directories(receiver_dir);
-    fsbridge::ofstream file{receiver_dir / "receiver_0.csv"};
-    BOOST_REQUIRE(file.is_open());
-    file << "Coin," << EncodeDestination(beneficiary) << "\n";
-    BOOST_REQUIRE(file.good());
-}
-
 void AdvanceTip(NodeContext& node, const CScript& script_pub_key)
 {
     CTxMemPool empty_pool;
@@ -410,6 +393,10 @@ BOOST_FIXTURE_TEST_CASE(historical_mainnet_auxpow, BasicTestingSetup)
     BOOST_CHECK(block.auxpow->check(block.GetHash(), block.GetChainId(),
                                     consensus, false));
     BOOST_CHECK(CheckProofOfWork(block, consensus));
+
+    const CAmount historical_reward = block.vtx[0]->GetValueOut();
+    BOOST_CHECK_GT(historical_reward, minerSubsidy);
+    BOOST_CHECK_LE(historical_reward, GetBlockSubsidy(height, consensus));
 
     BlockValidationState state;
     BOOST_CHECK(CheckBlock(block, state, consensus, true, true));
@@ -609,8 +596,6 @@ public:
 
 BOOST_FIXTURE_TEST_CASE(candidate_refresh_and_lifetime, RegTestingSetup)
 {
-    WriteReceiverFile(m_args.GetDataDirBase());
-
     AuxpowMinerForTest miner(m_node);
     LOCK(miner.cs);
 

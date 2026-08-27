@@ -40,7 +40,6 @@ jobs:
       PYTHON_DEBUG: "1"
       WINEDEBUG: fixme-all
       SDK_URL: https://github.com/phracker/MacOSX-SDKs/releases/download/
-      CURL_URL: https://curl.se/windows/
 
     strategy:
       fail-fast: false
@@ -56,8 +55,6 @@ jobs:
           - name: aarch64-linux
             host: aarch64-linux-gnu
             arch: "arm64"
-            curl:
-              arm: true
             os: ubuntu-20.04
             packages: g++-aarch64-linux-gnu
             run-tests: false
@@ -71,8 +68,6 @@ jobs:
           - name: armhf-linux
             host: arm-linux-gnueabihf
             arch: "armhf"
-            curl:
-              arm: true
             os: ubuntu-20.04
             packages: g++-arm-linux-gnueabihf
             run-tests: false
@@ -84,7 +79,7 @@ jobs:
           - name: x86_64-linux-nowallet
             host: x86_64-unknown-linux-gnu
             os: ubuntu-20.04
-            packages: python3 libcurl4-gnutls-dev
+            packages: python3
             run-tests: true
             dep-opts: "NO_WALLET=1"
             config-opts: "--enable-gui=qt5 --enable-glibc-back-compat --enable-reduce-exports --disable-wallet"
@@ -94,7 +89,7 @@ jobs:
           - name: x86_64-linux-dbg
             host: x86_64-unknown-linux-gnu
             os: ubuntu-20.04
-            packages: bc python3-zmq libcurl4-gnutls-dev
+            packages: bc python3-zmq
             run-tests: true
             dep-opts: "DEBUG=1"
             config-opts: "--enable-gui=qt5 --enable-zmq --enable-glibc-back-compat --enable-reduce-exports CPPFLAGS=-DDEBUG_LOCKORDER"
@@ -104,9 +99,6 @@ jobs:
           - name: x86_64-win
             host: x86_64-w64-mingw32
             arch: "i386"
-            curl:
-              version: "7.83.1_3"
-              api: win64
             os: ubuntu-20.04
             packages: python3 nsis g++-mingw-w64-x86-64 wine64 bc wine-binfmt
             postinstall: |
@@ -116,7 +108,7 @@ jobs:
             run-tests: true
             dep-opts: ""
             config-opts: "--enable-reduce-exports --enable-gui=qt5"
-            make-params: "LIBCURL=-lcurl.dll"
+            make-params: ""
             goal: install
             platform: windows
           - name: x86_64-macos
@@ -185,50 +177,6 @@ jobs:
         run: |
           make $MAKEJOBS -C depends HOST=${{ matrix.host }} ${{ matrix.dep-opts }}
 
-      - name: Install CURL for ARM
-        if: ${{ matrix.curl.arm }}
-        run: |
-          sudo bash <<EOF
-          cat > /etc/apt/sources.list.d/${{ matrix.arch }}.list <<LIST
-          deb [arch=${{ matrix.arch }}] http://ports.ubuntu.com/ focal main restricted security
-          deb [arch=${{ matrix.arch }}] http://ports.ubuntu.com/ focal-updates main restricted
-          deb [arch=${{ matrix.arch }}] http://ports.ubuntu.com/ focal universe
-          deb [arch=${{ matrix.arch }}] http://ports.ubuntu.com/ focal-updates universe
-          deb [arch=${{ matrix.arch }}] http://ports.ubuntu.com/ focal multiverse
-          deb [arch=${{ matrix.arch }}] http://ports.ubuntu.com/ focal-updates multiverse
-          deb [arch=${{ matrix.arch }}] http://ports.ubuntu.com/ focal-backports main restricted universe multiverse
-          LIST
-          EOF
-          sudo apt-get update || true
-          PACKAGES="libcurl4-gnutls-dev:${{ matrix.arch }} libgnutls28-dev:${{ matrix.arch }} libnghttp2-dev:${{ matrix.arch }} libssh-dev:${{ matrix.arch }}"
-          apt-get download $(apt-cache depends --recurse --no-recommends --no-suggests \
-            --no-conflicts --no-breaks --no-replaces --no-enhances \
-            --no-pre-depends ${PACKAGES} | grep "^\w" | grep ${{ matrix.arch }})
-          rm -f *amd64*.deb *i386*.deb
-          mkdir -p /tmp/libcurl
-          for i in *.deb; do
-              mkdir -p tmp/"$i"
-              cd tmp/"$i"/; ar -x ../../"$i"; cd ../../
-              tar -C /tmp/libcurl/ -xf tmp/"$i"/data.tar.xz
-          done
-          rm -rf tmp
-          sudo mkdir -p /lib/${{ matrix.host }}/ /usr/lib/${{ matrix.host }}/
-          sudo cp -a /tmp/libcurl/lib/${{ matrix.host }}/* /lib/${{ matrix.host }}/
-          sudo cp -a /tmp/libcurl/usr/lib/${{ matrix.host }}/* /usr/lib/${{ matrix.host }}/
-          sudo mkdir -p /usr/include/${{ matrix.host }}/
-          sudo cp -a /tmp/libcurl/usr/include/${{ matrix.host }}/* /usr/include/${{ matrix.host }}/
-
-      - name: Install CURL for Windows
-        if: ${{ matrix.curl.api }}
-        run: |
-          mkdir -p ./depends/sdk-sources
-          mkdir -p ./depends/SDKs
-          curl --location --fail $CURL_URL/dl-${{ matrix.curl.version }}/curl-${{ matrix.curl.version }}-${{ matrix.curl.api }}-mingw.tar.xz -o depends/sdk-sources/curl-${{ matrix.curl.version }}-${{ matrix.curl.api }}-mingw.tar.xz
-          tar -C /tmp -xf depends/sdk-sources/curl-${{ matrix.curl.version }}-${{ matrix.curl.api }}-mingw.tar.xz
-          cp -a /tmp/curl-${{ matrix.curl.version }}-${{ matrix.curl.api }}-mingw/bin/*.dll depends/${{ matrix.host }}/bin/
-          cp -a /tmp/curl-${{ matrix.curl.version }}-${{ matrix.curl.api }}-mingw/lib/* depends/${{ matrix.host }}/lib/
-          cp -a /tmp/curl-${{ matrix.curl.version }}-${{ matrix.curl.api }}-mingw/include/* depends/${{ matrix.host }}/include/
-
       - name: CCache
         uses: actions/cache@v2
         env:
@@ -255,4 +203,3 @@ jobs:
       - name: Setup tmate session
         if: ${{ failure() && 'workflow_dispatch' == github.event_name && 'yes' == github.event.inputs.debug_enabled }}
         uses: develCuy/action-tmate@master
-

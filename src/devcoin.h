@@ -7,17 +7,9 @@
 
 #include <amount.h>
 #include <inttypes.h>
-#include <string>
 
-inline int64_t roundint64(double d)
-{
-    return (int64_t)(d > 0 ? d + 0.5 : d - 0.5);
-}
-
-static const int64_t initialSubsidy = 50000*COIN ;
-static const int64_t devcoinShare = roundint64(initialSubsidy * 0.9);
-static const int64_t fallbackReduction = roundint64((initialSubsidy + devcoinShare) / 2);
-static const int devcoinStep = 4000;
-const std::string receiverCSV = std::string("receiver.csv");
+// Keep the historical consensus ceiling while creating templates accepted by legacy nodes.
+static const int64_t initialSubsidy = 50000 * COIN;
+static const int64_t minerSubsidy = 2500 * COIN;
 
 #endif // DEVCOIN_DEVCOIN_H

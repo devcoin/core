@@ -8,9 +8,6 @@
 #include <consensus/merkle.h>
 #include <consensus/tx_verify.h>
 #include <devcoin.h>
-#include <fs.h>
-#include <key.h>
-#include <key_io.h>
 #include <miner.h>
 #include <policy/policy.h>
 #include <script/standard.h>
@@ -71,16 +68,6 @@ void MinerTestingSetup::AddTestTransaction(const CAmount fee)
 
     TestMemPoolEntryHelper entry;
     m_node.mempool->addUnchecked(entry.Fee(fee).Time(GetTime()).Height(height).FromTx(tx));
-}
-
-static void WriteReceiverFile(const fs::path& data_dir, const std::string& contents)
-{
-    const fs::path receiver_dir = data_dir / "receiver";
-    fs::create_directories(receiver_dir);
-    fsbridge::ofstream file{receiver_dir / "receiver_0.csv"};
-    BOOST_REQUIRE(file.is_open());
-    file << contents;
-    BOOST_REQUIRE(file.good());
 }
 
 static CBlockIndex CreateBlockIndex(int nHeight, CBlockIndex* active_chain_tip) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
@@ -207,8 +194,6 @@ void MinerTestingSetup::TestPackageSelection(const CChainParams& chainparams, co
 
 BOOST_AUTO_TEST_CASE(CreateNewBlock_fee_accounting)
 {
-    WriteReceiverFile(m_args.GetDataDirBase(), "Format,pluribusunum\n");
-
     const CChainParams& chainparams = Params();
     const CScript script_pub_key{CScript{} << OP_TRUE};
 
@@ -219,6 +204,7 @@ BOOST_AUTO_TEST_CASE(CreateNewBlock_fee_accounting)
     BOOST_REQUIRE_EQUAL(no_fee_template->block.vtx[0]->vout.size(),
                         no_fee_template->vchCoinbaseCommitment.empty() ? 1U : 2U);
     const CAmount no_fee_miner_value = no_fee_template->block.vtx[0]->vout[0].nValue;
+    BOOST_CHECK_EQUAL(no_fee_miner_value, minerSubsidy);
 
     const CAmount fee_one = 1 * COIN;
     const CAmount fee_two = 2 * COIN;
@@ -234,44 +220,6 @@ BOOST_AUTO_TEST_CASE(CreateNewBlock_fee_accounting)
     BOOST_CHECK_EQUAL(block_template->vTxFees[0], -total_fees);
     BOOST_CHECK_EQUAL(block_template->vTxFees[1] + block_template->vTxFees[2], total_fees);
     BOOST_CHECK_EQUAL(block_template->block.vtx[0]->vout.size(), no_fee_template->block.vtx[0]->vout.size());
-
-    BlockValidationState state;
-    BOOST_CHECK_MESSAGE(
-        TestBlockValidity(state, chainparams, m_node.chainman->ActiveChainstate(), block_template->block,
-                          m_node.chainman->ActiveChain().Tip(), false, false),
-        state.ToString());
-}
-
-BOOST_AUTO_TEST_CASE(CreateNewBlock_beneficiary_fee_accounting)
-{
-    CKey beneficiary_key;
-    beneficiary_key.MakeNewKey(true);
-    const PKHash beneficiary{beneficiary_key.GetPubKey()};
-    WriteReceiverFile(m_args.GetDataDirBase(), strprintf("Coin,%s\n", EncodeDestination(beneficiary)));
-
-    const CChainParams& chainparams = Params();
-    const CScript script_pub_key{CScript{} << OP_TRUE};
-
-    LOCK2(cs_main, m_node.mempool->cs);
-
-    const auto no_fee_template = AssemblerForTest(chainparams).CreateNewBlock(script_pub_key);
-    BOOST_REQUIRE(no_fee_template);
-    BOOST_REQUIRE_EQUAL(no_fee_template->block.vtx[0]->vout.size(),
-                        no_fee_template->vchCoinbaseCommitment.empty() ? 2U : 3U);
-    BOOST_CHECK(no_fee_template->block.vtx[0]->vout[1].scriptPubKey == GetScriptForDestination(beneficiary));
-    BOOST_CHECK_EQUAL(no_fee_template->block.vtx[0]->vout[1].nValue, devcoinShare);
-
-    const CAmount fee = 2 * COIN;
-    AddTestTransaction(fee);
-    const auto block_template = AssemblerForTest(chainparams).CreateNewBlock(script_pub_key);
-    BOOST_REQUIRE(block_template);
-    BOOST_REQUIRE_EQUAL(block_template->block.vtx.size(), 2U);
-    BOOST_REQUIRE_EQUAL(block_template->block.vtx[0]->vout.size(), no_fee_template->block.vtx[0]->vout.size());
-    BOOST_CHECK_EQUAL(block_template->block.vtx[0]->vout[0].nValue,
-                      no_fee_template->block.vtx[0]->vout[0].nValue + fee);
-    BOOST_CHECK(block_template->block.vtx[0]->vout[1].scriptPubKey == no_fee_template->block.vtx[0]->vout[1].scriptPubKey);
-    BOOST_CHECK_EQUAL(block_template->block.vtx[0]->vout[1].nValue, no_fee_template->block.vtx[0]->vout[1].nValue);
-    BOOST_CHECK_EQUAL(block_template->vTxFees[0], -fee);
 
     BlockValidationState state;
     BOOST_CHECK_MESSAGE(

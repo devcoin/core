@@ -39,7 +39,6 @@
 #include <walletinitinterface.h>
 
 #include <functional>
-#include <fstream>
 
 const std::function<std::string(const char*)> G_TRANSLATION_FUN = nullptr;
 UrlDecodeFn* const URL_DECODE = nullptr;
@@ -176,13 +175,6 @@ ChainTestingSetup::~ChainTestingSetup()
 TestingSetup::TestingSetup(const std::string& chainName, const std::vector<const char*>& extra_args)
     : ChainTestingSetup(chainName, extra_args)
 {
-    // Unit tests must not fetch live receiver data. An empty local list makes
-    // block assembly use the deterministic fallback payout.
-    fs::create_directories(m_path_root / "receiver");
-    std::ofstream receiver_file{(m_path_root / "receiver" / "receiver_0.csv").string()};
-    receiver_file << "Format,pluribusunum\n";
-    receiver_file.close();
-
     const CChainParams& chainparams = Params();
     // Ideally we'd move all the RPC tests to the functional testing framework
     // instead of unit tests, but for now we need these here.
