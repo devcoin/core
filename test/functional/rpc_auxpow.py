@@ -5,7 +5,6 @@
 """Test createauxblock/submitauxblock state and strict proof parsing."""
 
 from decimal import Decimal
-from pathlib import Path
 import re
 import struct
 import time
@@ -32,6 +31,7 @@ from test_framework.util import (
 
 MERGED_MINING_HEADER = bytes.fromhex("fabe6d6d")
 PARENT_VERSION = 0x20000000
+MINER_SUBSIDY = 2500 * COIN
 
 
 def build_auxpow(candidate, hash_block=0, output_commitment=False):
@@ -87,7 +87,7 @@ class AuxpowRPCTest(DevcoinTestFramework):
         self.num_nodes = 1
         self.setup_clean_chain = True
 
-    def assert_candidate(self, candidate):
+    def assert_candidate(self, candidate, expected_coinbase_value):
         node = self.nodes[0]
         assert_equal(set(candidate), {
             "hash",
@@ -106,7 +106,7 @@ class AuxpowRPCTest(DevcoinTestFramework):
         assert_equal(candidate["previousblockhash"], node.getbestblockhash())
         assert_equal(candidate["height"], node.getblockcount() + 1)
         assert isinstance(candidate["coinbasevalue"], int)
-        assert candidate["coinbasevalue"] > 0
+        assert_equal(candidate["coinbasevalue"], expected_coinbase_value)
 
     def add_mempool_transaction(self, blocks, address, private_key):
         node = self.nodes[0]
@@ -127,22 +127,11 @@ class AuxpowRPCTest(DevcoinTestFramework):
         deterministic_key = node.get_deterministic_priv_key()
         payout = deterministic_key.address
 
-        receiver_text = f"Coin,{payout}\n"
-        # The receiver loader's data-dir conversion is not Unicode-safe, so
-        # also seed its working-directory fallback used by the test runner.
-        receiver_files = (
-            Path(node.datadir) / "receiver" / "receiver_0.csv",
-            Path(node.cwd) / "receiver_0.csv",
-        )
-        for receiver_file in receiver_files:
-            receiver_file.parent.mkdir(parents=True, exist_ok=True)
-            receiver_file.write_text(receiver_text, encoding="ascii")
-
         blocks = node.generatetoaddress(101, payout)
 
         self.log.info("Check candidate shape and strict RPC parsing")
         first = node.createauxblock(payout)
-        self.assert_candidate(first)
+        self.assert_candidate(first, MINER_SUBSIDY)
         first_proof = build_auxpow(first)
 
         assert_raises_rpc_error(
@@ -213,7 +202,7 @@ class AuxpowRPCTest(DevcoinTestFramework):
         )
 
         fresh = node.createauxblock(payout)
-        self.assert_candidate(fresh)
+        self.assert_candidate(fresh, MINER_SUBSIDY + COIN)
         # hashBlock is a legacy field that consensus intentionally ignores.
         fresh_proof = build_auxpow(fresh, hash_block=1, output_commitment=True)
         assert node.submitauxblock(fresh["hash"], fresh_proof)
